@@ -1,11 +1,20 @@
 import React from "react";
-import { products } from "@/lib/data";
+import prisma from "@/lib/prisma";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 
-export function BestSellers() {
-  // Show 8 products for Best Sellers
-  const bestsellerProducts = [...products].reverse().slice(0, 8);
+async function getBestSellers() {
+  return await prisma.product.findMany({
+    where: { isBestSeller: true },
+    take: 8,
+    orderBy: { createdAt: 'desc' }
+  });
+}
+
+export async function BestSellers() {
+  const bestsellerProducts = await getBestSellers();
+
+  if (bestsellerProducts.length === 0) return null;
 
   return (
     <section id="best-sellers" className="py-20 container mx-auto">
@@ -18,7 +27,7 @@ export function BestSellers() {
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-10 px-4 md:px-8 lg:px-16">
         {bestsellerProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product as any} />
         ))}
       </div>
     </section>

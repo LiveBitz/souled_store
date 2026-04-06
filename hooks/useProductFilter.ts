@@ -1,5 +1,23 @@
 import { useState, useMemo } from "react";
-import { Product } from "@/lib/data";
+
+export type Product = {
+  id: string;
+  name: string;
+  categoryId: string;
+  category?: {
+    name: string;
+    slug: string;
+  };
+  subCategory: string;
+  price: number;
+  originalPrice: number;
+  discount: number;
+  sizes: string[];
+  colors: string[];
+  image: string;
+  isNew: boolean;
+  isBestSeller: boolean;
+};
 
 export type Filters = {
   sizes: string[];
@@ -13,7 +31,7 @@ export function useProductFilter(products: Product[], slug: string) {
   const [filters, setFilters] = useState<Filters>({
     sizes: [],
     colors: [],
-    priceRange: [0, 3000],
+    priceRange: [0, 10000], // Increased for real data
     discount: 0,
     subCategories: [],
   });
@@ -22,9 +40,17 @@ export function useProductFilter(products: Product[], slug: string) {
 
   // Filter products by category/slug first
   const baseProducts = useMemo(() => {
-    if (slug === "sale") return products.filter((p) => p.discount > 0);
-    if (slug === "new-arrivals") return products.filter((p) => p.isNew);
-    return products.filter((p) => p.category.toLowerCase() === slug.toLowerCase());
+    if (!products || !slug) return [];
+    
+    const targetSlug = String(slug).toLowerCase();
+    
+    if (targetSlug === "sale") return products.filter((p) => p.discount > 0);
+    if (targetSlug === "new-arrivals") return products.filter((p) => p.isNew);
+    
+    return products.filter((p) => {
+      const categorySlug = p.category?.slug?.toLowerCase();
+      return (categorySlug && categorySlug === targetSlug) || p.categoryId === slug;
+    });
   }, [products, slug]);
 
   // Compute counts based on data in this category
@@ -32,14 +58,21 @@ export function useProductFilter(products: Product[], slug: string) {
     const sCounts: Record<string, number> = {};
     const cCounts: Record<string, number> = {};
     const subCounts: Record<string, number> = {};
+    let max = 0;
 
     baseProducts.forEach((p) => {
       p.sizes.forEach((s) => (sCounts[s] = (sCounts[s] || 0) + 1));
       p.colors.forEach((c) => (cCounts[c] = (cCounts[c] || 0) + 1));
       subCounts[p.subCategory] = (subCounts[p.subCategory] || 0) + 1;
+      if (p.price > max) max = p.price;
     });
 
-    return { sizes: sCounts, colors: cCounts, subCategories: subCounts };
+    return { 
+      sizes: sCounts, 
+      colors: cCounts, 
+      subCategories: subCounts,
+      maxPrice: Math.ceil((max || 10000) / 100) * 100
+    };
   }, [baseProducts]);
 
   const filteredProducts = useMemo(() => {
@@ -68,7 +101,7 @@ export function useProductFilter(products: Product[], slug: string) {
         if (sortBy === "price-asc") return a.price - b.price;
         if (sortBy === "price-desc") return b.price - a.price;
         if (sortBy === "discount") return b.discount - a.discount;
-        if (sortBy === "newest") return b.id - a.id;
+        if (sortBy === "newest") return b.id.localeCompare(a.id); // String ID comparison
         return 0;
       });
   }, [baseProducts, filters, sortBy]);
@@ -78,7 +111,7 @@ export function useProductFilter(products: Product[], slug: string) {
     filters.colors.length +
     filters.subCategories.length +
     (filters.discount > 0 ? 1 : 0) +
-    (filters.priceRange[0] > 0 || filters.priceRange[1] < 3000 ? 1 : 0);
+    (filters.priceRange[0] > 0 || filters.priceRange[1] < 10000 ? 1 : 0);
 
   return {
     filters,

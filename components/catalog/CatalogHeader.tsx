@@ -23,11 +23,13 @@ interface CatalogHeaderProps {
 }
 
 export function CatalogHeader({ slug, count, sortBy, setSortBy }: CatalogHeaderProps) {
-  const categoryName = slug === "sale" 
-    ? "Seasonal Sale" 
-    : slug === "new-arrivals" 
-      ? "New Arrivals" 
-      : productsBySlug[slug] || slug.charAt(0).toUpperCase() + slug.slice(1);
+  const categoryName = !slug 
+    ? "Collection" 
+    : slug === "sale" 
+      ? "Seasonal Sale" 
+      : slug === "new-arrivals" 
+        ? "New Arrivals" 
+        : productsBySlug[slug] || (slug.charAt(0).toUpperCase() + slug.slice(1));
 
   return (
     <div className="space-y-6">

@@ -18,25 +18,31 @@ interface FilterSidebarProps {
     sizes: Record<string, number>;
     colors: Record<string, number>;
     subCategories: Record<string, number>;
+    maxPrice?: number;
   };
   className?: string;
   slug?: string;
 }
 
-const sizes = ["One Size", "50ml", "100ml", "32", "34", "36", "XS", "S", "M", "L", "XL", "XXL", "3XL"];
-const colors = [
-  { name: "White", hex: "#FFFFFF", border: "border-zinc-200" },
-  { name: "Black", hex: "#000000" },
-  { name: "Navy", hex: "#000080" },
-  { name: "Grey", hex: "#808080" },
-  { name: "Red", hex: "#FF0000" },
-  { name: "Green", hex: "#008000" },
-  { name: "Yellow", hex: "#FFFF00" },
-  { name: "Pink", hex: "#FFC0CB" },
-  { name: "Brown", hex: "#A52A2A" },
-];
-const discounts = [10, 20, 30, 40];
-const subCategoriesList = ["T-Shirts", "Hoodies", "Joggers", "Shirts", "Shorts", "Jackets", "Analog", "Digital", "Chronograph", "EDP", "EDT", "Belts", "Eyewear", "Wallets", "Jewelry"];
+const sizeOrder = ["One Size", "50ml", "100ml", "32", "34", "36", "XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL"];
+
+const colorMap: Record<string, { hex: string; border?: string }> = {
+  "White": { hex: "#FFFFFF", border: "border-zinc-200" },
+  "Black": { hex: "#000000" },
+  "Navy": { hex: "#000080" },
+  "Grey": { hex: "#808080" },
+  "Red": { hex: "#FF0000" },
+  "Green": { hex: "#008000" },
+  "Yellow": { hex: "#FFFF00" },
+  "Pink": { hex: "#FFC0CB" },
+  "Brown": { hex: "#A52A2A" },
+  "Beige": { hex: "#F5F5DC", border: "border-zinc-100" },
+  "Blue": { hex: "#0000FF" },
+  "Purple": { hex: "#800080" },
+  "Orange": { hex: "#FFA500" },
+};
+
+const discounts = [10, 20, 30, 40, 50];
 
 export function FilterSidebar({ filters, setFilters, clearAll, counts, className, slug }: FilterSidebarProps) {
   const [expanded, setExpanded] = React.useState<Record<string, boolean>>({
@@ -52,9 +58,29 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
   const isAccessory = slug === "accessories";
   const isMen = slug === "men";
 
+  const availableSizes = React.useMemo(() => {
+    return Object.keys(counts.sizes).sort((a, b) => {
+      const indexA = sizeOrder.indexOf(a);
+      const indexB = sizeOrder.indexOf(b);
+      if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
+  }, [counts.sizes]);
+
+  const availableColors = React.useMemo(() => {
+    return Object.keys(counts.colors);
+  }, [counts.colors]);
+
+  const availableSubCategories = React.useMemo(() => {
+    return Object.keys(counts.subCategories).sort();
+  }, [counts.subCategories]);
+
   // Logic for showing sections
-  const showSize = isMen || isPerfume || isAccessory; // Accessories might have belt sizes
-  const showColor = isMen || isAccessory || isWatch; // Some watches have color variants
+  const showSize = availableSizes.length > 0;
+  const showColor = availableColors.length > 0;
+  const showSubCategory = availableSubCategories.length > 0;
 
   const toggleExpanded = (key: string) => {
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -109,7 +135,7 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
                 <Slider
                   value={filters.priceRange}
                   min={0}
-                  max={3000}
+                  max={(counts as any).maxPrice || 10000}
                   step={100}
                   onValueChange={(val) => setFilters({ ...filters, priceRange: val as [number, number] })}
                   className="py-4"
@@ -147,7 +173,7 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
                 
                 {expanded.size && (
                   <div className="grid grid-cols-2 gap-3 pt-2 animate-in fade-in slide-in-from-top-2 duration-300 text-sm">
-                    {sizes.map((size) => {
+                    {availableSizes.map((size) => {
                       const count = counts.sizes[size] || 0;
                       if (count === 0 && !filters.sizes.includes(size)) return null;
                       return (
@@ -192,25 +218,26 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
                 
                 {expanded.color && (
                   <div className="flex flex-wrap gap-3 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                    {colors.map((color) => {
-                      const count = counts.colors[color.name] || 0;
-                      const isDisabled = count === 0 && !filters.colors.includes(color.name);
+                    {availableColors.map((colorName) => {
+                      const count = counts.colors[colorName] || 0;
+                      const colorInfo = colorMap[colorName] || { hex: "#F4F4F5" }; // Default neutral 
+                      const isDisabled = count === 0 && !filters.colors.includes(colorName);
                       return (
                         <button
-                          key={color.name}
-                          onClick={() => !isDisabled && toggleArrayFilter("colors", color.name)}
-                          title={`${color.name} (${count})`}
+                          key={colorName}
+                          onClick={() => !isDisabled && toggleArrayFilter("colors", colorName)}
+                          title={`${colorName} (${count})`}
                           disabled={isDisabled}
                           className={cn(
                             "w-8 h-8 rounded-full border shadow-sm transition-all relative flex items-center justify-center",
-                            color.border || "border-transparent",
-                            filters.colors.includes(color.name) ? "ring-2 ring-brand ring-offset-2 scale-110" : "hover:scale-110",
+                            colorInfo.border || "border-transparent",
+                            filters.colors.includes(colorName) ? "ring-2 ring-brand ring-offset-2 scale-110" : "hover:scale-110",
                             isDisabled ? "opacity-20 grayscale cursor-not-allowed pointer-events-none" : "opacity-100"
                           )}
-                          style={{ backgroundColor: color.hex }}
+                          style={{ backgroundColor: colorInfo.hex }}
                         >
-                          {filters.colors.includes(color.name) && (
-                            <Check className={cn("w-4 h-4", color.name === "White" ? "text-zinc-950" : "text-white")} />
+                          {filters.colors.includes(colorName) && (
+                            <Check className={cn("w-4 h-4", colorName === "White" ? "text-zinc-950" : "text-white")} />
                           )}
                         </button>
                       );
@@ -256,24 +283,24 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
           <Separator className="opacity-50" />
 
           {/* Categories / Watch Type */}
-          <section className="space-y-4 py-4 pb-8">
-            <button 
-              onClick={() => toggleExpanded("category")}
-              className="flex items-center justify-between w-full group"
-            >
-              <h4 className="text-sm font-bold uppercase tracking-widest text-zinc-900 font-heading">
-                {isWatch ? "Watch Type" : (isPerfume ? "Fragrance Type" : "Category")}
-              </h4>
-              <div className="flex items-center gap-2">
-                {!expanded.category && <span className="text-[10px] font-bold text-brand">{getSelectionSummary("subCategories")}</span>}
-                <ChevronDown className={cn("w-4 h-4 transition-transform text-zinc-400 group-hover:text-zinc-900", expanded.category ? "rotate-180" : "")} />
-              </div>
-            </button>
-            
-            {expanded.category && (
-              <div className="space-y-3 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                {subCategoriesList
-                  .filter((sub) => (counts.subCategories[sub] || 0) > 0)
+          {showSubCategory && (
+            <section className="space-y-4 py-4 pb-8">
+              <button 
+                onClick={() => toggleExpanded("category")}
+                className="flex items-center justify-between w-full group"
+              >
+                <h4 className="text-sm font-bold uppercase tracking-widest text-zinc-900 font-heading">
+                  {isWatch ? "Watch Type" : (isPerfume ? "Fragrance Type" : "Category")}
+                </h4>
+                <div className="flex items-center gap-2">
+                  {!expanded.category && <span className="text-[10px] font-bold text-brand">{getSelectionSummary("subCategories")}</span>}
+                  <ChevronDown className={cn("w-4 h-4 transition-transform text-zinc-400 group-hover:text-zinc-900", expanded.category ? "rotate-180" : "")} />
+                </div>
+              </button>
+              
+              {expanded.category && (
+                <div className="space-y-3 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                  {availableSubCategories
                   .map((sub) => {
                     const count = counts.subCategories[sub] || 0;
                     return (
@@ -297,8 +324,9 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
               </div>
             )}
           </section>
-        </div>
-      </ScrollArea>
+        )}
+      </div>
+    </ScrollArea>
     </div>
   );
 }

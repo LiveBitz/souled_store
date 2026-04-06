@@ -10,9 +10,9 @@ import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
   product: {
-    id: number;
+    id: number | string;
     name: string;
-    category: string;
+    category: any;
     price: number;
     originalPrice: number;
     discount: number;
@@ -22,16 +22,22 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  const categoryName = typeof product.category === 'object' 
+    ? product.category?.name 
+    : product.category;
 
   return (
     <Card className="group relative overflow-hidden rounded-xl border-none shadow-none hover:shadow-xl transition-all duration-300">
       <CardContent className="p-0">
         <div className="relative aspect-square overflow-hidden bg-muted">
           <Image
-            src={product.image}
+            src={imgError ? "https://picsum.photos/seed/error/600/600" : product.image}
             alt={product.name}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-110"
+            onError={() => setImgError(true)}
           />
           {/* Wishlist Button */}
           <button
@@ -49,7 +55,7 @@ export function ProductCard({ product }: ProductCardProps) {
           
           {/* Category Badge */}
           <Badge className="absolute top-3 left-3 bg-white text-zinc-950 hover:bg-white font-medium px-3 py-1 rounded-full shadow-sm">
-            {product.category}
+            {categoryName}
           </Badge>
 
           {/* Discount Badge */}

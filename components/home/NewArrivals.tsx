@@ -1,12 +1,22 @@
 import React from "react";
 import Link from "next/link";
-import { products } from "@/lib/data";
+import prisma from "@/lib/prisma";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { SectionHeading } from "@/components/shared/SectionHeading";
+import { cn } from "@/lib/utils";
 
-export function NewArrivals() {
-  // Show first 8 products for New Arrivals
-  const featuredProducts = products.slice(0, 8);
+async function getNewArrivals() {
+  return await prisma.product.findMany({
+    where: { isNew: true },
+    take: 8,
+    orderBy: { createdAt: 'desc' }
+  });
+}
+
+export async function NewArrivals() {
+  const featuredProducts = await getNewArrivals();
+
+  if (featuredProducts.length === 0) return null;
 
   return (
     <section id="new-arrivals" className="py-14 container mx-auto">
@@ -16,7 +26,7 @@ export function NewArrivals() {
           subtitle="Be the first to wear our latest designs and exclusive drops."
           trailing={
             <Link 
-              href="/new-arrivals" 
+              href="/category/new-arrivals" 
               className="text-brand hover:underline font-bold text-sm tracking-tight flex items-center gap-1 group"
             >
               View All 
@@ -34,29 +44,11 @@ export function NewArrivals() {
               key={product.id} 
               className="min-w-[280px] md:min-w-0 snap-start"
             >
-              <ProductCard product={product} />
+              <ProductCard product={product as any} />
             </div>
-          ))}
-        </div>
-        
-        {/* Subtle scroll indicators for mobile */}
-        <div className="md:hidden flex justify-center gap-1 mt-2">
-          {featuredProducts.map((_, idx) => (
-            <div 
-              key={idx} 
-              className={cn(
-                "h-1 w-4 rounded-full transition-all",
-                idx === 0 ? "bg-brand w-8" : "bg-zinc-200"
-              )} 
-            />
           ))}
         </div>
       </div>
     </section>
   );
-}
-
-// Helper function locally if not available
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(" ");
 }
