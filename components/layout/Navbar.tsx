@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+import { useCart } from "@/context/CartContext";
+import { CartSheet } from "@/components/cart/CartSheet";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -20,7 +22,7 @@ const navLinks = [
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const cartCount = 3;
+  const { totalItems, setIsOpen: setOpenCart } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -140,11 +142,16 @@ export function Navbar() {
           <Button variant="ghost" size="icon" className="hidden sm:flex rounded-full">
             <Heart className="w-5 h-5 text-zinc-700" />
           </Button>
-          <Button variant="ghost" size="icon" className="rounded-full relative">
-            <ShoppingBag className="w-5 h-5 text-zinc-700" />
-            {cartCount > 0 && (
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-brand hover:bg-brand">
-                {cartCount}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="rounded-full relative group"
+            onClick={() => setOpenCart(true)}
+          >
+            <ShoppingBag className="w-5 h-5 text-zinc-700 group-hover:scale-110 transition-transform" />
+            {totalItems > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] font-black bg-zinc-950 text-white hover:bg-zinc-950 border-2 border-white">
+                {totalItems}
               </Badge>
             )}
           </Button>
@@ -153,6 +160,7 @@ export function Navbar() {
           </Button>
         </div>
       </div>
+      <CartSheet />
     </nav>
   );
 }

@@ -32,6 +32,7 @@ model Product {
   sizes         String[] // Supported in PostgreSQL
   colors        String[] 
   image         String
+  images        String[] 
   description   String   @default("")
   features      String[] @default([])
   isNew         Boolean  @default(false)

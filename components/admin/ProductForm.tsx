@@ -18,6 +18,7 @@ import {
   Upload,
   AlertCircle,
   X,
+  Plus,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
@@ -57,8 +58,8 @@ export function ProductForm({
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState<Record<string, boolean>>({});
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [showPreview, setShowPreview] = useState(false);
 
   const isEdit = !!initialData;
@@ -72,6 +73,7 @@ export function ProductForm({
     categoryId: initialData?.categoryId || preSelectedCategoryId || "",
     subCategory: initialData?.subCategory || "",
     image: initialData?.image || "",
+    images: Array.isArray(initialData?.images) ? initialData.images : [],
     isNew: initialData?.isNew ?? true,
     isBestSeller: initialData?.isBestSeller ?? false,
     sizes: Array.isArray(initialData?.sizes) ? initialData.sizes : [],
@@ -106,19 +108,21 @@ export function ProductForm({
     setFormData((prev) => ({ ...prev, name, slug }));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, slot: 'main' | number) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const id = slot === 'main' ? 'main' : `gallery-${slot}`;
+
     try {
-      setIsUploading(true);
-      setUploadProgress(10);
+      setIsUploading(prev => ({ ...prev, [id]: true }));
+      setUploadProgress(prev => ({ ...prev, [id]: 10 }));
 
       const fileExt = file.name.split(".").pop();
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = `products/${fileName}`;
 
-      setUploadProgress(30);
+      setUploadProgress(prev => ({ ...prev, [id]: 30 }));
 
       const { error: uploadError } = await supabase.storage
         .from("product")
@@ -126,17 +130,26 @@ export function ProductForm({
 
       if (uploadError) throw uploadError;
 
-      setUploadProgress(80);
+      setUploadProgress(prev => ({ ...prev, [id]: 80 }));
 
       const {
         data: { publicUrl },
       } = supabase.storage.from("product").getPublicUrl(filePath);
 
-      setFormData((prev) => ({ ...prev, image: publicUrl }));
-      setUploadProgress(100);
+      if (slot === 'main') {
+        setFormData((prev) => ({ ...prev, image: publicUrl }));
+      } else {
+        setFormData((prev) => {
+          const newImages = [...prev.images];
+          newImages[slot] = publicUrl;
+          return { ...prev, images: newImages };
+        });
+      }
+      
+      setUploadProgress(prev => ({ ...prev, [id]: 100 }));
       toast({
         title: "Media asset synchronized",
-        description: "Image successfully uploaded to storage.",
+        description: `Image successfully uploaded to ${slot === 'main' ? 'Primary' : 'Gallery'} slot.`,
       });
     } catch (error: any) {
       console.error("Error uploading image:", error);
@@ -147,9 +160,21 @@ export function ProductForm({
       });
     } finally {
       setTimeout(() => {
-        setIsUploading(false);
-        setUploadProgress(0);
+        setIsUploading(prev => ({ ...prev, [id]: false }));
+        setUploadProgress(prev => ({ ...prev, [id]: 0 }));
       }, 500);
+    }
+  };
+
+  const handleRemoveImage = (slot: 'main' | number) => {
+    if (slot === 'main') {
+      setFormData(prev => ({ ...prev, image: "" }));
+    } else {
+      setFormData(prev => {
+        const newImages = [...prev.images];
+        newImages.splice(slot, 1);
+        return { ...prev, images: newImages };
+      });
     }
   };
 
@@ -158,9 +183,14 @@ export function ProductForm({
     setIsSubmitting(true);
 
     try {
+      const payload = {
+        ...formData,
+        images: formData.images.filter(Boolean)
+      };
+
       const result = isEdit
-        ? await updateProduct(initialData.id, formData)
-        : await createProduct(formData);
+        ? await updateProduct(initialData.id, payload)
+        : await createProduct(payload);
 
       if (result.success) {
         toast({
@@ -369,10 +399,10 @@ export function ProductForm({
 
             <Button
               type="submit"
-              disabled={isSubmitting || isUploading}
+              disabled={isSubmitting || Object.values(isUploading).some(Boolean)}
               className="h-9 sm:h-11 px-4 sm:px-8 rounded-xl sm:rounded-2xl bg-brand hover:bg-brand/90 text-white font-bold shadow-xl shadow-brand/20 transition-all active:scale-95 flex items-center justify-center gap-2 text-xs sm:text-sm"
             >
-              {isSubmitting || isUploading ? (
+              {isSubmitting || Object.values(isUploading).some(Boolean) ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Save className="w-4 h-4" />
@@ -398,91 +428,156 @@ export function ProductForm({
           {/* Form Sections */}
           <div className="lg:col-span-2 space-y-6 sm:space-y-8">
 
-            {/* Gallery & Media */}
-            <section className="bg-white p-5 sm:p-8 rounded-3xl border border-zinc-100 shadow-sm space-y-6 transition-all hover:shadow-md">
+            {/* Gallery & Media Expansion */}
+            <section className="bg-white p-5 sm:p-8 rounded-3xl border border-zinc-100 shadow-sm space-y-8 transition-all hover:shadow-md">
               <div className="flex items-center gap-3 border-b border-zinc-50 pb-5">
                 <div className="w-9 h-9 rounded-xl bg-zinc-50 flex items-center justify-center shrink-0">
                   <ImageIcon className="w-4 h-4 text-brand" />
                 </div>
                 <div>
                   <h2 className="text-base sm:text-lg font-bold text-zinc-900 tracking-tight">
-                    Gallery & Media
+                    Multi-Asset Gallery
                   </h2>
                   <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-0.5">
-                    Visual Identity & Assets
+                    Visual Identity & Supplemental Assets
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-5 sm:gap-8 items-start">
-                {/* Image preview box */}
-                <div className="w-full sm:w-40 h-52 sm:h-52 rounded-[28px] bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 shadow-inner group overflow-hidden relative transition-all active:scale-95">
-                  {isUploading ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <Loader2 className="w-7 h-7 text-brand animate-spin" />
-                      <p className="text-[10px] font-extrabold text-brand uppercase tracking-widest">
-                        {uploadProgress}%
-                      </p>
-                    </div>
-                  ) : formData.image ? (
-                    <img
-                      src={formData.image}
-                      alt="Preview"
-                      className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700"
-                    />
-                  ) : (
-                    <ImageIcon className="w-10 h-10 text-zinc-200" />
-                  )}
-                  {formData.image && !isUploading && (
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                      <p className="text-[9px] font-extrabold text-white uppercase tracking-widest">
-                        Click to Replace
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Upload controls */}
-                <div className="flex-1 w-full space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1 flex items-center gap-2">
-                      Media Asset (Supabase Storage)
-                      <AlertCircle className="w-3 h-3 text-zinc-300" />
+              <div className="space-y-8">
+                {/* Primary Asset */}
+                <div className="space-y-4">
+                  <div className="px-1">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                      Main Display (Primary Slot)
                     </label>
-
-                    <div className="relative">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        disabled={isUploading}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                      />
-                      <div className="h-16 sm:h-20 rounded-2xl border-2 border-dashed border-zinc-100 hover:border-brand/40 bg-zinc-50/50 hover:bg-brand/[0.02] transition-all flex items-center justify-center gap-3 group">
-                        <div className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center text-zinc-400 group-hover:text-brand transition-colors shrink-0">
-                          <Upload className="w-4 h-4" />
+                    <p className="text-[9px] text-zinc-300 font-bold uppercase mt-0.5">
+                      This asset represents the product in all catalog views
+                    </p>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-6 items-start">
+                    <div className="w-full sm:w-60 aspect-square rounded-[32px] bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 shadow-inner group overflow-hidden relative transition-all active:scale-95">
+                      {isUploading['main'] ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <Loader2 className="w-8 h-8 text-brand animate-spin" />
+                          <p className="text-[10px] font-extrabold text-brand uppercase tracking-widest">
+                            {uploadProgress['main']}%
+                          </p>
                         </div>
-                        <div className="text-left">
-                          <p className="text-sm font-bold text-zinc-900 leading-none">
-                            Choose high-res asset
-                          </p>
-                          <p className="text-[10px] text-zinc-400 font-bold uppercase mt-1">
-                            Direct upload to 'product' bucket
-                          </p>
+                      ) : formData.image ? (
+                        <>
+                          <img
+                            src={formData.image}
+                            alt="Primary"
+                            className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage('main')}
+                            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-xl flex items-center justify-center text-zinc-400 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 text-zinc-200">
+                          <ImageIcon className="w-12 h-12" />
+                          <p className="text-[9px] font-bold uppercase tracking-widest">Awaiting Identity</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 w-full space-y-4">
+                      <div className="relative">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(e, 'main')}
+                          disabled={isUploading['main']}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        <div className="h-20 rounded-2xl border-2 border-dashed border-zinc-100 hover:border-brand/40 bg-zinc-50/50 hover:bg-brand/[0.02] transition-all flex items-center justify-center gap-3 group">
+                          <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-zinc-400 group-hover:text-brand transition-colors shrink-0">
+                            <Upload className="w-5 h-5" />
+                          </div>
+                          <div className="text-left">
+                            <p className="text-sm font-bold text-zinc-900 leading-none">
+                              Synchronize Primary Asset
+                            </p>
+                            <p className="text-[10px] text-zinc-400 font-bold uppercase mt-1">
+                              High-res 1:1 ratio recommended
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
 
-                    <div className="p-3 sm:p-4 rounded-2xl bg-zinc-50/50 border border-zinc-100/50 text-[10px] text-zinc-400 font-bold space-y-1.5">
-                      <p className="flex items-center gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                        Storage: supabase-storage://product
-                      </p>
-                      <p className="flex items-center gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                        Optimized CDN distribution enabled.
-                      </p>
-                    </div>
+                {/* Supplemental Gallery (3 Slots) */}
+                <div className="space-y-4 pt-4 border-t border-zinc-50">
+                  <div className="px-1">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                      Supplemental Assets (Gallery Slots)
+                    </label>
+                    <p className="text-[9px] text-zinc-300 font-bold uppercase mt-0.5">
+                      Additional perspectives for the detailed showcase
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6">
+                    {[0, 1, 2].map((idx) => {
+                      const id = `gallery-${idx}`;
+                      const imageUrl = formData.images[idx];
+                      const uploading = isUploading[id];
+                      const progress = uploadProgress[id];
+
+                      return (
+                        <div key={idx} className="space-y-3">
+                          <div className="aspect-[4/5] rounded-[24px] bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 shadow-inner group overflow-hidden relative transition-all active:scale-95">
+                            {uploading ? (
+                              <div className="flex flex-col items-center gap-2">
+                                <Loader2 className="w-6 h-6 text-brand animate-spin" />
+                                <p className="text-[9px] font-extrabold text-brand uppercase tracking-widest">
+                                  {progress}%
+                                </p>
+                              </div>
+                            ) : imageUrl ? (
+                              <>
+                                <img
+                                  src={imageUrl}
+                                  alt={`Gallery ${idx + 1}`}
+                                  className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveImage(idx)}
+                                  className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm shadow-xl flex items-center justify-center text-zinc-400 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </>
+                            ) : (
+                              <div className="relative w-full h-full">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleImageUpload(e, idx)}
+                                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                />
+                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-zinc-200 group-hover:text-zinc-300 transition-colors">
+                                  <div className="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-zinc-200 group-hover:text-brand/40 transition-all">
+                                    <Plus className="w-6 h-6" />
+                                  </div>
+                                  <p className="text-[8px] font-extrabold uppercase tracking-[0.2em]">Add Slot {idx + 1}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -826,66 +921,118 @@ export function ProductForm({
                   </div>
                 </div>
 
-                {/* Colors */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between px-1">
-                    <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em]">
-                      Color Palette
-                    </label>
-                    <p className="text-[9px] text-zinc-300 font-bold uppercase tracking-widest">
-                      Visual Clusters
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                    {[
-                      "Black",
-                      "White",
-                      "Grey",
-                      "Navy",
-                      "Red",
-                      "Blue",
-                      "Green",
-                      "Yellow",
-                      "Orange",
-                      "Purple",
-                      "Brown",
-                    ].map((color) => {
-                      const isSelected = formData.colors.includes(color);
-                      return (
-                        <button
-                          key={color}
-                          type="button"
-                          onClick={() => {
-                            const newColors = isSelected
-                              ? formData.colors.filter(
-                                  (c: string) => c !== color
-                                )
-                              : [...formData.colors, color];
-                            setFormData((p) => ({
-                              ...p,
-                              colors: newColors,
-                            }));
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between px-1">
+                      <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em]">
+                        Color Palette
+                      </label>
+                      <p className="text-[9px] text-zinc-300 font-bold uppercase tracking-widest">
+                        Visual Clusters
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                      {[
+                        "Black",
+                        "White",
+                        "Grey",
+                        "Navy",
+                        "Red",
+                        "Blue",
+                        "Green",
+                        "Yellow",
+                        "Orange",
+                        "Purple",
+                        "Brown",
+                        ...formData.colors.filter((c: string) => ![
+                          "Black", "White", "Grey", "Navy", "Red", "Blue", "Green", "Yellow", "Orange", "Purple", "Brown"
+                        ].includes(c))
+                      ].map((color) => {
+                        const isSelected = formData.colors.includes(color);
+                        return (
+                          <button
+                            key={color}
+                            type="button"
+                            onClick={() => {
+                              const newColors = isSelected
+                                ? formData.colors.filter(
+                                    (c: string) => c !== color
+                                  )
+                                : Array.from(new Set([...formData.colors, color]));
+                              setFormData((p) => ({
+                                ...p,
+                                colors: newColors,
+                              }));
+                            }}
+                            className={cn(
+                              "px-4 h-12 rounded-2xl border font-bold text-[10px] uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-sm flex items-center gap-3",
+                              isSelected
+                                ? "bg-zinc-900 border-zinc-900 text-white shadow-xl shadow-zinc-200"
+                                : "bg-white border-zinc-100 text-zinc-400 hover:border-zinc-200 hover:text-zinc-600"
+                            )}
+                          >
+                            <div
+                              className="w-4 h-4 rounded-full border border-white/20 shadow-sm shrink-0"
+                              style={{ 
+                                backgroundColor: color.toLowerCase() === "white" 
+                                  ? "#ffffff" 
+                                  : color.toLowerCase() 
+                              }}
+                            />
+                            <span className="flex-1 text-left truncate">{color}</span>
+                            {isSelected && (
+                              <CheckCircle2 className="w-3 h-3 text-brand shrink-0" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Custom Color Input */}
+                    <div className="flex gap-2 pt-2 px-1">
+                      <div className="relative flex-1">
+                        <Input
+                          placeholder="Add Custom Color..."
+                          id="customColor"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              const input = e.currentTarget;
+                              const val = input.value.trim();
+                              if (val && !formData.colors.includes(val)) {
+                                setFormData(p => ({
+                                  ...p,
+                                  colors: Array.from(new Set([...p.colors, val]))
+                                }));
+                                input.value = '';
+                              }
+                            }
                           }}
-                          className={cn(
-                            "px-4 h-12 rounded-2xl border font-bold text-[10px] uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-sm flex items-center gap-3",
-                            isSelected
-                              ? "bg-zinc-900 border-zinc-900 text-white shadow-xl shadow-zinc-200"
-                              : "bg-white border-zinc-100 text-zinc-400 hover:border-zinc-200 hover:text-zinc-600"
-                          )}
-                        >
-                          <div
-                            className="w-4 h-4 rounded-full border border-white/20 shadow-sm shrink-0"
-                            style={{ backgroundColor: color.toLowerCase() }}
-                          />
-                          <span className="flex-1 text-left">{color}</span>
-                          {isSelected && (
-                            <CheckCircle2 className="w-3 h-3 text-brand shrink-0" />
-                          )}
-                        </button>
-                      );
-                    })}
+                          className="h-12 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white text-[10px] font-bold uppercase tracking-widest pl-10"
+                        />
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                          <Sparkles className="w-4 h-4 text-zinc-300" />
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          const input = document.getElementById('customColor') as HTMLInputElement;
+                          const val = input.value.trim();
+                          if (val && !formData.colors.includes(val)) {
+                            setFormData(p => ({
+                              ...p,
+                              colors: Array.from(new Set([...p.colors, val]))
+                            }));
+                            input.value = '';
+                          }
+                        }}
+                        className="h-12 rounded-2xl bg-zinc-900 text-white px-6 text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-zinc-200 active:scale-95"
+                      >
+                        Add
+                      </Button>
+                    </div>
                   </div>
-                </div>
               </div>
             </section>
 

@@ -14,6 +14,8 @@ const dmSans = DM_Sans({
   variable: "--font-body",
 });
 
+import { CartProvider } from "@/context/CartContext";
+
 export const metadata: Metadata = {
   title: "SOULED | Premium Clothing Store",
   description: "Experience premium, conversion-focused clothing shop.",
@@ -27,14 +29,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${dmSans.variable} h-full antialiased font-body selection:bg-brand/20`}
+      className={`${spaceGrotesk.variable} ${dmSans.variable} h-full antialiased font-body selection:bg-brand/20 text-[15px]`}
     >
       <body className="min-h-full flex flex-col bg-white text-zinc-950">
-        <Navbar />
-        <main className="flex-1 pt-[72px] md:pt-[84px] lg:pt-[92px]">
-          {children}
-        </main>
-        <Footer />
+        <CartProvider>
+          <Navbar />
+          <main className="flex-1 pt-[72px] md:pt-[84px] lg:pt-[92px]">
+            {children}
+          </main>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );

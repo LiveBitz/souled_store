@@ -1,33 +1,37 @@
 import React from "react";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import Image from "next/image";
-import { 
-  Heart, 
-  ShoppingBag, 
-  ShieldCheck, 
-  Truck, 
+import {
+  Heart,
+  ShoppingBag,
+  ShieldCheck,
+  Truck,
   RotateCcw,
-  Star
+  Star,
+  ChevronRight,
+  Package,
+  BadgeCheck,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { ProductGallery } from "@/components/catalog/ProductGallery";
+import { ProductSelection } from "@/components/catalog/ProductSelection";
 
 async function getProduct(slug: string) {
   return await prisma.product.findUnique({
     where: { slug },
     include: {
-      category: true
-    }
+      category: true,
+    },
   });
 }
 
-export default async function ProductDetailsPage({ 
-  params 
-}: { 
-  params: Promise<{ slug: string }> 
+export default async function ProductDetailsPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
   const product = await getProduct(slug);
@@ -36,228 +40,283 @@ export default async function ProductDetailsPage({
     notFound();
   }
 
-  const discountPercentage = product.discount > 0 
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) 
-    : 0;
+  const discountPercentage =
+    product.discount > 0
+      ? Math.round(
+          ((product.originalPrice - product.price) / product.originalPrice) *
+            100
+        )
+      : 0;
 
   return (
-    <div className="bg-white min-h-screen pb-24">
-      {/* Breadcrumb Section (Storefront Style) */}
-      <div className="container mx-auto px-4 md:px-8 pt-8 lg:pt-12">
-        <nav className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-400">
-          <a href="/" className="hover:text-brand transition-colors">Home</a>
-          <span>/</span>
-          <a href={`/category/${product.category.slug}`} className="hover:text-brand transition-colors">{product.category.name}</a>
-          <span>/</span>
-          <span className="text-zinc-900">{product.name}</span>
-        </nav>
+    <div className="bg-white min-h-screen">
+      {/* ── Breadcrumb ── */}
+      <div className="border-b border-zinc-100">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+          <nav className="flex items-center gap-1.5 py-4 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 overflow-x-auto whitespace-nowrap scrollbar-none">
+            <a
+              href="/"
+              className="hover:text-zinc-800 transition-colors duration-200 shrink-0"
+            >
+              Home
+            </a>
+            <ChevronRight className="w-3 h-3 shrink-0 text-zinc-300" />
+            <a
+              href={`/category/${product.category.slug}`}
+              className="hover:text-zinc-800 transition-colors duration-200 shrink-0"
+            >
+              {product.category.name}
+            </a>
+            <ChevronRight className="w-3 h-3 shrink-0 text-zinc-300" />
+            <span className="text-zinc-700 truncate max-w-[160px] sm:max-w-none">
+              {product.name}
+            </span>
+          </nav>
+        </div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-8 mt-8 lg:mt-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
-          
-          {/* Visual Excellence Column (Left) */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="aspect-[3/4] relative overflow-hidden rounded-[40px] bg-zinc-50 border border-zinc-100 shadow-2xl shadow-zinc-100/50 group">
-              <Image 
-                src={product.image} 
-                alt={product.name} 
-                fill 
-                priority
-                className="object-cover transition-transform duration-1000 group-hover:scale-110"
-              />
-              
-              {/* Floating Badges */}
-              <div className="absolute top-8 left-8 flex flex-col gap-3">
-                {product.isNew && (
-                  <Badge className="bg-zinc-950 text-white hover:bg-zinc-950 px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] shadow-2xl shadow-black/30">
-                    NEW ARRIVAL
-                  </Badge>
-                )}
-                {product.isBestSeller && (
-                  <Badge className="bg-brand text-white hover:bg-brand px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] shadow-2xl shadow-brand/30">
-                    BEST SELLER
-                  </Badge>
-                )}
-              </div>
+      {/* ── Main Content ── */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-10 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-24">
 
-              {/* Focus Interaction */}
-              <button className="absolute top-8 right-8 w-14 h-14 rounded-full bg-white/80 backdrop-blur-xl flex items-center justify-center text-zinc-600 shadow-xl hover:bg-white transition-all active:scale-90 border border-white/50">
-                <Heart className="w-6 h-6 stroke-brand" />
-              </button>
-            </div>
+          {/* ─── Left · Visual Showcase ─── */}
+          <div className="lg:col-span-7">
+            <ProductGallery
+              mainImage={product.image}
+              supplementalImages={(product as any).images || []}
+              productName={product.name}
+              isNew={product.isNew}
+              isBestSeller={product.isBestSeller}
+            />
           </div>
 
-          {/* Details & Commercial Orchestration (Right) */}
-          <div className="lg:col-span-5 flex flex-col pt-4">
-            <div className="space-y-8 sticky top-[120px]">
+          <div className="lg:col-span-5 lg:pt-2">
+            <div className="lg:sticky lg:top-32 space-y-9">
+
               {/* Product Identity */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="rounded-full border-brand/20 text-brand font-bold text-[10px] uppercase tracking-widest px-3 py-1 bg-brand/5">
+              <div className="space-y-4">
+                {/* Category + Rating row */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <Badge
+                    variant="outline"
+                    className="rounded-full border-zinc-200 text-zinc-500 font-semibold text-[10px] uppercase tracking-widest px-3 py-1 bg-zinc-50"
+                  >
                     {product.subCategory || product.category.name}
                   </Badge>
-                  <div className="flex items-center gap-1 text-zinc-400">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className="w-3 h-3 fill-zinc-200 stroke-zinc-200" />
-                    ))}
-                    <span className="text-[10px] font-bold ml-1 tracking-tight">4.9 (120 Reviews)</span>
-                  </div>
-                </div>
-                <h1 className="text-4xl lg:text-5xl font-bold font-heading tracking-tight text-zinc-950 leading-[1.1]">
-                  {product.name}
-                </h1>
-              </div>
 
-              {/* Pricing Architecture */}
-              <div className="space-y-2">
-                <div className="flex items-baseline gap-4">
-                  <span className="text-4xl font-bold font-heading tracking-tighter text-zinc-950">₹{product.price}</span>
-                  {product.discount > 0 && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl text-zinc-400 line-through decoration-zinc-300 font-medium">₹{product.originalPrice}</span>
-                      <Badge className="bg-success/10 text-success hover:bg-success/10 border-none px-3 py-1 text-[10px] font-bold rounded-full">
-                        {discountPercentage}% OFF
-                      </Badge>
-                    </div>
-                  )}
-                </div>
-                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Inclusive of all taxes</p>
-              </div>
-
-              <Separator className="bg-zinc-50" />
-
-              {/* Size & Inventory Sync (Dynamic from Database) */}
-              <div className="space-y-10 font-sans">
-                {(product.sizes as string[])?.length > 0 && (
-                  <div className="space-y-5">
-                    <div className="flex items-center justify-between px-1">
-                      <div className="space-y-0.5">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">Select Size</label>
-                        <p className="text-[9px] text-zinc-300 font-bold uppercase tracking-widest">Real-time Stock Sync</p>
-                      </div>
-                      <button className="text-[10px] font-bold text-brand uppercase tracking-widest hover:underline">Size Guide</button>
-                    </div>
-                    <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-3">
-                      {(product.sizes as string[]).map((sizeData: string) => {
-                        const [size, qtyStr] = sizeData.split(":");
-                        const quantity = parseInt(qtyStr || "0");
-                        const isOutOfStock = quantity === 0;
-                        const isLowStock = !isOutOfStock && quantity <= 5;
-
-                        return (
-                          <button 
-                            key={size}
-                            disabled={isOutOfStock}
-                            className={cn(
-                              "relative group h-16 rounded-2xl border flex flex-col items-center justify-center transition-all duration-300 shadow-sm overflow-hidden",
-                              isOutOfStock 
-                                ? "bg-zinc-50 border-zinc-50 text-zinc-300 cursor-not-allowed" 
-                                : "bg-white border-zinc-100 text-zinc-900 hover:border-zinc-900 hover:shadow-xl hover:shadow-zinc-200 active:scale-95"
-                            )}
-                          >
-                            <span className="text-sm font-black tracking-tight z-10">{size}</span>
-                            
-                            {!isOutOfStock && (
-                              <span className={cn(
-                                "text-[9px] font-bold uppercase tracking-widest mt-0.5 z-10",
-                                isLowStock ? "text-brand" : "text-zinc-400 group-hover:text-zinc-900"
-                              )}>
-                                {isLowStock ? `Only ${quantity} Left` : "Available"}
-                              </span>
-                            )}
-
-                            {isOutOfStock && (
-                              <span className="text-[9px] font-bold uppercase tracking-widest mt-0.5 z-10 text-zinc-300">
-                                Sold Out
-                              </span>
-                            )}
-
-                            {/* Elegant diagonal line for out of stock */}
-                            {isOutOfStock && (
-                              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-zinc-100 to-transparent opacity-50" />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {product.colors.length > 0 && (
-                  <div className="space-y-5">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">Available Colors</label>
-                    <div className="flex flex-wrap gap-4">
-                      {product.colors.map((color: string) => (
-                        <button 
-                          key={color}
-                          title={color}
-                          className="w-10 h-10 rounded-full border-2 border-white ring-1 ring-zinc-100 shadow-xl transition-all hover:scale-125 hover:ring-brand active:scale-95"
-                          style={{ backgroundColor: color.toLowerCase() }}
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                          key={s}
+                          className="w-3 h-3 fill-amber-400 stroke-amber-400"
                         />
                       ))}
                     </div>
+                    <span className="text-[11px] font-semibold text-zinc-500">
+                      4.9
+                    </span>
+                    <span className="text-[11px] text-zinc-300 font-medium">
+                      · 120 Reviews
+                    </span>
                   </div>
+                </div>
+
+                {/* Product Name */}
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950 leading-[1.15]">
+                  {product.name}
+                </h1>
+
+                {/* Short description if available */}
+                {product.description && (
+                  <p className="text-sm text-zinc-500 leading-relaxed line-clamp-2" title={product.description}>
+                    {product.description}
+                  </p>
                 )}
               </div>
 
-              {/* Action Orchestration */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button className="flex-1 h-16 rounded-[2rem] bg-zinc-950 hover:bg-zinc-900 text-white font-bold text-lg shadow-xl shadow-zinc-200 transition-all active:scale-[0.98] gap-3">
-                  <ShoppingBag className="w-5 h-5" />
-                  Add to Cart
-                </Button>
-                <Button variant="outline" className="h-16 w-full sm:w-20 rounded-[2rem] border-zinc-100 shadow-sm hover:border-brand hover:text-brand transition-all active:scale-[0.98] flex items-center justify-center p-0">
-                  <Heart className="w-6 h-6" />
-                </Button>
+              {/* Pricing */}
+              <div className="space-y-1.5">
+                <div className="flex items-baseline flex-wrap gap-3">
+                  <span className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950">
+                    ₹{product.price.toLocaleString("en-IN")}
+                  </span>
+                  {product.discount > 0 && (
+                    <>
+                      <span className="text-lg text-zinc-400 line-through font-medium">
+                        ₹{product.originalPrice.toLocaleString("en-IN")}
+                      </span>
+                      <Badge className="bg-emerald-50 text-emerald-600 hover:bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 text-[11px] font-bold rounded-full">
+                        {discountPercentage}% OFF
+                      </Badge>
+                    </>
+                  )}
+                </div>
+                <p className="text-[10px] text-zinc-400 font-semibold uppercase tracking-widest">
+                  Inclusive of all taxes · Free shipping on orders above ₹499
+                </p>
               </div>
 
-              {/* Brand Trust Framework */}
-              <div className="grid grid-cols-3 gap-4 pt-4">
-                <div className="flex flex-col items-center text-center p-4 rounded-3xl bg-zinc-50 space-y-3">
-                  <ShieldCheck className="w-6 h-6 text-zinc-900" />
-                  <p className="text-[10px] font-bold text-zinc-950 uppercase tracking-tight">100% Genuine</p>
-                </div>
-                <div className="flex flex-col items-center text-center p-4 rounded-3xl bg-zinc-50 space-y-3">
-                  <Truck className="w-6 h-6 text-zinc-900" />
-                  <p className="text-[10px] font-bold text-zinc-950 uppercase tracking-tight">FAST DELIVERY</p>
-                </div>
-                <div className="flex flex-col items-center text-center p-4 rounded-3xl bg-zinc-50 space-y-3">
-                  <RotateCcw className="w-6 h-6 text-zinc-900" />
-                  <p className="text-[10px] font-bold text-zinc-950 uppercase tracking-tight">Easy Returns</p>
-                </div>
+              <Separator className="bg-zinc-100" />
+
+              {/* Selection Layer (Client) */}
+              <ProductSelection product={product as any} />
+
+              {/* Elite Trust Indicators */}
+              <div className="grid grid-cols-3 gap-3 pt-2">
+                {[
+                  {
+                    icon: ShieldCheck,
+                    label: "100% Genuine",
+                    sub: "Verified",
+                  },
+                  {
+                    icon: Truck,
+                    label: "Fast Delivery",
+                    sub: "2–4 Days",
+                  },
+                  {
+                    icon: RotateCcw,
+                    label: "Easy Returns",
+                    sub: "7-Day Policy",
+                  },
+                ].map(({ icon: Icon, label, sub }) => (
+                  <div
+                    key={label}
+                    className="flex flex-col items-center text-center gap-1.5 p-3 rounded-2xl bg-zinc-50/50 border border-zinc-100/50 hover:bg-zinc-50 transition-colors"
+                  >
+                    <Icon className="w-4 h-4 text-zinc-900 shrink-0" />
+                    <div>
+                      <p className="text-[9px] font-black text-zinc-950 uppercase tracking-tighter leading-none">
+                        {label}
+                      </p>
+                      <p className="text-[8px] text-zinc-400 font-bold uppercase tracking-tighter mt-1">
+                        {sub}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Delivery Info Strip */}
+              <div className="flex items-center gap-3 p-4 rounded-xl border border-zinc-100 bg-zinc-50/50">
+                <Package className="w-4 h-4 text-zinc-500 shrink-0" />
+                <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                  Order within{" "}
+                  <span className="text-zinc-800 font-semibold">
+                    4 hrs 23 mins
+                  </span>{" "}
+                  to get it by{" "}
+                  <span className="text-zinc-800 font-semibold">
+                    Tomorrow, 10 AM
+                  </span>
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Narrative & Specifications Section */}
-        <div className="mt-24 lg:mt-32 border-t border-zinc-50 pt-24 max-w-4xl">
-          <div className="space-y-12">
-            <div className="space-y-6">
-              <h2 className="text-3xl font-bold font-heading tracking-tight text-zinc-950">Product Story</h2>
-              <div className="prose prose-zinc max-w-none">
-                <p className="text-lg text-zinc-500 font-medium leading-relaxed whitespace-pre-wrap">
-                  {product.description || "Every SOULED creation is a masterpiece of modern design and premium craftsmanship. This item represents our commitment to excellence, blending comfort with a sophisticated aesthetic that transcends trends."}
+        {/* ── Product Details Section ── */}
+        <div className="mt-20 lg:mt-28">
+          <Separator className="bg-zinc-100 mb-16" />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+
+            {/* Description */}
+            <div className="lg:col-span-7 space-y-10">
+              <div className="space-y-5">
+                <div className="flex items-center gap-3">
+                  <span className="block w-1 h-5 rounded-full bg-zinc-900" />
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950">
+                    Product Description
+                  </h2>
+                </div>
+                <p className="text-base text-zinc-500 leading-relaxed whitespace-pre-wrap">
+                  {product.description ||
+                    "Every creation is a masterpiece of modern design and premium craftsmanship. This item represents a commitment to excellence, blending comfort with a sophisticated aesthetic that transcends trends."}
                 </p>
               </div>
+
+              {/* Features */}
+              {product.features && product.features.length > 0 && (
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <span className="block w-1 h-5 rounded-full bg-zinc-900" />
+                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950">
+                      Key Highlights
+                    </h3>
+                  </div>
+                  <ul className="space-y-3">
+                    {product.features.map((feature: string, idx: number) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <BadgeCheck className="w-4 h-4 text-zinc-400 mt-0.5 shrink-0" />
+                        <span className="text-sm sm:text-base text-zinc-600 leading-relaxed">
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
-            {product.features && product.features.length > 0 && (
-              <div className="space-y-8">
-                <h3 className="text-[10px] font-bold text-brand uppercase tracking-widest">Key Highlights</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {product.features.map((feature: string, idx: number) => (
-                    <div key={idx} className="flex gap-4">
-                      <div className="w-6 h-6 rounded-full bg-brand/10 flex items-center justify-center shrink-0">
-                        <span className="text-[10px] font-bold text-brand">{idx + 1}</span>
+            {/* Sidebar Spec Card */}
+            <div className="lg:col-span-5">
+              <div className="rounded-[2rem] border border-zinc-100 bg-zinc-50/30 p-8 sm:p-10 space-y-8">
+                <div className="space-y-1">
+                  <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                    Technical Specs
+                  </h3>
+                  <div className="h-0.5 w-8 bg-zinc-200 rounded-full" />
+                </div>
+                
+                <div className="space-y-0 divide-y divide-zinc-100/50">
+                  {[
+                    { label: "Collection", value: product.category.name },
+                    product.subCategory && {
+                      label: "Archetype",
+                      value: product.subCategory,
+                    },
+                    {
+                      label: "Availability",
+                      value:
+                        (product.sizes as string[])
+                          ?.map((s) => s.split(":")[0])
+                          .join(", ") || "One Size",
+                    },
+                    {
+                      label: "Palette",
+                      value:
+                        product.colors.length > 0
+                          ? `${product.colors.length} Variants`
+                          : "Unified",
+                    },
+                    {
+                      label: "Reference",
+                      value: product.slug.toUpperCase().replace(/-/g, ""),
+                    },
+                    {
+                      label: "Logistics",
+                      value: "7-Day Return Sync",
+                    },
+                  ]
+                    .filter(Boolean)
+                    .map((spec: any) => (
+                      <div
+                        key={spec.label}
+                        className="flex items-start justify-between gap-6 py-4"
+                      >
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest shrink-0 pt-0.5">
+                          {spec.label}
+                        </span>
+                        <span className="text-[11px] font-black text-zinc-900 text-right leading-relaxed">
+                          {spec.value}
+                        </span>
                       </div>
-                      <p className="text-zinc-600 font-medium leading-relaxed">{feature}</p>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
