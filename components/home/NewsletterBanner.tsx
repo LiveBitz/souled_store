@@ -5,7 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail } from "lucide-react";
 
-export function NewsletterBanner() {
+import { Banner } from "@prisma/client";
+
+interface NewsletterBannerProps {
+  banner?: Banner | null;
+}
+
+export function NewsletterBanner({ banner }: NewsletterBannerProps) {
+  if (!banner) return null;
+
+  const displayTitle = banner.title;
+  const displaySubtitle = banner.subtitle || "";
+  const displayButtonText = banner.buttonText || "Subscribe";
+
   return (
     <section className="py-20 px-4 md:px-8 lg:px-16 container mx-auto mb-10 overflow-hidden">
       <div className="relative w-full overflow-hidden rounded-3xl bg-brand text-white p-8 md:p-16 lg:p-24 flex flex-col lg:flex-row items-center gap-12 group">
@@ -15,12 +27,12 @@ export function NewsletterBanner() {
         
         <div className="relative z-10 flex-1 space-y-6 text-center lg:text-left">
           <div className="space-y-4">
-            <h2 className="text-3xl md:text-5xl font-bold font-heading tracking-tighter leading-tight">
-              GET 10% OFF <br />
-              <span className="text-zinc-900/40">YOUR FIRST ORDER</span>
+            <h2 className="text-3xl md:text-5xl font-bold font-heading tracking-tighter leading-tight whitespace-pre-line">
+              {displayTitle.split('\n')[0]} <br />
+              <span className="text-zinc-900/40">{displayTitle.split('\n')[1] || ""}</span>
             </h2>
             <p className="text-white/90 text-sm md:text-lg max-w-md font-medium uppercase tracking-wide mx-auto lg:mx-0">
-              Subscribe to our newsletter for exclusive deals, new drops, and early access.
+              {displaySubtitle}
             </p>
           </div>
         </div>
@@ -37,7 +49,7 @@ export function NewsletterBanner() {
               />
             </div>
             <Button className="bg-white text-zinc-950 hover:bg-zinc-100 px-8 h-12 rounded-full font-bold uppercase tracking-widest text-xs transition-all shadow-lg active:scale-95 shrink-0">
-              Subscribe
+              {displayButtonText}
             </Button>
           </form>
         </div>

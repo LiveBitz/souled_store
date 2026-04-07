@@ -11,11 +11,23 @@ import {
 } from "@/components/ui/carousel";
 import { heroSlides } from "@/lib/data";
 import Autoplay from "embla-carousel-autoplay";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-export function HeroBanner() {
+import { Banner } from "@prisma/client";
+
+interface HeroBannerProps {
+  banners?: Banner[];
+}
+
+export function HeroBanner({ banners = [] }: HeroBannerProps) {
   const plugin = React.useRef(
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
+
+  if (banners.length === 0) return null;
+
+  const displaySlides = banners;
 
   return (
     <section className="relative w-full overflow-hidden bg-zinc-100">
@@ -26,17 +38,33 @@ export function HeroBanner() {
         onMouseLeave={plugin.current.reset}
       >
         <CarouselContent>
-          {heroSlides.map((slide) => (
+          {displaySlides.map((slide) => (
             <CarouselItem key={slide.id}>
-              <div className="relative h-[250px] md:h-[500px] lg:h-[700px] w-full flex items-center">
-                <Image
-                  src={slide.image}
-                  alt={slide.title}
-                  fill
-                  className="object-cover"
-                  priority={slide.id === 1}
-                />
-              </div>
+              <Link href={(slide as any).link || "/"} className="block cursor-pointer group">
+                <div className="relative h-[250px] md:h-[500px] lg:h-[700px] w-full flex items-center">
+                  <Image
+                    src={slide.image}
+                    alt={slide.title}
+                    fill
+                    className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                    priority
+                  />
+                  
+                  {/* Dynamic Content Overlay */}
+                  <div className="absolute inset-0 bg-black/10 flex items-center justify-center sm:justify-start px-6 sm:px-20 lg:px-32">
+                    <div className="max-w-2xl space-y-4 sm:space-y-6 text-center sm:text-left animate-in fade-in slide-in-from-bottom-5 duration-1000">
+                      <h2 className="text-3xl sm:text-5xl lg:text-7xl font-bold text-white tracking-tighter leading-none whitespace-pre-line drop-shadow-xl">
+                        {slide.title}
+                      </h2>
+                      {slide.subtitle && (
+                        <p className="text-sm sm:text-lg lg:text-xl text-white/90 font-medium max-w-md drop-shadow-lg">
+                          {slide.subtitle}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Link>
             </CarouselItem>
           ))}
         </CarouselContent>

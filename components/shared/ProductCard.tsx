@@ -86,13 +86,15 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </Link>
         
-        <Button 
-          variant="outline" 
-          className="w-full rounded-xl border-zinc-200 group-hover:bg-brand group-hover:text-white group-hover:border-brand transition-all duration-300 gap-2 h-10 font-bold text-xs uppercase tracking-widest"
-        >
-          <ShoppingBag className="w-4 h-4" />
-          Add to Cart
-        </Button>
+        <Link href={`/product/${product.slug}`} className="w-full">
+          <Button 
+            variant="outline" 
+            className="w-full rounded-xl border-zinc-200 group-hover:bg-brand group-hover:text-white group-hover:border-brand transition-all duration-300 gap-2 h-10 font-bold text-xs uppercase tracking-widest"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            Add to Cart
+          </Button>
+        </Link>
       </CardFooter>
     </Card>
   );

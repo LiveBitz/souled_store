@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Heart, ShoppingBag, User, Menu, X, ChevronRight, LogIn, HelpCircle, PhoneCall } from "lucide-react";
+import { Search, Heart, ShoppingBag, User, Menu, X, ChevronRight, LogIn, HelpCircle, PhoneCall, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -10,6 +10,9 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/context/CartContext";
 import { CartSheet } from "@/components/cart/CartSheet";
+import { createClient } from "@/lib/supabase/client";
+import { signOut } from "@/lib/actions/auth-actions";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -22,15 +25,39 @@ const navLinks = [
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const { totalItems, setIsOpen: setOpenCart } = useCart();
+  const supabase = createClient();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    // Initial user fetch
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+    fetchUser();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      subscription.unsubscribe();
+    };
   }, []);
+
+  const handleLogout = async () => {
+    await signOut();
+  };
 
   return (
     <nav
@@ -84,10 +111,23 @@ export function Navbar() {
                 <div className="p-4 py-2">
                   <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[2px] ml-2">Account & Help</span>
                   <div className="mt-2 flex flex-col">
-                    <Link href="/login" onClick={() => setIsOpen(false)} className="flex items-center gap-3 w-full p-4 hover:bg-zinc-50 transition-colors">
-                      <LogIn className="w-5 h-5 text-zinc-500" />
-                      <span className="font-bold text-zinc-800">Login / Signup</span>
-                    </Link>
+                    {!user ? (
+                      <Link href="/login" onClick={() => setIsOpen(false)} className="flex items-center gap-3 w-full p-4 hover:bg-zinc-50 transition-colors">
+                        <LogIn className="w-5 h-5 text-zinc-500" />
+                        <span className="font-bold text-zinc-800">Login / Signup</span>
+                      </Link>
+                    ) : (
+                      <>
+                        <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-3 w-full p-4 hover:bg-zinc-50 transition-colors">
+                          <Shield className="w-5 h-5 text-zinc-500" />
+                          <span className="font-bold text-zinc-800">Admin Console</span>
+                        </Link>
+                        <button onClick={handleLogout} className="flex items-center gap-3 w-full p-4 hover:bg-zinc-50 transition-colors text-left">
+                          <LogOut className="w-5 h-5 text-red-500" />
+                          <span className="font-bold text-red-600">Secure Logout</span>
+                        </button>
+                      </>
+                    )}
                     <Link href="/track-order" onClick={() => setIsOpen(false)} className="flex items-center gap-3 w-full p-4 hover:bg-zinc-50 transition-colors">
                       <HelpCircle className="w-5 h-5 text-zinc-500" />
                       <span className="font-bold text-zinc-800">Track Order</span>
@@ -155,9 +195,49 @@ export function Navbar() {
               </Badge>
             )}
           </Button>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <User className="w-5 h-5 text-zinc-700" />
-          </Button>
+
+          {loading ? (
+            <div className="w-10 h-10 flex items-center justify-center">
+              <div className="w-4 h-4 border-2 border-zinc-200 border-t-zinc-800 rounded-full animate-spin" />
+            </div>
+          ) : user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full bg-zinc-50 border border-zinc-100">
+                  <User className="w-5 h-5 text-brand" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 rounded-2xl border-zinc-100 shadow-xl p-1.5 mt-2">
+                <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                  Curator Session
+                </DropdownMenuLabel>
+                <div className="px-3 py-2">
+                  <p className="text-sm font-bold text-zinc-900 truncate">{user.email}</p>
+                </div>
+                <DropdownMenuSeparator className="bg-zinc-50" />
+                <DropdownMenuItem asChild>
+                  <Link href="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer focus:bg-zinc-50 transition-colors">
+                    <Shield className="w-4 h-4 text-zinc-500" />
+                    <span className="text-xs font-bold text-zinc-700">Admin Console</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-zinc-50" />
+                <DropdownMenuItem 
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer focus:bg-red-50 text-red-600 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="text-xs font-black uppercase tracking-widest">Secure Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link href="/login">
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <LogIn className="w-5 h-5 text-zinc-700" />
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
       <CartSheet />

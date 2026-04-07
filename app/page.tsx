@@ -5,17 +5,30 @@ import { PromoBanner } from "@/components/home/PromoBanner";
 import { BestSellers } from "@/components/home/BestSellers";
 import { FeaturesStrip } from "@/components/home/FeaturesStrip";
 import { NewsletterBanner } from "@/components/home/NewsletterBanner";
+import { getBanners } from "@/lib/actions/banner-actions";
+import { getCategories } from "@/lib/actions/category-actions";
 
-export default function Home() {
+export default async function Home() {
+  const heroBanners = await getBanners("HERO");
+  const promoBanners = await getBanners("PROMO");
+  const newsletterBanners = await getBanners("NEWSLETTER");
+  const dbCategories = await getCategories();
+  
+  // Use the first active promo banner for the section
+  const activePromo = promoBanners.length > 0 ? promoBanners[0] : null;
+
+  // Use the first active newsletter banner
+  const activeNewsletter = newsletterBanners.length > 0 ? newsletterBanners[0] : null;
+
   return (
     <div className="flex flex-col gap-0 pb-10">
-      <HeroBanner />
-      <CategoryGrid />
+      <HeroBanner banners={heroBanners} />
+      <CategoryGrid categories={dbCategories} />
       <NewArrivals />
-      <PromoBanner />
+      <PromoBanner banner={activePromo} />
       <BestSellers />
       <FeaturesStrip />
-      <NewsletterBanner />
+      <NewsletterBanner banner={activeNewsletter} />
     </div>
   );
 }

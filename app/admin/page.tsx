@@ -1,4 +1,3 @@
-import React from "react";
 import { 
   ShoppingBag, 
   Users, 
@@ -6,18 +5,24 @@ import {
   TrendingUp,
   ArrowUpRight,
   ArrowDownRight,
-  Package
+  Package,
+  Store // Added Store icon
 } from "lucide-react";
 import prisma from "@/lib/prisma";
 import { cn } from "@/lib/utils";
+import Link from "next/link"; // Added Link import
 
 async function getStats() {
   const productCount = await prisma.product.count();
-  const categoryCount = await prisma.category.count();
+  
+  // Defensive check for the new 'banner' model to handle stale dev server cache
+  const bannerCount = (prisma as any).banner 
+    ? await (prisma as any).banner.count({ where: { isActive: true } }) 
+    : 0;
   
   return {
     productCount,
-    categoryCount,
+    bannerCount,
     totalSales: 0, 
     activeUsers: 0,
   };
@@ -27,10 +32,9 @@ export default async function AdminPage() {
   const stats = await getStats();
 
   const cards = [
-    { label: "Total Products", value: stats.productCount, icon: Package, change: "+12%", trend: "up" },
-    { label: "Total Categories", value: stats.categoryCount, icon: ShoppingBag, change: "0%", trend: "neutral" },
-    { label: "Total Revenue", value: "₹0", icon: BadgeIndianRupee, change: "-2%", trend: "down" },
-    { label: "Active Customers", value: "0", icon: Users, change: "+5%", trend: "up" },
+    { label: "Total Products", value: stats.productCount, icon: Package, change: "+12%", trend: "up", href: "/admin/products" },
+    { label: "Active Banners", value: stats.bannerCount, icon: Store, change: "Live", trend: "up", href: "/admin/banners" },
+    { label: "Total Revenue", value: "₹0", icon: BadgeIndianRupee, change: "-2%", trend: "down", href: "/admin" },
   ];
 
   return (
@@ -57,7 +61,11 @@ export default async function AdminPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-10">
         {cards.map((card) => (
-          <div key={card.label} className="bg-white p-8 rounded-[40px] border border-zinc-100 shadow-sm hover:shadow-xl hover:shadow-zinc-100/50 transition-all group overflow-hidden relative">
+          <Link 
+            key={card.label} 
+            href={card.href || "/admin"}
+            className="bg-white p-8 rounded-[40px] border border-zinc-100 shadow-sm hover:shadow-xl hover:shadow-zinc-100/50 transition-all group overflow-hidden relative"
+          >
             <div className="flex items-center justify-between mb-8">
               <div className="w-14 h-14 bg-zinc-50 rounded-3xl flex items-center justify-center text-zinc-400 group-hover:bg-brand/5 group-hover:text-brand transition-all">
                 <card.icon className="w-7 h-7" />
@@ -78,7 +86,7 @@ export default async function AdminPage() {
             </div>
             {/* Minimal Background Decoration */}
             <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-zinc-50/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
+          </Link>
         ))}
       </div>
 

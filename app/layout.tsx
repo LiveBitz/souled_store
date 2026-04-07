@@ -15,6 +15,7 @@ const dmSans = DM_Sans({
 });
 
 import { CartProvider } from "@/context/CartContext";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "SOULED | Premium Clothing Store",
@@ -38,6 +39,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <Toaster />
         </CartProvider>
       </body>
     </html>
