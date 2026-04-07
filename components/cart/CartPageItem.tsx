@@ -15,106 +15,113 @@ export function CartPageItem({ item }: CartPageItemProps) {
   const { updateQuantity, removeItem } = useCart();
 
   return (
-    <div className="group relative flex items-center gap-4 sm:gap-6 p-4 sm:p-5 bg-white rounded-3xl border border-zinc-100 hover:border-zinc-200 hover:shadow-[0_20px_50px_rgba(0,0,0,0.03)] transition-all duration-500 animate-in fade-in slide-in-from-bottom-5">
-      {/* ── High-Fidelity Asset ── */}
-      <div className="relative w-24 h-32 sm:w-32 sm:h-40 rounded-2xl overflow-hidden bg-zinc-50 border border-zinc-50 shrink-0">
+    <div className="group relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 p-5 sm:p-6 bg-white rounded-2xl sm:rounded-3xl border border-zinc-100 hover:border-zinc-200/80 hover:shadow-lg hover:shadow-zinc-950/5 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4">
+      {/* ── High-Fidelity Product Image ── */}
+      <div className="relative w-full sm:w-28 md:w-32 lg:w-36 h-48 sm:h-40 md:h-48 lg:h-56 rounded-2xl overflow-hidden bg-zinc-50 border border-zinc-100 shrink-0">
         <Image 
           src={item.image} 
           alt={item.name} 
           fill 
-          className="object-cover group-hover:scale-110 transition-transform duration-1000 ease-out" 
+          className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out" 
         />
-        {/* Subtle Overlay Shadow */}
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        {/* Subtle shine effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
 
-      {/* ── Content Orchestration ── */}
-      <div className="flex-1 flex flex-col justify-between self-stretch py-1">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1.5 flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h4 className="text-sm sm:text-base font-bold text-zinc-950 truncate leading-tight tracking-tight">
-                {item.name}
-              </h4>
-              <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-full bg-zinc-50 border border-zinc-100 text-[8px] font-black text-zinc-400 uppercase tracking-widest">
-                SKU_{item.productId.slice(-4).toUpperCase()}
-              </span>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-2">
-              {item.size && (
-                <span className="text-[10px] sm:text-[11px] font-medium text-zinc-500 px-2.5 py-1 rounded-full bg-zinc-50 border border-zinc-100">
-                  Size: <span className="font-bold text-zinc-950">{item.size}</span>
+      {/* ── Product Details & Actions ── */}
+      <div className="flex-1 flex flex-col justify-between w-full">
+        
+        {/* Top section: Title, SKU, Price */}
+        <div className="space-y-3">
+          <div className="flex items-start justify-between gap-3 sm:gap-4">
+            <div className="space-y-2 flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h4 className="text-base sm:text-lg lg:text-xl font-black text-zinc-950 leading-tight tracking-tight">
+                  {item.name}
+                </h4>
+                <span className="text-[9px] sm:text-[10px] font-bold px-2 py-1 rounded-full bg-zinc-900/5 border border-zinc-200 text-zinc-600 uppercase tracking-widest">
+                  SKU_{item.productId.slice(-4).toUpperCase()}
                 </span>
-              )}
-              {item.color && (
-                <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-medium text-zinc-500 px-2.5 py-1 rounded-full bg-zinc-50 border border-zinc-100">
-                  Color: 
-                  <span 
-                    className="w-2.5 h-2.5 rounded-full ring-2 ring-white ring-offset-1" 
-                    style={{ backgroundColor: item.color.toLowerCase(), boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)' }} 
-                  />
-                  <span className="font-bold text-zinc-950 capitalize">{item.color}</span>
-                </div>
-              )}
+              </div>
+              
+              {/* Size and Color badges */}
+              <div className="flex items-center gap-2.5 flex-wrap">
+                {item.size && (
+                  <span className="text-[11px] sm:text-xs font-semibold text-zinc-600 px-3 py-1.5 rounded-lg bg-zinc-50/80 border border-zinc-200">
+                    Size: <span className="font-bold text-zinc-950">{item.size.toUpperCase()}</span>
+                  </span>
+                )}
+                {item.color && (
+                  <div className="flex items-center gap-2 text-[11px] sm:text-xs font-semibold text-zinc-600 px-3 py-1.5 rounded-lg bg-zinc-50/80 border border-zinc-200">
+                    <span 
+                      className="w-3 h-3 rounded-full ring-2 ring-white ring-offset-1 flex-shrink-0" 
+                      style={{ backgroundColor: item.color.toLowerCase(), boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)' }} 
+                    />
+                    <span className="font-bold text-zinc-950 capitalize">{item.color}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="text-right shrink-0">
-            <span className="text-base sm:text-lg font-black text-zinc-950 tracking-tight">
-              ₹{(item.price * item.quantity).toLocaleString("en-IN")}
-            </span>
-            <p className="text-[10px] text-zinc-400 font-medium tracking-tight mt-0.5">
-              ₹{item.price.toLocaleString("en-IN")} / Unit
-            </p>
+            {/* Price info - Right aligned */}
+            <div className="text-right shrink-0">
+              <div className="text-lg sm:text-xl lg:text-2xl font-black text-zinc-950 tracking-tight tabular-nums">
+                ₹{(item.price * item.quantity).toLocaleString("en-IN")}
+              </div>
+              <p className="text-xs sm:text-sm text-zinc-400 font-medium tracking-tight mt-1">
+                ₹{item.price.toLocaleString("en-IN")} each
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* ── Interactive Footer Controls ── */}
-        <div className="mt-auto flex items-end justify-between pt-2">
-          <div className="flex items-center gap-4">
-            {/* Quantity Controls */}
-            <div className="flex items-center bg-zinc-50/80 border border-zinc-100 rounded-2xl h-10 px-1 shadow-sm">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => updateQuantity(item.id, -1)}
-                className="w-8 h-8 rounded-xl hover:bg-white hover:text-zinc-950 text-zinc-400 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
-                disabled={item.quantity <= 1}
-              >
-                <Minus className="w-3.5 h-3.5" />
-              </Button>
-              <span className="w-10 text-center text-xs font-bold text-zinc-950 tabular-nums">
-                {item.quantity}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => updateQuantity(item.id, 1)}
-                className="w-8 h-8 rounded-xl hover:bg-white hover:text-zinc-950 text-zinc-400 transition-all"
-              >
-                <Plus className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-
-            {/* Save for later / Wishlist integration placeholder */}
+        {/* Bottom section: Quantity controls & Actions */}
+        <div className="mt-5 sm:mt-6 flex items-center justify-between gap-4 pt-5 sm:pt-6 border-t border-zinc-100">
+          
+          {/* Quantity selector */}
+          <div className="flex items-center bg-zinc-50/80 border border-zinc-200 rounded-2xl h-11 px-1.5 shadow-sm">
             <Button
               variant="ghost"
               size="icon"
-              className="w-10 h-10 rounded-2xl text-zinc-300 hover:text-rose-500 hover:bg-rose-50/50 transition-all hidden sm:flex"
+              onClick={() => updateQuantity(item.id, -1)}
+              className="w-9 h-9 rounded-xl hover:bg-white hover:text-zinc-950 text-zinc-400 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+              disabled={item.quantity <= 1}
             >
-              <Heart className="w-4 h-4" />
+              <Minus className="w-4 h-4" />
+            </Button>
+            <span className="w-10 text-center text-sm font-bold text-zinc-950 tabular-nums">
+              {item.quantity}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => updateQuantity(item.id, 1)}
+              className="w-9 h-9 rounded-xl hover:bg-white hover:text-zinc-950 text-zinc-400 transition-all active:scale-90"
+            >
+              <Plus className="w-4 h-4" />
             </Button>
           </div>
 
-          <Button
-            variant="ghost"
-            onClick={() => removeItem(item.id)}
-            className="h-10 px-4 rounded-2xl text-zinc-300 hover:text-rose-500 hover:bg-rose-50/50 transition-all flex items-center gap-2 group/remove"
-          >
-            <Trash2 className="w-4 h-4 group-hover/remove:scale-110 transition-transform" />
-            <span className="text-[10px] font-bold uppercase tracking-widest">Remove</span>
-          </Button>
+          {/* Action buttons: Wishlist & Remove */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-11 h-11 rounded-xl text-zinc-300 hover:text-rose-500 hover:bg-rose-50/50 transition-all hidden sm:inline-flex"
+              title="Save for later"
+            >
+              <Heart className="w-5 h-5" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              onClick={() => removeItem(item.id)}
+              className="h-11 px-4 rounded-xl text-zinc-400 hover:text-rose-600 hover:bg-rose-50 active:bg-rose-100 transition-all flex items-center gap-2 group/remove font-semibold text-sm"
+            >
+              <Trash2 className="w-4 h-4 group-hover/remove:scale-110 transition-transform" />
+              <span className="hidden sm:inline">Remove</span>
+            </Button>
+          </div>
         </div>
       </div>
     </div>

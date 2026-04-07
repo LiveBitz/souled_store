@@ -11,7 +11,8 @@ import {
   Settings, 
   LogOut,
   ChevronRight,
-  Store
+  Store,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,8 +20,9 @@ const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Products", href: "/admin/products", icon: Package },
   { label: "Categories", href: "/admin/categories", icon: Layers },
-  { label: "Banners", href: "/admin/banners", icon: Store }, // Added Banners
+  { label: "Banners", href: "/admin/banners", icon: Store },
   { label: "Orders", href: "/admin/orders", icon: ShoppingBag },
+  { label: "Users", href: "/admin/users", icon: Users },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

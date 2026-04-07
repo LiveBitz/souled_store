@@ -139,10 +139,12 @@ export function CartSheet() {
               
               <Separator className="bg-zinc-100" />
 
-              <Button className="w-full h-16 rounded-[2rem] bg-zinc-950 hover:bg-zinc-800 text-white font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-zinc-200 transition-all active:scale-95 group gap-3 mt-4">
-                Secure Checkout
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <Link href="/checkout" className="w-full" onClick={() => setIsOpen(false)}>
+                <Button className="w-full h-16 rounded-[2rem] bg-zinc-950 hover:bg-zinc-800 text-white font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-zinc-200 transition-all active:scale-95 group gap-3 mt-4 disabled:opacity-50 disabled:cursor-not-allowed" disabled={items.length === 0}>
+                  Secure Checkout
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
 
               <Link href="/cart" className="block w-full" onClick={() => setIsOpen(false)}>
                 <Button 

@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeIndianRupee, TrendingUp, ArrowUpRight, ArrowDownRight, Package, Store } from "lucide-react";
+import { BadgeIndianRupee, TrendingUp, ArrowUpRight, ArrowDownRight, Package, Store, Users } from "lucide-react";
 import DashboardContent from "@/components/admin/DashboardContent";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -32,7 +32,7 @@ export default function AdminPage() {
       <DashboardContent />
 
       {/* Quick Access Links */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Link
           href="/admin/products"
           className="bg-white p-6 rounded-xl border border-zinc-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group"
@@ -49,6 +49,15 @@ export default function AdminPage() {
           <BadgeIndianRupee className="w-6 h-6 text-emerald-600 mb-3 group-hover:scale-110 transition-transform" />
           <h3 className="font-bold text-gray-900">Order Management</h3>
           <p className="text-sm text-gray-600 mt-1">Process and track orders</p>
+        </Link>
+
+        <Link
+          href="/admin/users"
+          className="bg-white p-6 rounded-xl border border-zinc-100 shadow-sm hover:shadow-md hover:border-orange-200 transition-all group"
+        >
+          <Users className="w-6 h-6 text-orange-600 mb-3 group-hover:scale-110 transition-transform" />
+          <h3 className="font-bold text-gray-900">Users Management</h3>
+          <p className="text-sm text-gray-600 mt-1">View customer accounts</p>
         </Link>
 
         <Link
