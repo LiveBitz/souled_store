@@ -333,70 +333,212 @@ export default function DashboardContent() {
           </div>
 
           {/* Top Products and Recent Orders */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
             {/* Top Products Chart */}
-            <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Top Products by Orders</h2>
+            <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 lg:p-8 shadow-sm hover:shadow-md transition-shadow">
+              <div className="mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl lg:text-xl font-bold text-gray-900">Top Products by Orders</h2>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1">Units sold this month</p>
+              </div>
               {data?.topProducts && data.topProducts.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart 
-                    data={data.topProducts}
-                    key={`products-${JSON.stringify(data.topProducts.map(d => d.quantity).join(','))}`}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis 
-                      dataKey="name" 
-                      stroke="#9ca3af"
-                      angle={-45}
-                      textAnchor="end"
-                      height={100}
-                      style={{ fontSize: "12px" }}
-                    />
-                    <YAxis 
-                      stroke="#9ca3af"
-                      style={{ fontSize: "12px" }}
-                      label={{ value: "Units Sold", angle: -90, position: "insideLeft" }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#fff",
-                        border: "1px solid #e5e7eb",
-                        borderRadius: "8px",
-                        padding: "8px",
-                      }}
-                      formatter={(value) => [value, "Units"]}
-                    />
-                    <Bar dataKey="quantity" fill="#10b981" radius={[8, 8, 0, 0]} isAnimationActive={true} />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="w-full">
+                  {/* Mobile View (sm: below) */}
+                  <div className="sm:hidden w-full overflow-x-auto -mx-4 px-4">
+                    <div style={{ minWidth: "320px" }}>
+                      <ResponsiveContainer width={320} height={240}>
+                        <BarChart 
+                          data={data.topProducts}
+                          key={`products-mobile-${JSON.stringify(data.topProducts.map(d => d.quantity).join(','))}`}
+                          margin={{ top: 8, right: 12, left: 20, bottom: 65 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis 
+                            dataKey="name" 
+                            stroke="#d1d5db"
+                            angle={-60}
+                            textAnchor="end"
+                            height={80}
+                            tick={{ fontSize: 8, fill: "#6b7280", fontWeight: 500 }}
+                            interval={0}
+                          />
+                          <YAxis 
+                            stroke="#d1d5db"
+                            tick={{ fontSize: 9, fill: "#6b7280" }}
+                            label={{ value: "Units", angle: -90, position: "insideLeft", fontSize: 8 }}
+                            width={30}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "#fff",
+                              border: "1px solid #e5e7eb",
+                              borderRadius: "6px",
+                              padding: "6px 8px",
+                              fontSize: "10px",
+                              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.08)"
+                            }}
+                            formatter={(value) => [value, "Units"]}
+                            cursor={{ fill: "rgba(16, 185, 129, 0.1)" }}
+                          />
+                          <Bar 
+                            dataKey="quantity" 
+                            fill="#10b981" 
+                            radius={[5, 5, 0, 0]}
+                            isAnimationActive={true}
+                            animationDuration={500}
+                            maxBarSize={22}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Tablet View (sm: to lg:) */}
+                  <div className="hidden sm:block lg:hidden w-full overflow-x-auto -mx-6 px-6">
+                    <div style={{ minWidth: "450px" }}>
+                      <ResponsiveContainer width={450} height={290}>
+                        <BarChart 
+                          data={data.topProducts}
+                          key={`products-tablet-${JSON.stringify(data.topProducts.map(d => d.quantity).join(','))}`}
+                          margin={{ top: 10, right: 15, left: 35, bottom: 95 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                          <XAxis 
+                            dataKey="name" 
+                            stroke="#9ca3af"
+                            angle={-50}
+                            textAnchor="end"
+                            height={100}
+                            tick={{ fontSize: 10, fill: "#6b7280", fontWeight: 500 }}
+                            interval={0}
+                          />
+                          <YAxis 
+                            stroke="#9ca3af"
+                            tick={{ fontSize: 10, fill: "#6b7280" }}
+                            label={{ value: "Units Sold", angle: -90, position: "insideLeft", fontSize: 10 }}
+                            width={40}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "#fff",
+                              border: "1px solid #e5e7eb",
+                              borderRadius: "7px",
+                              padding: "8px",
+                              fontSize: "11px",
+                              boxShadow: "0 3px 6px rgba(0, 0, 0, 0.1)"
+                            }}
+                            formatter={(value) => [value, "Units"]}
+                            cursor={{ fill: "rgba(16, 185, 129, 0.1)" }}
+                          />
+                          <Legend wrapperStyle={{ paddingTop: "10px", fontSize: "11px" }} />
+                          <Bar 
+                            dataKey="quantity" 
+                            fill="#10b981" 
+                            radius={[6, 6, 0, 0]}
+                            isAnimationActive={true}
+                            animationDuration={600}
+                            maxBarSize={35}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Desktop View (lg:+) */}
+                  <div className="hidden lg:block w-full">
+                    <ResponsiveContainer width="100%" height={360}>
+                      <BarChart 
+                        data={data.topProducts}
+                        key={`products-desktop-${JSON.stringify(data.topProducts.map(d => d.quantity).join(','))}`}
+                        margin={{ top: 12, right: 25, left: 50, bottom: 110 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={true} />
+                        <XAxis 
+                          dataKey="name" 
+                          stroke="#9ca3af"
+                          angle={-45}
+                          textAnchor="end"
+                          height={125}
+                          tick={{ fontSize: 12, fill: "#6b7280", fontWeight: 500 }}
+                          interval={0}
+                        />
+                        <YAxis 
+                          stroke="#9ca3af"
+                          tick={{ fontSize: 12, fill: "#6b7280" }}
+                          label={{ value: "Units Sold", angle: -90, position: "insideLeft", fontSize: 12, offset: 10 }}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "#fff",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "8px",
+                            padding: "10px 12px",
+                            fontSize: "12px",
+                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.12)"
+                          }}
+                          formatter={(value) => [value, "Units"]}
+                          labelFormatter={(label) => `Product: ${label}`}
+                          cursor={{ fill: "rgba(16, 185, 129, 0.08)" }}
+                        />
+                        <Legend 
+                          wrapperStyle={{ paddingTop: "16px", fontSize: "12px" }}
+                          height={30}
+                        />
+                        <Bar 
+                          dataKey="quantity" 
+                          fill="#10b981" 
+                          radius={[8, 8, 0, 0]}
+                          isAnimationActive={true}
+                          animationDuration={700}
+                          maxBarSize={55}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               ) : (
-                <div className="flex items-center justify-center h-64 text-gray-400">
-                  No product data available
+                <div className="flex flex-col items-center justify-center h-56 sm:h-72 lg:h-96 text-gray-400 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-100">
+                  <Package className="w-7 h-7 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-gray-300 mb-2 sm:mb-3" />
+                  <p className="text-xs sm:text-sm lg:text-base font-semibold text-gray-600">No product data available</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400 mt-1 px-4 text-center">Products will appear once orders are placed</p>
                 </div>
               )}
             </div>
 
             {/* Recent Orders Table */}
-            <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Orders</h2>
+            <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 lg:p-8 shadow-sm hover:shadow-md transition-shadow">
+              <div className="mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl lg:text-xl font-bold text-gray-900">Recent Orders</h2>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1">Latest transactions</p>
+              </div>
               {data?.recentOrders && data.recentOrders.length > 0 ? (
-                <div className="space-y-4 max-h-96 overflow-y-auto">
+                <div className="space-y-3 sm:space-y-4 max-h-96 overflow-y-auto scrollbar-hide">
                   {data.recentOrders.map((order) => (
                     <div
                       key={order.id}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-transparent rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all"
                     >
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900 text-sm">
-                          Order #{order.orderNumber}
-                        </p>
-                        <p className="text-gray-600 text-xs">{order.customerName}</p>
-                        <p className="text-gray-400 text-xs">{order.createdAt}</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 sm:block">
+                          <p className="font-semibold text-gray-900 text-xs sm:text-sm truncate">
+                            Order #{order.orderNumber}
+                          </p>
+                          <span
+                            className="inline-block px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold capitalize text-white whitespace-nowrap sm:hidden"
+                            style={{
+                              backgroundColor: STATUS_COLORS[order.status.toLowerCase()] || "#f3f4f6",
+                              color: STATUS_COLORS[order.status.toLowerCase()] ? "white" : "#374151",
+                            }}
+                          >
+                            {order.status}
+                          </span>
+                        </div>
+                        <p className="text-gray-600 text-xs sm:mt-1 truncate">{order.customerName}</p>
+                        <p className="text-gray-400 text-xs mt-0.5 sm:mt-1">{order.createdAt}</p>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-gray-900">₹{order.total.toLocaleString()}</p>
+                      <div className="flex items-center justify-between sm:flex-col sm:items-end gap-3 sm:gap-2">
+                        <p className="font-bold text-gray-900 text-xs sm:text-sm">₹{order.total.toLocaleString()}</p>
                         <span
-                          className="inline-block px-3 py-1 rounded-full text-xs font-semibold capitalize text-white"
+                          className="hidden sm:inline-block px-3 py-1 rounded-full text-xs font-semibold capitalize text-white"
                           style={{
                             backgroundColor: STATUS_COLORS[order.status.toLowerCase()] || "#f3f4f6",
                             color: STATUS_COLORS[order.status.toLowerCase()] ? "white" : "#374151",
@@ -409,8 +551,10 @@ export default function DashboardContent() {
                   ))}
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-64 text-gray-400">
-                  No recent orders
+                <div className="flex flex-col items-center justify-center h-56 sm:h-72 lg:h-96 text-gray-400 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-100">
+                  <ShoppingCart className="w-7 h-7 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-gray-300 mb-2 sm:mb-3" />
+                  <p className="text-xs sm:text-sm lg:text-base font-semibold text-gray-600">No recent orders</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400 mt-1 px-4 text-center">Orders will appear here once customers purchase</p>
                 </div>
               )}
             </div>

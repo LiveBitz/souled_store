@@ -23,7 +23,6 @@ const navItems = [
   { label: "Banners", href: "/admin/banners", icon: Store },
   { label: "Orders", href: "/admin/orders", icon: ShoppingBag },
   { label: "Users", href: "/admin/users", icon: Users },
-  { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebarContent() {
