@@ -42,22 +42,31 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setIsLoading(true);
       setError(null);
       
-      const response = await fetch("/api/wishlist");
+      const response = await fetch("/api/wishlist", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
       
       if (!response.ok) {
         if (response.status === 401) {
-          // User not authenticated
+          // User not authenticated - silently handle
           setItems([]);
           return;
         }
-        throw new Error("Failed to load wishlist");
+        // Log error but don't show to user for other non-critical errors
+        if (response.status === 500) {
+          console.warn("Wishlist service temporarily unavailable");
+        }
+        setItems([]);
+        return;
       }
 
       const data = await response.json();
-      setItems(data);
+      setItems(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Error loading wishlist:", err);
-      setError(err instanceof Error ? err.message : "Failed to load wishlist");
+      // Silently handle network errors (e.g., offline, fetch failure)
+      console.debug("Wishlist load error:", err instanceof Error ? err.message : "Unknown error");
+      setItems([]);
     } finally {
       setIsLoading(false);
     }
@@ -87,11 +96,14 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (response.status === 401) {
           throw new Error("Please login to add items to wishlist");
         }
+        if (response.status === 404) {
+          throw new Error("Product not found");
+        }
         throw new Error("Failed to add to wishlist");
       }
 
       const data = await response.json();
-      if (data.action === "added") {
+      if (data.action === "added" && data.data) {
         setItems((prev) => [data.data, ...prev]);
       }
     } catch (err) {
@@ -113,6 +125,9 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Please login to manage wishlist");
+        }
         throw new Error("Failed to remove from wishlist");
       }
 

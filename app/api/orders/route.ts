@@ -185,20 +185,35 @@ export async function POST(request: NextRequest) {
       const product = orderItem.product;
       
       if (orderItem.size && Array.isArray(product.sizes)) {
-        // Update size-variant stock: "S:10" -> "S:5" (if ordered 5 units)
+        // Handle both size-only and size-color variants: "S:10" or "S-White:5"
         const updatedSizes = product.sizes.map((sizeStr: string) => {
           if (typeof sizeStr === "string" && sizeStr.includes(":")) {
-            const [size, quantity] = sizeStr.split(":");
+            const [key, quantity] = sizeStr.split(":");
             
-            // If this is the size ordered, deduct the quantity
-            if (size === orderItem.size) {
-              const currentQty = parseInt(quantity) || 0;
-              const newQty = Math.max(0, currentQty - orderItem.quantity);
-              return `${size}:${newQty}`;
+            // Check if this is a size-color variant (S-White:5) or just size (S:10)
+            const isColorVariant = key.includes("-");
+            
+            if (isColorVariant) {
+              // For "S-White:5" format
+              const [size, color] = key.split("-");
+              
+              // Match if size matches AND color matches (if color exists in orderItem)
+              if (size === orderItem.size && (!orderItem.color || color === orderItem.color)) {
+                const currentQty = parseInt(quantity) || 0;
+                const newQty = Math.max(0, currentQty - orderItem.quantity);
+                return newQty > 0 ? `${key}:${newQty}` : null;
+              }
+            } else {
+              // For old "S:10" format - backwards compatibility
+              if (key === orderItem.size && !key.includes("-")) {
+                const currentQty = parseInt(quantity) || 0;
+                const newQty = Math.max(0, currentQty - orderItem.quantity);
+                return `${key}:${newQty}`;
+              }
             }
           }
           return sizeStr;
-        });
+        }).filter(s => s !== null);
 
         // Update product in database
         await prisma.product.update({
@@ -207,7 +222,7 @@ export async function POST(request: NextRequest) {
         });
 
         console.log(
-          `✅ Stock deducted: ${product.name} (${orderItem.size}: -${orderItem.quantity} units)`
+          `✅ Stock deducted: ${product.name} (${orderItem.size}${orderItem.color ? ` - ${orderItem.color}` : ""}: -${orderItem.quantity} units)`
         );
       } else {
         // Legacy: deduct from total stock field

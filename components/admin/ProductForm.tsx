@@ -64,24 +64,74 @@ export function ProductForm({
 
   const isEdit = !!initialData;
 
+  // Helper functions to parse existing data
+  const extractBaseSizes = (sizes: string[] = []) => {
+    const baseSizes = new Set<string>();
+    sizes.forEach((entry: string) => {
+      if (entry.includes("-")) {
+        // New format: "S-Purple:5" → extract "S"
+        const baseSize = entry.split("-")[0];
+        baseSizes.add(baseSize);
+      } else if (entry.includes(":")) {
+        // Old format: "S:10" → extract "S"
+        const baseSize = entry.split(":")[0];
+        baseSizes.add(baseSize);
+      } else {
+        // Plain size: "S"
+        baseSizes.add(entry);
+      }
+    });
+    return Array.from(baseSizes);
+  };
+
+  const extractColors = (sizes: string[] = []) => {
+    const colors = new Set<string>();
+    sizes.forEach((entry: string) => {
+      if (entry.includes("-") && entry.includes(":")) {
+        // New format: "S-Purple:5" → extract "Purple"
+        const color = entry.split("-")[1].split(":")[0];
+        colors.add(color);
+      }
+    });
+    return Array.from(colors);
+  };
+
+  const parseSizeColorStock = (sizes: string[] = []) => {
+    const stock: Record<string, number> = {};
+    sizes.forEach((entry: string) => {
+      if (entry.includes("-") && entry.includes(":")) {
+        // New format: "S-Purple:5"
+        const [key, quantity] = entry.split(":");
+        stock[key] = parseInt(quantity) || 0;
+      }
+    });
+    return stock;
+  };
+
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     slug: initialData?.slug || "",
     price: initialData?.price?.toString() || "",
     originalPrice: initialData?.originalPrice?.toString() || "",
     discount: initialData?.discount?.toString() || "0",
-    stock: initialData?.stock?.toString() || "10",
     categoryId: initialData?.categoryId || preSelectedCategoryId || "",
     subCategory: initialData?.subCategory || "",
     image: initialData?.image || "",
     images: Array.isArray(initialData?.images) ? initialData.images : [],
     isNew: initialData?.isNew ?? true,
     isBestSeller: initialData?.isBestSeller ?? false,
-    sizes: Array.isArray(initialData?.sizes) ? initialData.sizes : [],
-    colors: Array.isArray(initialData?.colors) ? initialData.colors : [],
+    sizes: extractBaseSizes(initialData?.sizes || []),
+    colors: extractColors(initialData?.sizes || []).length > 0 
+      ? extractColors(initialData?.sizes || [])
+      : (Array.isArray(initialData?.colors) ? initialData.colors : []),
     description: initialData?.description || "",
     features: Array.isArray(initialData?.features) ? initialData.features : [],
   });
+
+  // State for tracking size-color stock combinations
+  const [sizeColorStock, setSizeColorStock] = useState<Record<string, number>>(
+    parseSizeColorStock(initialData?.sizes || [])
+  );
 
   const selectedCategory = categories.find((c) => c.id === formData.categoryId);
   const isPerfume =
@@ -184,8 +234,14 @@ export function ProductForm({
     setIsSubmitting(true);
 
     try {
+      // Convert sizeColorStock back to storage format: ["S-White:5", "S-Black:3", ...]
+      const storageSizes = Object.entries(sizeColorStock)
+        .filter(([_, quantity]) => quantity > 0)
+        .map(([key, quantity]) => `${key}:${quantity}`);
+
       const payload = {
         ...formData,
+        sizes: storageSizes, // Use converted sizes with color and quantity
         images: formData.images.filter(Boolean)
       };
 
@@ -595,51 +651,82 @@ export function ProductForm({
                     Product Information
                   </h2>
                   <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-0.5">
-                    Classification & Naming
+                    Essential Details & Metadata
                   </p>
                 </div>
               </div>
 
               <div className="space-y-6">
-                {/* Name */}
+                {/* Product Name */}
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">
-                    Production Name
-                  </label>
+                  <div className="flex items-center justify-between px-1">
+                    <div>
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                        Product Name
+                      </label>
+                      <p className="text-[9px] text-zinc-300 font-bold uppercase mt-0.5">
+                        Display Title for Customers
+                      </p>
+                    </div>
+                    <span className={cn(
+                      "text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full",
+                      (formData.name || "").length > 50 
+                        ? "bg-red-50 text-red-600" 
+                        : (formData.name || "").length > 40
+                        ? "bg-yellow-50 text-yellow-600"
+                        : "bg-emerald-50 text-emerald-600"
+                    )}>
+                      {(formData.name || "").length}/60
+                    </span>
+                  </div>
                   <Input
-                    placeholder="e.g. Signature Oversized Tee"
+                    placeholder="e.g. Classic White Oversized Tee"
                     value={formData.name || ""}
+                    maxLength={60}
                     onChange={(e) => handleSlugify(e.target.value)}
-                    className="rounded-2xl border-zinc-100 h-13 sm:h-14 font-bold text-lg sm:text-xl text-zinc-900 focus:ring-brand/10 shadow-sm"
+                    className="rounded-2xl border-zinc-100 h-13 sm:h-14 font-bold text-lg sm:text-xl text-zinc-900 focus:ring-2 focus:ring-brand/20 shadow-sm"
                     required
                   />
                   <div className="px-1 flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                    <div className={cn(
+                      "w-1.5 h-1.5 rounded-full shrink-0",
+                      formData.slug ? "bg-emerald-500" : "bg-zinc-300"
+                    )} />
                     <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest truncate">
-                      Automated ID: {formData.slug || "new-creation"}
+                      URL Slug: <span className="font-mono text-zinc-600">{formData.slug || "auto-generated"}</span>
                     </p>
                   </div>
                 </div>
 
-                {/* Category + SubCategory */}
+                {/* Category & Sub-Category Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {/* Collection Category */}
                   <div className="space-y-3">
                     <div className="px-1">
                       <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                        Collection Cluster
+                        Collection Category
                       </label>
                       <p className="text-[9px] text-zinc-300 font-bold uppercase mt-0.5">
-                        Primary Allocation
+                        Primary Product grouping
                       </p>
                     </div>
                     <Select
                       value={formData.categoryId}
-                      onValueChange={(v) =>
-                        setFormData((prev) => ({ ...prev, categoryId: v }))
-                      }
+                      onValueChange={(v) => {
+                        setFormData((prev) => ({ ...prev, categoryId: v }));
+                        // Auto-set sizes based on category
+                        const category = categories.find(c => c.id === v);
+                        if (!isEdit) {
+                          if (category?.name?.toLowerCase() === "perfumes") {
+                            setFormData((prev) => ({ ...prev, sizes: ["50ml", "100ml"] }));
+                          } else if (category?.name?.toLowerCase() === "men") {
+                            setFormData((prev) => ({ ...prev, sizes: ["S", "M", "L", "XL"] }));
+                          }
+                        }
+                      }}
                     >
-                      <SelectTrigger className="w-full h-13 sm:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 px-5 font-bold text-zinc-900 shadow-sm transition-all focus:ring-brand/10 hover:border-zinc-200 hover:bg-white">
-                        <SelectValue placeholder="Assign to Cluster" />
+                      <SelectTrigger className="w-full h-13 sm:h-14 rounded-2xl border-zinc-100 bg-white px-5 font-bold text-zinc-900 shadow-sm transition-all focus:ring-2 focus:ring-brand/20 hover:border-brand/20 border-brand/0">
+                        <SelectValue placeholder="Select a collection..." />
                       </SelectTrigger>
                       <SelectContent className="rounded-2xl border-zinc-100 shadow-2xl p-2 bg-white z-50">
                         {categories.map((cat) => (
@@ -653,26 +740,34 @@ export function ProductForm({
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="px-1 flex items-center justify-between">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                          Sub-Classification
-                        </label>
-                        <p className="text-[9px] text-zinc-300 font-bold uppercase">
-                          Minor Descriptor
+                    {formData.categoryId && (
+                      <div className="px-1 py-2 bg-brand/5 rounded-xl border border-brand/10">
+                        <p className="text-[9px] font-bold text-brand uppercase tracking-widest">
+                          ✓ {categories.find(c => c.id === formData.categoryId)?.name} selected
                         </p>
                       </div>
-                      {existingSubCategories[formData.categoryId]?.length > 0 && (
-                        <span className="text-[9px] font-extrabold text-brand uppercase tracking-widest bg-brand/5 px-3 py-1.5 rounded-full border border-brand/10">
-                          Suggestions Enabled
+                    )}
+                  </div>
+
+                  {/* Sub-Category */}
+                  <div className="space-y-3">
+                    <div className="px-1 flex items-center justify-between">
+                      <div>
+                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                          Sub-Category Type
+                        </label>
+                        <p className="text-[9px] text-zinc-300 font-bold uppercase mt-0.5">
+                          Product Type Classification
+                        </p>
+                      </div>
+                      {(existingSubCategories[formData.categoryId]?.length > 0) && (
+                        <span className="text-[9px] font-extrabold text-emerald-600 uppercase tracking-widest bg-emerald-50/50 px-2 py-1 rounded-full border border-emerald-200/50">
+                          Suggestions
                         </span>
                       )}
                     </div>
                     <Input
-                      placeholder="e.g. Vintage"
+                      placeholder="e.g., T-Shirts, Hoodies, Analog..."
                       value={formData.subCategory || ""}
                       onChange={(e) =>
                         setFormData((p) => ({
@@ -680,11 +775,11 @@ export function ProductForm({
                           subCategory: e.target.value,
                         }))
                       }
-                      className="rounded-2xl border-zinc-100 h-13 sm:h-14 font-bold text-zinc-900 bg-zinc-50/50 shadow-sm focus:bg-white transition-all"
+                      className="rounded-2xl border-zinc-100 h-13 sm:h-14 font-bold text-zinc-900 bg-white shadow-sm focus:ring-2 focus:ring-brand/20"
                       required
                     />
                     
-                    {/* Unique Classification Suggestions */}
+                    {/* Quick Selection Pills */}
                     {(() => {
                       const suggestions = existingSubCategories[formData.categoryId] || [];
                       if (suggestions.length === 0) return null;
@@ -692,7 +787,7 @@ export function ProductForm({
                       return (
                         <div className="pt-2 px-1 space-y-2">
                           <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">
-                            Existing Patterns for this Cluster:
+                            Known Sub-Categories:
                           </p>
                           <div className="flex flex-wrap gap-2">
                             {suggestions.map((sub) => {
@@ -703,10 +798,10 @@ export function ProductForm({
                                   type="button"
                                   onClick={() => setFormData(p => ({ ...p, subCategory: sub }))}
                                   className={cn(
-                                    "px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border shadow-sm active:scale-95",
+                                    "px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all border shadow-sm active:scale-95",
                                     isSelected
-                                      ? "bg-zinc-900 border-zinc-900 text-white shadow-zinc-200"
-                                      : "bg-white border-zinc-100 text-zinc-400 hover:border-zinc-200 hover:text-zinc-600"
+                                      ? "bg-brand border-brand text-white shadow-brand/20"
+                                      : "bg-white border-zinc-100 text-zinc-500 hover:border-brand/30 hover:text-brand hover:bg-brand/5"
                                   )}
                                 >
                                   {sub}
@@ -720,28 +815,44 @@ export function ProductForm({
                   </div>
                 </div>
 
-                {/* Description */}
+                {/* Product Description */}
                 <div className="space-y-3">
-                  <div className="px-1">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                      Product Narrative
-                    </label>
-                    <p className="text-[9px] text-zinc-300 font-bold uppercase mt-0.5">
-                      Draft the story of this creation
-                    </p>
+                  <div className="flex items-center justify-between px-1">
+                    <div>
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                        Product Description
+                      </label>
+                      <p className="text-[9px] text-zinc-300 font-bold uppercase mt-0.5">
+                        Detailed Features & Benefits
+                      </p>
+                    </div>
+                    <span className={cn(
+                      "text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full",
+                      (formData.description || "").length > 400
+                        ? "bg-red-50 text-red-600"
+                        : (formData.description || "").length > 350
+                        ? "bg-yellow-50 text-yellow-600"
+                        : "bg-emerald-50 text-emerald-600"
+                    )}>
+                      {(formData.description || "").length}/500
+                    </span>
                   </div>
                   <textarea
-                    placeholder="Tell the story of this creation..."
+                    placeholder="Describe key features, materials, care instructions, benefits..."
                     value={formData.description}
+                    maxLength={500}
                     onChange={(e) =>
                       setFormData((p) => ({
                         ...p,
                         description: e.target.value,
                       }))
                     }
-                    className="w-full rounded-[24px] border border-zinc-100 p-5 sm:p-6 min-h-[140px] sm:min-h-[160px] font-medium text-zinc-900 focus:ring-2 focus:ring-brand/10 focus:border-brand/20 transition-all shadow-sm outline-none resize-none bg-zinc-50/50 focus:bg-white leading-relaxed text-sm"
+                    className="w-full rounded-2xl border border-zinc-100 p-5 sm:p-6 min-h-[140px] sm:min-h-[160px] font-medium text-zinc-900 focus:ring-2 focus:ring-brand/20 focus:border-brand/20 transition-all shadow-sm outline-none resize-none bg-white leading-relaxed text-sm focus:bg-white"
                     required
                   />
+                  <div className="px-1 text-[9px] text-zinc-400 font-bold uppercase tracking-widest">
+                    💡 Tip: Include key features, materials, and care info for better conversion
+                  </div>
                 </div>
               </div>
             </section>
@@ -762,177 +873,112 @@ export function ProductForm({
                 </div>
               </div>
 
-              <div className="space-y-8">
-                {/* Sizes */}
-                <div className="space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-1">
-                    <div>
-                      <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em]">
-                        {isPerfume
-                          ? "Scent Volume & Stock"
-                          : isWatch
-                          ? "Case Diameter & Stock"
-                          : "Standard Sizing & Inventory"}
-                      </label>
-                      <p className="text-[9px] text-zinc-300 font-bold uppercase tracking-widest mt-0.5">
-                        Quantity-per-selection Management
-                      </p>
-                    </div>
-                    <span className="self-start sm:self-auto text-[9px] font-extrabold text-brand uppercase tracking-widest bg-brand/5 px-3 py-1.5 rounded-full border border-brand/10 whitespace-nowrap">
-                      Dynamic Mapping
-                    </span>
+              <div className="space-y-12">
+                {/* Section 1: Select Sizes */}
+                <div className="space-y-5 pb-8 border-b border-zinc-100">
+                  <div className="flex flex-col gap-1 px-1">
+                    <label className="text-[12px] font-bold text-zinc-700 uppercase tracking-[0.1em]">
+                      Step 1: Select Sizes
+                    </label>
+                    <p className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wide">
+                      Choose available sizes for this product
+                    </p>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
-                    {(isPerfume
-                      ? ["50ml", "100ml"]
-                      : isWatch
-                      ? ["40mm", "42mm", "44mm"]
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                  {(isPerfume
+                    ? ["50ml", "100ml"]
+                    : isWatch
+                    ? ["40mm", "42mm", "44mm"]
                       : ["XS", "S", "M", "L", "XL", "XXL", "3XL"]
                     ).map((sizeLabel) => {
-                      const sizeData = formData.sizes.find(
-                        (s: string) => s.split(":")[0] === sizeLabel
-                      );
-                      const isSelected = !!sizeData;
-                      const quantity = isSelected
-                        ? (sizeData.split(":")[1] || "")
-                        : "0";
+                      const isSelected = formData.sizes.includes(sizeLabel);
 
                       return (
-                        <div
-                          key={sizeLabel}
-                          className={cn(
-                            "group relative p-4 rounded-[24px] border transition-all duration-300",
-                            isSelected
-                              ? "bg-zinc-900 border-zinc-900 shadow-xl shadow-zinc-200"
-                              : "bg-white border-zinc-100 hover:border-zinc-200"
-                          )}
-                        >
-                          <div className="flex items-center gap-2 mb-3">
+                        <div key={sizeLabel}>
+                          {/* Default State - Just shows size option */}
+                          {!isSelected && (
                             <button
                               type="button"
                               onClick={() => {
-                                const newSizes = isSelected
-                                  ? formData.sizes.filter(
-                                      (s: string) =>
-                                        s.split(":")[0] !== sizeLabel
-                                    )
-                                  : [
-                                      ...formData.sizes,
-                                      `${sizeLabel}:0`,
-                                    ];
                                 setFormData((p) => ({
                                   ...p,
-                                  sizes: newSizes,
+                                  sizes: Array.from(new Set([...p.sizes, sizeLabel])),
                                 }));
                               }}
-                              className={cn(
-                                "w-8 h-8 rounded-xl flex items-center justify-center transition-all shrink-0",
-                                isSelected
-                                  ? "bg-brand text-white"
-                                  : "bg-zinc-50 text-zinc-400 group-hover:text-zinc-600"
-                              )}
+                              className="w-full p-5 rounded-xl border-2 border-zinc-200 bg-white hover:bg-zinc-50 hover:border-brand/40 transition-all duration-200 cursor-pointer group"
                             >
-                              {isSelected ? (
-                                <CheckCircle2 className="w-4 h-4" />
-                              ) : (
-                                <div className="w-1.5 h-1.5 rounded-full bg-current" />
-                              )}
-                            </button>
-                            <span
-                              className={cn(
-                                "text-xs font-black tracking-tight",
-                                isSelected
-                                  ? "text-white"
-                                  : "text-zinc-400 group-hover:text-zinc-900 transition-colors"
-                              )}
-                            >
-                              {sizeLabel}
-                            </span>
-                          </div>
-
-                          {isSelected && (
-                            <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
-                              <div className="flex items-center justify-between px-0.5">
-                                <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
-                                  Stock
-                                </label>
-                                <span className="text-[9px] font-bold text-brand uppercase">
-                                  Units
+                              <div className="flex flex-col items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-zinc-100 group-hover:bg-brand/10 flex items-center justify-center transition-all">
+                                  <div className="w-2 h-2 rounded-full bg-zinc-400 group-hover:bg-brand"></div>
+                                </div>
+                                <span className="text-lg font-bold text-zinc-700 group-hover:text-brand transition-colors">
+                                  {sizeLabel}
                                 </span>
                               </div>
-                              <Input
-                                type="number"
-                                value={quantity}
-                                min="0"
-                                onFocus={() => {
-                                  if (quantity === "0") {
-                                    const newSizes = formData.sizes.map(
-                                      (s: string) =>
-                                        s.split(":")[0] === sizeLabel
-                                          ? `${sizeLabel}:`
-                                          : s
-                                    );
-                                    setFormData((p) => ({
-                                      ...p,
-                                      sizes: newSizes,
-                                    }));
-                                  }
-                                }}
-                                onBlur={() => {
-                                  if (quantity === "") {
-                                    const newSizes = formData.sizes.map(
-                                      (s: string) =>
-                                        s.split(":")[0] === sizeLabel
-                                          ? `${sizeLabel}:0`
-                                          : s
-                                    );
-                                    setFormData((p) => ({
-                                      ...p,
-                                      sizes: newSizes,
-                                    }));
-                                  }
-                                }}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  const newSizes = formData.sizes.map(
-                                    (s: string) =>
-                                      s.split(":")[0] === sizeLabel
-                                        ? `${sizeLabel}:${val}`
-                                        : s
-                                  );
-                                  setFormData((p) => ({
-                                    ...p,
-                                    sizes: newSizes,
-                                  }));
-                                }}
-                                className="h-10 rounded-xl bg-white/10 border-white/10 text-white font-bold text-sm focus:ring-brand/20 tabular-nums"
-                              />
-                            </div>
+                            </button>
                           )}
 
-                          {!isSelected && (
-                            <p className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest">
-                              Unassigned
-                            </p>
+                          {/* Selected State - Shows input for stock */}
+                          {isSelected && (
+                            <div className="bg-gradient-to-br from-brand/5 to-brand/10 p-5 rounded-xl border-2 border-brand shadow-md">
+                              <div className="flex flex-col gap-4">
+                                {/* Header with size and remove button */}
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center">
+                                      <CheckCircle2 className="w-5 h-5" />
+                                    </div>
+                                    <span className="text-xl font-bold text-zinc-900">
+                                      {sizeLabel}
+                                    </span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setFormData((p) => ({
+                                        ...p,
+                                        sizes: p.sizes.filter(
+                                          (s: string) => s !== sizeLabel
+                                        ),
+                                      }));
+                                      // Clean up size-color stock entries for this size
+                                      setSizeColorStock((prev) => {
+                                        const updated = { ...prev };
+                                        Object.keys(updated).forEach((key) => {
+                                          if (key.startsWith(sizeLabel + "-")) {
+                                            delete updated[key];
+                                          }
+                                        });
+                                        return updated;
+                                      });
+                                    }}
+                                    className="text-zinc-400 hover:text-brand transition-colors"
+                                  >
+                                    <X className="w-5 h-5" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
                           )}
                         </div>
                       );
                     })}
-                  </div>
-                </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between px-1">
-                      <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em]">
-                        Color Palette
-                      </label>
-                      <p className="text-[9px] text-zinc-300 font-bold uppercase tracking-widest">
-                        Visual Clusters
-                      </p>
                     </div>
+                  </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                {/* Section 2: Color Palette */}
+                <div className="space-y-5 pt-8">
+                  <div className="flex flex-col gap-1 px-1">
+                    <label className="text-[12px] font-bold text-zinc-700 uppercase tracking-[0.1em]">
+                      Step 2: Select Colors
+                    </label>
+                    <p className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wide">
+                      Choose available colors
+                    </p>
+                  </div>
+
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
                       {[
                         "Black",
                         "White",
@@ -964,26 +1010,45 @@ export function ProductForm({
                                 ...p,
                                 colors: newColors,
                               }));
+                              
+                              // Clean up size-color stock entries when color is removed
+                              if (isSelected) {
+                                setSizeColorStock((prev) => {
+                                  const updated = { ...prev };
+                                  Object.keys(updated).forEach((key) => {
+                                    if (key.endsWith(`-${color}`)) {
+                                      delete updated[key];
+                                    }
+                                  });
+                                  return updated;
+                                });
+                              }
                             }}
                             className={cn(
-                              "px-4 h-12 rounded-2xl border font-bold text-[10px] uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-sm flex items-center gap-3",
+                              "p-5 rounded-xl border-2 transition-all duration-200 flex flex-col items-center justify-center gap-3 h-full cursor-pointer group",
                               isSelected
-                                ? "bg-zinc-900 border-zinc-900 text-white shadow-xl shadow-zinc-200"
-                                : "bg-white border-zinc-100 text-zinc-400 hover:border-zinc-200 hover:text-zinc-600"
+                                ? "bg-brand/10 border-brand shadow-md hover:shadow-lg"
+                                : "bg-white border-zinc-200 hover:border-brand/40 hover:bg-zinc-50"
                             )}
                           >
                             <div
-                              className="w-4 h-4 rounded-full border border-white/20 shadow-sm shrink-0"
+                              className={cn(
+                                "w-14 h-14 rounded-full shadow-sm transition-all border-2",
+                                isSelected ? "border-brand ring-2 ring-brand/30 scale-110" : "border-zinc-200 group-hover:scale-105"
+                              )}
                               style={{ 
+                                borderColor: isSelected ? undefined : (color.toLowerCase() === "white" ? "#d1d5db" : "transparent"),
                                 backgroundColor: color.toLowerCase() === "white" 
                                   ? "#ffffff" 
                                   : color.toLowerCase() 
                               }}
                             />
-                            <span className="flex-1 text-left truncate">{color}</span>
-                            {isSelected && (
-                              <CheckCircle2 className="w-3 h-3 text-brand shrink-0" />
-                            )}
+                            <div className="flex flex-col items-center gap-1 w-full">
+                              <span className="text-sm font-bold text-center text-zinc-900">{color}</span>
+                              {isSelected && (
+                                <CheckCircle2 className="w-4 h-4 text-brand" />
+                              )}
+                            </div>
                           </button>
                         );
                       })}
@@ -1009,10 +1074,10 @@ export function ProductForm({
                               }
                             }
                           }}
-                          className="h-12 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white text-[10px] font-bold uppercase tracking-widest pl-10"
+                          className="h-10 sm:h-12 rounded-lg sm:rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white text-[9px] sm:text-[10px] font-bold uppercase tracking-widest pl-8 sm:pl-10"
                         />
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                          <Sparkles className="w-4 h-4 text-zinc-300" />
+                        <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2">
+                          <Sparkles className="w-3 sm:w-4 h-3 sm:h-4 text-zinc-300" />
                         </div>
                       </div>
                       <Button
@@ -1028,16 +1093,109 @@ export function ProductForm({
                             input.value = '';
                           }
                         }}
-                        className="h-12 rounded-2xl bg-zinc-900 text-white px-6 text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-zinc-200 active:scale-95"
+                        className="h-10 sm:h-12 rounded-lg sm:rounded-2xl bg-zinc-900 text-white px-3 sm:px-6 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest shadow-lg active:scale-95 shrink-0"
                       >
                         Add
                       </Button>
                     </div>
                   </div>
+
+                  {/* Size-Color Stock Matrix */}
+                  {formData.sizes.length > 0 && formData.colors.length > 0 && (
+                    <div className="space-y-4 pt-6 border-t border-zinc-100">
+                      <div className="flex items-center justify-between px-1">
+                        <div>
+                          <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em]">
+                            Inventory Matrix
+                          </label>
+                          <p className="text-[9px] text-zinc-300 font-bold uppercase tracking-widest mt-0.5">
+                            Stock per Size & Color Combination
+                          </p>
+                        </div>
+                        <span className="text-[9px] font-extrabold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+                          Granular Tracking
+                        </span>
+                      </div>
+
+                      {/* Matrix Table */}
+                      <div className="overflow-x-auto">
+                        <table className="w-full min-w-max border-collapse">
+                          <thead>
+                            <tr>
+                              <th className="sticky left-0 bg-zinc-50 border border-zinc-200 px-4 py-3 text-left z-10">
+                                <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">
+                                  Size
+                                </span>
+                              </th>
+                              {formData.colors.map((color: string) => (
+                                <th
+                                  key={`header-${color}`}
+                                  className="border border-zinc-200 px-4 py-3 text-center bg-zinc-50 min-w-[100px]"
+                                >
+                                  <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest block">
+                                    {color}
+                                  </span>
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {formData.sizes.map((size: string) => (
+                              <tr key={`row-${size}`}>
+                                <td className="sticky left-0 bg-white border border-zinc-200 px-4 py-3 font-bold text-zinc-900 text-sm z-[5]">
+                                  {size}
+                                </td>
+                                {formData.colors.map((color: string) => {
+                                  const key = `${size}-${color}`;
+                                  const quantity = sizeColorStock[key] || 0;
+
+                                  return (
+                                    <td
+                                      key={`cell-${key}`}
+                                      className="border border-zinc-200 px-4 py-3 text-center"
+                                    >
+                                      <Input
+                                        type="number"
+                                        min="0"
+                                        value={quantity > 0 ? quantity : ""}
+                                        placeholder="0"
+                                        onFocus={(e) => {
+                                          if (!e.target.value) {
+                                            e.target.placeholder = "";
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          e.target.placeholder = "0";
+                                        }}
+                                        onChange={(e) => {
+                                          const val = e.target.value.trim();
+                                          const newQuantity = val ? parseInt(val) || 0 : 0;
+
+                                          setSizeColorStock((prev) => {
+                                            const updated = { ...prev };
+                                            if (newQuantity > 0) {
+                                              updated[key] = newQuantity;
+                                            } else {
+                                              delete updated[key];
+                                            }
+                                            return updated;
+                                          });
+                                        }}
+                                        className="w-full h-10 text-center rounded-lg border-emerald-200 bg-emerald-50 font-bold text-emerald-700 text-sm focus:ring-2 focus:ring-emerald-300"
+                                      />
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                    </div>
+                  )}
               </div>
             </section>
-
-            {/* Pricing */}
             <section className="bg-white p-5 sm:p-8 rounded-3xl border border-zinc-100 shadow-sm space-y-6 transition-all hover:shadow-md">
               <div className="flex items-center gap-3 border-b border-zinc-50 pb-5">
                 <div className="w-9 h-9 rounded-xl bg-zinc-50 flex items-center justify-center shrink-0">
@@ -1053,79 +1211,124 @@ export function ProductForm({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">
-                    Selling Price (₹)
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      placeholder="999"
-                      value={formData.price || ""}
-                      onChange={(e) =>
-                        setFormData((p) => ({ ...p, price: e.target.value }))
-                      }
-                      className="rounded-2xl border-zinc-100 h-13 sm:h-14 font-bold text-lg sm:text-xl text-zinc-900 pl-10 shadow-sm"
-                      required
-                    />
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-sm">
-                      ₹
-                    </span>
+              <div className="space-y-6">
+                {/* Prices Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Selling Price */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">
+                      Selling Price (₹)
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        placeholder="999"
+                        value={formData.price || ""}
+                        onChange={(e) => {
+                          const newPrice = parseFloat(e.target.value) || 0;
+                          const originalPrice = parseFloat(formData.originalPrice) || 0;
+                          
+                          setFormData((prev) => {
+                            const updatedData = { ...prev, price: e.target.value };
+                            
+                            // Auto-calculate discount if both prices are valid
+                            if (newPrice > 0 && originalPrice > 0 && newPrice < originalPrice) {
+                              const discount = Math.round(((originalPrice - newPrice) / originalPrice) * 100);
+                              updatedData.discount = discount.toString();
+                            }
+                            
+                            return updatedData;
+                          });
+                        }}
+                        className="rounded-2xl border-zinc-100 h-13 sm:h-14 font-bold text-lg sm:text-xl text-zinc-900 pl-10 shadow-sm focus:ring-2 focus:ring-brand/20"
+                        required
+                      />
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-sm">
+                        ₹
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Original Price */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">
+                      Original Price (₹)
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        placeholder="1299"
+                        value={formData.originalPrice || ""}
+                        onChange={(e) => {
+                          const newOriginalPrice = parseFloat(e.target.value) || 0;
+                          const price = parseFloat(formData.price) || 0;
+                          
+                          setFormData((prev) => {
+                            const updatedData = { ...prev, originalPrice: e.target.value };
+                            
+                            // Auto-calculate discount if both prices are valid
+                            if (price > 0 && newOriginalPrice > 0 && price < newOriginalPrice) {
+                              const discount = Math.round(((newOriginalPrice - price) / newOriginalPrice) * 100);
+                              updatedData.discount = discount.toString();
+                            }
+                            
+                            return updatedData;
+                          });
+                        }}
+                        className="rounded-2xl border-zinc-100 h-13 sm:h-14 font-medium text-zinc-600 pl-10 bg-zinc-50/50 shadow-sm focus:ring-2 focus:ring-brand/20"
+                        required
+                      />
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300 font-bold text-sm">
+                        ₹
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">
-                    List Price (₹)
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      placeholder="1499"
-                      value={formData.originalPrice || ""}
-                      onChange={(e) =>
-                        setFormData((p) => ({
-                          ...p,
-                          originalPrice: e.target.value,
-                        }))
-                      }
-                      className="rounded-2xl border-zinc-100 h-13 sm:h-14 font-medium text-zinc-400 pl-10 bg-zinc-50/50 shadow-sm"
-                      required
-                    />
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300 font-bold text-sm">
-                      ₹
-                    </span>
+
+                {/* Discount & Savings */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Discount */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">
+                      Discount (%)
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        placeholder="20"
+                        value={formData.discount || ""}
+                        onChange={(e) =>
+                          setFormData((p) => ({ ...p, discount: e.target.value }))
+                        }
+                        className="rounded-2xl border-brand/20 h-13 sm:h-14 font-bold text-lg text-brand bg-brand/5 shadow-sm focus:ring-2 focus:ring-brand/30 text-center"
+                        required
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-brand font-bold text-sm">
+                        %
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">
-                    Disc Strategy (%)
-                  </label>
-                  <Input
-                    type="number"
-                    placeholder="30"
-                    value={formData.discount || ""}
-                    onChange={(e) =>
-                      setFormData((p) => ({ ...p, discount: e.target.value }))
-                    }
-                    className="rounded-2xl border-zinc-100 h-13 sm:h-14 font-bold text-zinc-600 bg-brand/5 border-brand/10 shadow-sm text-center"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">
-                    Available Stock
-                  </label>
-                  <Input
-                    type="number"
-                    placeholder="10"
-                    value={formData.stock || ""}
-                    onChange={(e) =>
-                      setFormData((p) => ({ ...p, stock: e.target.value }))
-                    }
-                    className="rounded-2xl border-zinc-100 h-13 sm:h-14 font-bold text-zinc-600 bg-emerald-50/50 border-emerald-100/50 shadow-sm text-center"
-                    required
-                  />
+
+                  {/* Savings */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest px-1">
+                      Customer Saves (₹)
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        disabled
+                        value={
+                          formData.price && formData.originalPrice
+                            ? `₹${Math.max(0, Math.round(parseFloat(formData.originalPrice) - parseFloat(formData.price))).toLocaleString()}`
+                            : "₹0"
+                        }
+                        className="rounded-2xl border-emerald-200 h-13 sm:h-14 font-bold text-lg text-emerald-700 bg-emerald-50 shadow-sm cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </section>

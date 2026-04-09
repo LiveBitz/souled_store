@@ -178,7 +178,8 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
                   <div className="grid grid-cols-2 gap-2 pt-2 text-sm">
                     {availableSizes.map((size) => {
                       const count = counts.sizes[size] || 0;
-                      if (count === 0 && !filters.sizes.includes(size)) return null;
+                      // Hide sizes with 0 available units (unless currently selected for display)
+                      if (count === 0) return null;
                       return (
                         <div 
                           key={size} 
@@ -192,7 +193,7 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
                           />
                           <label htmlFor={`size-${size}`} className="font-medium text-zinc-700 cursor-pointer group-hover:text-brand transition-colors flex-1 flex items-center justify-between">
                             {size}
-                            <span className="text-xs text-zinc-400 ml-1">({count})</span>
+                            <span className="text-xs text-zinc-400 ml-1">({count} units)</span>
                           </label>
                         </div>
                       );

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 export type Product = {
   id: string;
@@ -42,7 +42,7 @@ const normalizeArray = (val: any): string[] => {
   return [];
 };
 
-// Calculate total stock from size variants (format: "S:10", "M:15", etc.)
+// Calculate total stock from size variants (format: "S:10", "S-White:5", etc.)
 const getTotalStock = (sizes: string[]): number => {
   if (!Array.isArray(sizes)) return 0;
   return sizes.reduce((total, sizeStr) => {
@@ -97,20 +97,46 @@ export function useProductFilter(products: Product[], slug: string) {
     const subCounts: Record<string, number> = {};
     let max = 0;
 
-    baseProducts.forEach((p) => {
-      // Handle structured sizes (size:qty) with deep array defense
-      normalizeArray(p.sizes).forEach((s) => {
-        const [size, qty] = s.split(":");
-        if (qty !== "0") {
-          sCounts[size] = (sCounts[size] || 0) + 1;
+    // Calculate max from baseProducts (filtered by category)
+    if (baseProducts && baseProducts.length > 0) {
+      baseProducts.forEach((p) => {
+        const price = typeof p.price === 'number' ? p.price : parseFloat(String(p.price) || '0');
+        if (!isNaN(price) && price > max) {
+          max = price;
         }
       });
+    }
+
+    baseProducts.forEach((p) => {
+      // Sum actual inventory units per size (handles both "SIZE:QTY", "SIZE-COLOR:QTY", and "SIZE" formats)
+      normalizeArray(p.sizes).forEach((s) => {
+        const parts = s.split(":");
+        // Handle both "S:10" and "S-White:5" formats
+        const fullSize = parts[0];
+        const size = fullSize.includes("-") ? fullSize.split("-")[0] : fullSize;
+        
+        // If format has quantity (both "SIZE:QTY" and "SIZE-COLOR:QTY")
+        let quantity = 0;
+        if (parts.length > 1) {
+          quantity = parseInt(parts[1]) || 0;
+        } else {
+          // Legacy format without qty - distribute total stock across all sizes
+          const totalStock = (p as any).stock || 0;
+          const sizeCount = normalizeArray(p.sizes).length;
+          quantity = sizeCount > 0 ? Math.ceil(totalStock / sizeCount) : totalStock;
+        }
+        
+        // Only count if size has available stock
+        if (quantity > 0) {
+          sCounts[size] = (sCounts[size] || 0) + quantity;
+        }
+      });
+      
       normalizeArray(p.colors).forEach((c) => (cCounts[c] = (cCounts[c] || 0) + 1));
       subCounts[p.subCategory] = (subCounts[p.subCategory] || 0) + 1;
-      if (p.price > max) max = p.price;
     });
 
-    const calculatedMax = Math.ceil((max || 10000) / 100) * 100;
+    const calculatedMax = max > 0 ? Math.ceil(max / 100) * 100 : 1000;
 
     return { 
       sizes: sCounts, 
@@ -118,14 +144,17 @@ export function useProductFilter(products: Product[], slug: string) {
       subCategories: subCounts,
       maxPrice: calculatedMax
     };
-  }, [baseProducts]);
+  }, [baseProducts, products]);
 
-  // Sync price range when category changes
-  const [lastMaxPrice, setLastMaxPrice] = useState(counts.maxPrice);
-  if (counts.maxPrice !== lastMaxPrice) {
-    setLastMaxPrice(counts.maxPrice);
-    setFilters(prev => ({ ...prev, priceRange: [0, counts.maxPrice] }));
-  }
+  // Update price range when category maxPrice changes
+  useEffect(() => {
+    if (counts.maxPrice > 0) {
+      setFilters(prev => ({ 
+        ...prev, 
+        priceRange: [0, counts.maxPrice] 
+      }));
+    }
+  }, [counts.maxPrice]);
 
   const filteredProducts = useMemo(() => {
     return baseProducts

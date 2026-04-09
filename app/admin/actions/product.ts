@@ -13,7 +13,7 @@ export async function createProduct(data: any) {
         price: parseFloat(data.price),
         originalPrice: parseFloat(data.originalPrice),
         discount: parseInt(data.discount),
-        stock: parseInt(data.stock) || 10,
+        stock: 0, // Legacy field - stock now managed through size variants
         sizes: data.sizes,
         colors: data.colors,
         image: data.image,
@@ -48,7 +48,7 @@ export async function updateProduct(id: string, data: any) {
         price: parseFloat(data.price),
         originalPrice: parseFloat(data.originalPrice),
         discount: parseInt(data.discount),
-        stock: parseInt(data.stock) || 10,
+        stock: 0, // Legacy field - stock now managed through size variants
         sizes: data.sizes,
         colors: data.colors,
         image: data.image,

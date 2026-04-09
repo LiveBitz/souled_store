@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { ShoppingBag, Heart, Check, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
@@ -29,8 +29,41 @@ export function ProductSelection({ product }: ProductSelectionProps) {
   const [showError, setShowError] = useState(false);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
 
-  const hasSizes = product.sizes && product.sizes.length > 0;
-  const hasColors = product.colors && product.colors.length > 0;
+  // Helper: Extract base sizes from inventory data (new format: "S-Purple:5")
+  const extractBaseSizes = (sizes: string[]) => {
+    const baseSizes = new Set<string>();
+    sizes.forEach((entry: string) => {
+      if (entry.includes("-")) {
+        // New format: "S-Purple:5" → extract "S"
+        const baseSize = entry.split("-")[0];
+        baseSizes.add(baseSize);
+      }
+    });
+    return Array.from(baseSizes);
+  };
+
+  // Helper: Get available colors for a specific size
+  const getAvailableColorsForSize = (size: string) => {
+    const colors = new Set<string>();
+    product.sizes.forEach((entry: string) => {
+      if (entry.includes("-") && entry.startsWith(size + "-")) {
+        // New format: "S-Purple:5" → extract "Purple"
+        const color = entry.split("-")[1].split(":")[0];
+        colors.add(color);
+      }
+    });
+    return Array.from(colors);
+  };
+
+  // Use all colors if no size selected, otherwise only colors available for that size
+  const cleanSizes = useMemo(() => extractBaseSizes(product.sizes), [product.sizes]);
+  const hasSizes = cleanSizes.length > 0;
+  
+  const availableColors = selectedSize 
+    ? getAvailableColorsForSize(selectedSize)
+    : product.colors;
+  
+  const hasColors = availableColors.length > 0;
 
   const handleAddToCart = () => {
     const isSizeMissing = hasSizes && !selectedSize;
@@ -132,23 +165,26 @@ export function ProductSelection({ product }: ProductSelectionProps) {
           </div>
 
           <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 gap-3">
-            {product.sizes.map((sizeData: string) => {
-              const [size, qtyStr] = sizeData.split(":");
-              const quantity = parseInt(qtyStr || "0");
-              const isOutOfStock = quantity === 0;
+            {cleanSizes.map((size: string) => {
               const isSelected = selectedSize === size;
+              
+              // Check if this size has any inventory
+              const hasInventory = product.sizes.some((entry: string) => 
+                entry.startsWith(size + "-")
+              );
 
               return (
                 <button
                   key={size}
-                  disabled={isOutOfStock}
+                  disabled={!hasInventory}
                   onClick={() => {
                     setSelectedSize(size);
+                    setSelectedColor(null); // Reset color when size changes
                     setShowError(false);
                   }}
                   className={cn(
                     "relative group h-14 rounded-2xl border-2 flex flex-col items-center justify-center transition-all duration-300 overflow-hidden",
-                    isOutOfStock
+                    !hasInventory
                       ? "bg-zinc-50 border-zinc-100 text-zinc-200 cursor-not-allowed"
                       : isSelected
                       ? "bg-zinc-950 border-zinc-950 text-white shadow-xl shadow-zinc-200"
@@ -158,7 +194,7 @@ export function ProductSelection({ product }: ProductSelectionProps) {
                   <span className="text-[13px] font-black tracking-tight z-10">
                     {size}
                   </span>
-                  {isOutOfStock && (
+                  {!hasInventory && (
                     <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <span className="block w-[140%] h-0.5 bg-zinc-200/50 rotate-[35deg]" />
                     </span>
@@ -177,10 +213,10 @@ export function ProductSelection({ product }: ProductSelectionProps) {
             "text-[11px] font-black uppercase tracking-[0.2em] transition-colors",
             showError && !selectedColor ? "text-rose-500" : "text-zinc-400"
           )}>
-            Visual Palette (Color)
+            Visual Palette (Color) {selectedSize && `• Available for ${selectedSize}`}
           </p>
           <div className="flex flex-wrap gap-4">
-            {product.colors.map((color: string) => (
+            {availableColors.map((color: string) => (
               <button
                 key={color}
                 onClick={() => {
