@@ -35,11 +35,18 @@ export async function updateSession(request: NextRequest) {
 
   const isAdminPath = request.nextUrl.pathname.startsWith('/admin')
   const isEntryPath = request.nextUrl.pathname === '/admin/entry'
+  const isAuthPath = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup')
   const isPublicPath = 
     request.nextUrl.pathname === '/' || 
-    request.nextUrl.pathname.startsWith('/login') || 
-    request.nextUrl.pathname.startsWith('/signup') ||
+    isAuthPath ||
     request.nextUrl.pathname.startsWith('/auth')
+
+  // Redirect authenticated users away from login/signup pages
+  if (user && isAuthPath) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/'
+    return NextResponse.redirect(url)
+  }
 
   // Global Primary Identity Protection
   if (!user && !isPublicPath) {

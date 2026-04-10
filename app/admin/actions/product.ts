@@ -129,6 +129,18 @@ export async function createProduct(data: any) {
       };
     }
 
+    // Calculate total stock from sizes array format: ["S-Purple:5", "M-Black:3"]
+    const sizes = data.sizes || [];
+    let totalStock = 0;
+    sizes.forEach((sizeEntry: string) => {
+      if (typeof sizeEntry === 'string' && sizeEntry.includes(':')) {
+        const quantity = parseInt(sizeEntry.split(':')[1], 10);
+        if (!isNaN(quantity)) {
+          totalStock += quantity;
+        }
+      }
+    });
+
     const product = await prisma.product.create({
       data: {
         name: data.name.trim(),
@@ -137,7 +149,7 @@ export async function createProduct(data: any) {
         price: parseFloat(data.price),
         originalPrice: parseFloat(data.originalPrice),
         discount: parseInt(data.discount || "0"),
-        stock: 0, // Legacy field - stock now managed through size variants
+        stock: totalStock, // ✅ FIXED: Calculate from sizes array (Phase 7 fix)
         sizes: data.sizes || [],
         colors: data.colors || [],
         image: data.image,
@@ -187,6 +199,18 @@ export async function updateProduct(id: string, data: any) {
       };
     }
 
+    // Calculate total stock from sizes array format: ["S-Purple:5", "M-Black:3"]
+    const sizes = data.sizes || [];
+    let totalStock = 0;
+    sizes.forEach((sizeEntry: string) => {
+      if (typeof sizeEntry === 'string' && sizeEntry.includes(':')) {
+        const quantity = parseInt(sizeEntry.split(':')[1], 10);
+        if (!isNaN(quantity)) {
+          totalStock += quantity;
+        }
+      }
+    });
+
     const product = await prisma.product.update({
       where: { id },
       data: {
@@ -196,7 +220,7 @@ export async function updateProduct(id: string, data: any) {
         price: parseFloat(data.price),
         originalPrice: parseFloat(data.originalPrice),
         discount: parseInt(data.discount || "0"),
-        stock: 0, // Legacy field - stock now managed through size variants
+        stock: totalStock, // ✅ FIXED: Calculate from sizes array (Phase 7 fix)
         sizes: data.sizes || [],
         colors: data.colors || [],
         image: data.image,

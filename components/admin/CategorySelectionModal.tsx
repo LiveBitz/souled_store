@@ -1,24 +1,8 @@
 "use client";
 
-import React from "react";
-import { 
-  X, 
-  Shirt, 
-  Watch, 
-  FlaskConical, 
-  Briefcase,
-  ArrowRight,
-  Sparkles
-} from "lucide-react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription 
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Shirt, Watch, FlaskConical, Briefcase, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Category {
@@ -33,34 +17,45 @@ interface CategorySelectionModalProps {
   onClose: () => void;
 }
 
-const CATEGORY_CONFIG: Record<string, { icon: any; color: string; description: string }> = {
-  "men": { 
-    icon: Shirt, 
-    color: "bg-blue-500/10 text-blue-600", 
-    description: "Signature apparel, oversized tees, and premium menswear." 
+const CATEGORY_CONFIG: Record<string, {
+  icon: any;
+  description: string;
+}> = {
+  men: {
+    icon: Shirt,
+    description: "Apparel & premium wear",
   },
-  "watches": { 
-    icon: Watch, 
-    color: "bg-emerald-500/10 text-emerald-600", 
-    description: "Luxury timepieces and precision craftsmanship." 
+  accessories: {
+    icon: Briefcase,
+    description: "Bags & lifestyle essentials",
   },
-  "perfumes": { 
-    icon: FlaskConical, 
-    color: "bg-purple-500/10 text-purple-600", 
-    description: "SOULED signature scents and artisanal fragrances." 
+  perfumes: {
+    icon: FlaskConical,
+    description: "Signature scents & fragrances",
   },
-  "accessories": { 
-    icon: Briefcase, 
-    color: "bg-amber-500/10 text-amber-600", 
-    description: "Lifestyle essentials, bags, and luxury additions." 
+  watches: {
+    icon: Watch,
+    description: "Luxury timepieces & craft",
   },
 };
 
-export function CategorySelectionModal({ categories, isOpen, onClose }: CategorySelectionModalProps) {
+export function CategorySelectionModal({
+  categories,
+  isOpen,
+  onClose,
+}: CategorySelectionModalProps) {
   const router = useRouter();
 
-  // Filter to only the 4 core categories mentioned by the user
-  const coreCategories = categories.filter(c => 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  const coreCategories = categories.filter((c) =>
     ["men", "watches", "perfumes", "accessories"].includes(c.name.toLowerCase())
   );
 
@@ -70,53 +65,100 @@ export function CategorySelectionModal({ categories, isOpen, onClose }: Category
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl p-0 border-none bg-white rounded-[32px] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-        <DialogHeader className="p-8 pb-4 border-b border-zinc-50">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <DialogTitle className="text-2xl font-bold tracking-tight text-zinc-900">Choose Collection</DialogTitle>
-              <DialogDescription className="text-zinc-500 font-medium">Select a primary cluster for this new product.</DialogDescription>
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
+        onClick={onClose}
+      />
+
+      {/* Modal Card — Responsive */}
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-none p-4 sm:p-0">
+        <div className={cn(
+          "w-full sm:w-full md:max-w-2xl pointer-events-auto",
+          "bg-white",
+          "rounded-2xl sm:rounded-3xl overflow-hidden",
+          "shadow-2xl border border-zinc-100",
+          "animate-in fade-in zoom-in-95 duration-300"
+        )}>
+
+          {/* Drag handle — mobile only */}
+          <div className="flex justify-center pt-3 sm:hidden">
+            <div className="w-12 h-1 rounded-full bg-zinc-300" />
+          </div>
+
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4 px-6 sm:px-8 pt-6 sm:pt-8 pb-5 sm:pb-6 border-b border-zinc-100/50">
+            <div className="flex-1">
+              <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">
+                Choose Collection
+              </h2>
+              <p className="text-sm sm:text-base text-zinc-500 mt-1.5 leading-relaxed">
+                Select a primary category for this new product
+              </p>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose} className="rounded-xl h-10 w-10 text-zinc-400">
-              <X className="w-5 h-5" />
-            </Button>
+            <button
+              onClick={onClose}
+              className="flex-shrink-0 w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center transition-all duration-200 hover:scale-110"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4 text-zinc-600" />
+            </button>
           </div>
-        </DialogHeader>
 
-        <div className="p-8">
-          <div className="grid grid-cols-2 gap-4">
-            {coreCategories.map((cat) => {
-              const config = CATEGORY_CONFIG[cat.name.toLowerCase()] || { icon: Shirt, color: "bg-zinc-50 text-zinc-900" };
-              const Icon = config.icon;
-              
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => handleSelect(cat.id)}
-                  className="group flex flex-col items-center justify-center p-8 rounded-3xl border border-zinc-100 hover:border-brand/40 hover:bg-brand/[0.02] transition-all duration-200 text-center space-y-4"
-                >
-                  <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center transition-colors group-hover:bg-brand group-hover:text-white", config.color)}>
-                    <Icon className="w-7 h-7" />
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="font-bold text-zinc-900 tracking-tight group-hover:text-brand transition-colors text-lg">{cat.name}</h3>
-                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Select</p>
-                  </div>
-                </button>
-              );
-            })}
+          {/* Grid */}
+          <div className="px-6 sm:px-8 py-6 sm:py-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+              {coreCategories.map((cat) => {
+                const key = cat.name.toLowerCase();
+                const config = CATEGORY_CONFIG[key];
+                if (!config) return null;
+                const Icon = config.icon;
+
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => handleSelect(cat.id)}
+                    className={cn(
+                      "group flex flex-col items-center justify-center gap-3 p-4 sm:p-5 rounded-2xl text-center",
+                      "border-2 border-zinc-100 bg-white/50 backdrop-blur-sm",
+                      "hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-md",
+                      "active:scale-95 transition-all duration-200"
+                    )}
+                  >
+                    {/* Icon box */}
+                    <div className="w-12 sm:w-14 h-12 sm:h-14 rounded-2xl bg-gradient-to-br from-zinc-50 to-zinc-100 group-hover:from-zinc-100 group-hover:to-zinc-200 flex items-center justify-center transition-all duration-200">
+                      <Icon className="w-6 sm:w-7 h-6 sm:h-7 text-zinc-700 group-hover:text-zinc-900" strokeWidth={1.5} />
+                    </div>
+
+                    {/* Text */}
+                    <div>
+                      <p className="text-sm sm:text-base font-semibold text-zinc-900 leading-snug">
+                        {cat.name}
+                      </p>
+                      <p className="text-xs sm:text-sm text-zinc-500 mt-1 leading-snug">
+                        {config.description}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        <div className="px-8 py-6 bg-zinc-50/50 border-t border-zinc-100 flex items-center justify-between">
-           <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">Digital Inventory Management</p>
-           <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-brand uppercase tracking-widest">
-              <Sparkles className="w-3 h-3" />
-              SOULED Standard
-           </div>
+          {/* Footer */}
+          <div className="px-6 sm:px-8 py-4 sm:py-5 bg-gradient-to-r from-zinc-50 to-zinc-100/50 border-t border-zinc-100/50 flex items-center justify-between">
+            <p className="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-widest">
+              Digital Inventory Management
+            </p>
+            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-zinc-400">
+              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              Souled Standard
+            </div>
+          </div>
+
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </>
   );
 }
