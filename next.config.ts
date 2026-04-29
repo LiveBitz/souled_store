@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
   // IMAGE OPTIMIZATION - Bandwidth Reduction
   // ============================================
   images: {
-    formats: ["image/avif", "image/webp"],  // Modern formats (60% smaller)
+    unoptimized: true,  // Bypass Vercel image optimization quota
+    formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     
@@ -29,6 +30,11 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "zjhxlwanzqdigsvqxzau.supabase.co",
+      },
+      // ✅ Current Supabase project
+      {
+        protocol: "https",
+        hostname: "zmsbmnxqhmxaaemnswzc.supabase.co",
       },
       {
         protocol: "https",

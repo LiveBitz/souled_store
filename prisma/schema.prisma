@@ -43,8 +43,9 @@ model Product {
   features      String[] @default([])
   isNew         Boolean  @default(false)
   isBestSeller  Boolean  @default(false)
-  wishlists     Wishlist[]
-  orderItems    OrderItem[]
+  wishlists        Wishlist[]
+  orderItems       OrderItem[]
+  offlineSaleItems OfflineSaleItem[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -145,13 +146,50 @@ model OrderItem {
   orderId   String
   product   Product  @relation(fields: [productId], references: [id])
   productId String
-  
+
   quantity  Int
   price     Float    // Price at time of purchase
   size      String?
   color     String?
-  
+
   @@index([orderId])
   @@index([productId])
   @@index([productId, orderId])  // ✅ PHASE 6: Composite for grouping top products
+}
+
+model OfflineSale {
+  id            String            @id @default(cuid())
+  saleNumber    String            @unique
+  customerName  String?
+  customerPhone String?
+  items         OfflineSaleItem[]
+  subtotal      Float
+  discount      Float             @default(0)
+  total         Float
+  paymentMethod String            @default("cash") // cash, upi, card
+  paymentStatus String            @default("paid")
+  notes         String?
+  soldBy        String?
+  saleDate      DateTime          @default(now())
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([saleDate])
+  @@index([paymentMethod])
+  @@index([createdAt])
+}
+
+model OfflineSaleItem {
+  id          String       @id @default(cuid())
+  saleId      String
+  sale        OfflineSale  @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName String
+  quantity    Int
+  price       Float
+  total       Float
+
+  @@index([saleId])
+  @@index([productId])
 }
