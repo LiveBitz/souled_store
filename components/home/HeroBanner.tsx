@@ -26,7 +26,7 @@ export function HeroBanner({ banners = [] }: HeroBannerProps) {
   if (banners.length === 0) return null;
 
   return (
-    <section className="relative w-full overflow-hidden bg-zinc-950">
+    <section className="relative w-full overflow-hidden">
       <Carousel
         plugins={[plugin.current]}
         className="w-full"
@@ -37,60 +37,38 @@ export function HeroBanner({ banners = [] }: HeroBannerProps) {
           {banners.map((slide) => (
             <CarouselItem key={slide.id}>
               <Link href={(slide as any).link || "/"} className="block cursor-pointer group">
-                <div className="relative h-[300px] md:h-[450px] lg:h-[600px] w-full flex items-center">
+                <div className="relative h-[300px] md:h-[450px] lg:h-[600px] w-full">
                   <Image
                     src={slide.image}
                     alt={slide.title}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                     priority
                     quality={85}
                   />
 
-                  {/* Multi-layer gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/30 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                  {/* Subtle gradient only on bottom-left so image design is not blocked */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
 
-                  {/* Content */}
-                  <div className="absolute inset-0 flex items-center px-6 md:px-14 lg:px-24">
-                    <div className="max-w-xl space-y-4 md:space-y-5">
-                      {/* Collection tag */}
-                      <div className="inline-flex items-center gap-2 bg-brand/90 text-white text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
-                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                        New Collection
-                      </div>
-
-                      <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.05] tracking-tight">
-                        {slide.title}
-                      </h1>
-
-                      {slide.subtitle && (
-                        <p className="text-sm md:text-base lg:text-lg text-white/75 font-medium max-w-md leading-relaxed">
-                          {slide.subtitle}
-                        </p>
-                      )}
-
-                      {slide.buttonText && (
-                        <div className="pt-1">
-                          <span className="inline-flex items-center gap-2.5 bg-white text-zinc-900 font-bold text-sm px-6 py-3 rounded-xl hover:bg-zinc-100 transition-all shadow-lg shadow-black/20">
-                            {slide.buttonText}
-                            <ArrowRight className="w-4 h-4" />
-                          </span>
-                        </div>
-                      )}
+                  {/* Button pinned to bottom-left */}
+                  {slide.buttonText && (
+                    <div className="absolute bottom-6 left-6 md:bottom-10 md:left-12 lg:bottom-12 lg:left-16 z-10">
+                      <span className="inline-flex items-center gap-2 bg-white text-zinc-900 font-bold text-sm px-5 py-2.5 rounded-xl shadow-lg hover:bg-zinc-100 transition-all">
+                        {slide.buttonText}
+                        <ArrowRight className="w-4 h-4" />
+                      </span>
                     </div>
-                  </div>
+                  )}
                 </div>
               </Link>
             </CarouselItem>
           ))}
         </CarouselContent>
 
-        {/* Navigation arrows */}
-        <div className="hidden lg:block">
-          <CarouselPrevious className="left-6 bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/25 h-12 w-12 rounded-xl transition-all" />
-          <CarouselNext className="right-6 bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/25 h-12 w-12 rounded-xl transition-all" />
-        </div>
+        {/* Nav arrows — inside the banner, vertically centered */}
+        <CarouselPrevious className="left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/40 h-10 w-10 rounded-xl transition-all" />
+        <CarouselNext className="right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/40 h-10 w-10 rounded-xl transition-all" />
       </Carousel>
     </section>
   );
