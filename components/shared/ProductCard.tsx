@@ -3,9 +3,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { Heart, ShoppingBag } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/hooks/use-toast";
@@ -35,22 +32,19 @@ export function ProductCard({ product }: ProductCardProps) {
   const { isWishlisted, toggleWishlist } = useWishlist();
   const { toast } = useToast();
 
-  // Calculate total stock using shared utility
   const totalStock = getTotalStock(product.sizes);
   const isOutOfStock = totalStock === 0;
 
   const handleWishlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     setIsAddingToWishlist(true);
-
     try {
       await toggleWishlist(String(product.id));
       const wishlisted = isWishlisted(String(product.id));
-      
       toast({
         title: wishlisted ? "Added to Wishlist" : "Removed from Wishlist",
-        description: wishlisted 
-          ? `${product.name} has been added to your wishlist` 
+        description: wishlisted
+          ? `${product.name} has been added to your wishlist`
           : `${product.name} has been removed from your wishlist`,
         duration: 2000,
       });
@@ -77,76 +71,99 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className="group relative overflow-hidden rounded-xl border-none shadow-none hover:shadow-xl transition-all duration-300 h-full flex flex-col">
-      <CardContent className="p-0 flex-1">
-        <Link href={`/product/${product.slug}`} className="block relative aspect-square overflow-hidden bg-muted">
-          <Image
-            src={imgError ? "https://picsum.photos/seed/error/600/600" : product.image}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
-            onError={() => setImgError(true)}
-            quality={75}
-            loading="lazy"
+    <div className="group relative flex flex-col bg-white rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      {/* Image */}
+      <Link
+        href={`/product/${product.slug}`}
+        className="relative aspect-square overflow-hidden bg-zinc-100 block"
+      >
+        <Image
+          src={imgError ? "https://picsum.photos/seed/error/600/600" : product.image}
+          alt={product.name}
+          fill
+          className={cn(
+            "object-cover transition-transform duration-500 group-hover:scale-105",
+            isOutOfStock && "opacity-60"
+          )}
+          onError={() => setImgError(true)}
+          quality={75}
+          loading="lazy"
+        />
+
+        {/* Wishlist */}
+        <button
+          onClick={handleWishlistClick}
+          disabled={isAddingToWishlist}
+          className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center transition-all hover:scale-110 active:scale-95 disabled:opacity-50 z-10"
+          aria-label={isWishlisted(String(product.id)) ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <Heart
+            className={cn(
+              "w-4 h-4 transition-colors",
+              isWishlisted(String(product.id))
+                ? "fill-brand stroke-brand"
+                : "stroke-zinc-400"
+            )}
           />
-          {/* Wishlist Button Overlay */}
-          <button
-            onClick={handleWishlistClick}
-            disabled={isAddingToWishlist}
-            className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm shadow-sm transition-colors hover:bg-white z-10 disabled:opacity-50"
-            aria-label={isWishlisted(String(product.id)) ? "Remove from wishlist" : "Add to wishlist"}
-          >
-            <Heart
-              className={cn(
-                "w-5 h-5 transition-colors",
-                isWishlisted(String(product.id)) ? "fill-brand stroke-brand" : "stroke-zinc-600"
-              )}
-            />
-          </button>
+        </button>
 
-          {/* Discount Badge */}
+        {/* Badges */}
+        <div className="absolute bottom-3 left-3 flex flex-col gap-1.5 z-10">
           {product.discount > 0 && (
-            <Badge className="absolute bottom-3 left-3 bg-success text-white hover:bg-success font-bold px-2 py-0.5 rounded-full shadow-sm z-10">
+            <span className="bg-emerald-500 text-white text-[10px] font-extrabold uppercase tracking-wider px-2 py-1 rounded-lg shadow-sm">
               {product.discount}% OFF
-            </Badge>
+            </span>
           )}
+          {product.isNew && (
+            <span className="bg-zinc-900 text-white text-[10px] font-extrabold uppercase tracking-wider px-2 py-1 rounded-lg shadow-sm">
+              NEW
+            </span>
+          )}
+        </div>
 
-          {/* Out of Stock Overlay */}
-          {isOutOfStock && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-20">
-              <span className="text-white font-bold text-sm">OUT OF STOCK</span>
-            </div>
-          )}
-        </Link>
-      </CardContent>
-      
-      <CardFooter className="flex flex-col items-start p-4 space-y-3">
-        <Link href={`/product/${product.slug}`} className="w-full">
-          <h3 className="font-semibold text-sm line-clamp-1 group-hover:text-brand transition-colors">
-            {product.name}
-          </h3>
-          <div className="flex items-center gap-2 mt-1 tabular-nums">
-            <span className="font-bold text-lg text-zinc-900">₹{product.price}</span>
-            <span className="text-sm text-muted-foreground line-through decoration-muted-foreground/50">
-              ₹{product.originalPrice}
+        {/* Out of Stock */}
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center z-20">
+            <span className="bg-zinc-900 text-white font-bold text-xs px-3 py-1.5 rounded-lg uppercase tracking-widest">
+              Out of Stock
             </span>
           </div>
+        )}
+      </Link>
+
+      {/* Info */}
+      <div className="p-3.5 flex flex-col gap-3 flex-1">
+        <Link href={`/product/${product.slug}`} className="flex-1">
+          <h3 className="font-bold text-sm text-zinc-800 line-clamp-1 group-hover:text-brand transition-colors leading-snug">
+            {product.name}
+          </h3>
+          <div className="flex items-baseline gap-2 mt-1.5 tabular-nums">
+            <span className="font-extrabold text-base text-zinc-900">
+              ₹{product.price.toLocaleString("en-IN")}
+            </span>
+            {product.originalPrice > product.price && (
+              <span className="text-xs text-zinc-400 line-through">
+                ₹{product.originalPrice.toLocaleString("en-IN")}
+              </span>
+            )}
+          </div>
         </Link>
-        
-        <Link href={`/product/${product.slug}`} className="w-full">
-          <Button 
+
+        <Link href={`/product/${product.slug}`} className="block">
+          <button
             disabled={isOutOfStock}
-            variant={isOutOfStock ? "secondary" : "outline"} 
             className={cn(
-              "w-full rounded-xl border-zinc-200 gap-2 h-10 font-bold text-xs uppercase tracking-widest transition-all duration-300",
-              !isOutOfStock && "group-hover:bg-brand group-hover:text-white group-hover:border-brand"
+              "w-full h-10 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all duration-200",
+              isOutOfStock
+                ? "bg-zinc-100 text-zinc-400 cursor-not-allowed"
+                : "bg-zinc-100 text-zinc-700 hover:bg-brand hover:text-white active:scale-[0.98]"
             )}
           >
-            <ShoppingBag className="w-4 h-4" />
-            {isOutOfStock ? "Out of Stock" : "Add to Cart"}
-          </Button>
+            <ShoppingBag className="w-3.5 h-3.5" />
+            {isOutOfStock ? "Unavailable" : "Add to Cart"}
+          </button>
         </Link>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }

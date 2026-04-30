@@ -1,17 +1,18 @@
 import React from "react";
+import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { SectionHeading } from "@/components/shared/SectionHeading";
+import { ArrowRight } from "lucide-react";
 
 async function getBestSellers() {
-  // Phase 7: Filter by stock in database query instead of JavaScript (40% less data)
   const products = await prisma.product.findMany({
-    where: { 
+    where: {
       isBestSeller: true,
-      stock: { gt: 0 }  // Only fetch products with stock
+      stock: { gt: 0 },
     },
-    orderBy: { createdAt: 'desc' },
-    take: 8  // Only fetch needed products
+    orderBy: { createdAt: "desc" },
+    take: 8,
   });
 
   return products;
@@ -23,16 +24,23 @@ export async function BestSellers() {
   if (bestsellerProducts.length === 0) return null;
 
   return (
-    <section id="best-sellers" className="py-16 md:py-20 bg-zinc-50 border-t border-zinc-200">
-      <div className="container mx-auto">
-        <div className="px-4 md:px-6 lg:px-8 mb-10">
-          <SectionHeading 
-            title="Best Sellers" 
-            subtitle="The most loved pieces from our collection." 
-          />
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6 px-4 md:px-6 lg:px-8">
+    <section id="best-sellers" className="py-16 md:py-24 bg-zinc-50">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+        <SectionHeading
+          title="Best Sellers"
+          subtitle="The most loved pieces from our collection."
+          trailing={
+            <Link
+              href="/category"
+              className="flex items-center gap-1.5 text-brand hover:text-brand/80 transition-colors font-bold text-sm"
+            >
+              View All
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          }
+        />
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5">
           {bestsellerProducts.map((product) => (
             <ProductCard key={product.id} product={product as any} />
           ))}

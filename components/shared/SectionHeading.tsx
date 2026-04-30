@@ -7,22 +7,24 @@ interface SectionHeadingProps {
 }
 
 export function SectionHeading({ title, subtitle, trailing }: SectionHeadingProps) {
+  const words = title.split(" ");
+  const firstWord = words[0];
+  const rest = words.slice(1).join(" ");
+
   return (
-    <div className="flex items-end justify-between mb-8 group">
-      <div className="space-y-1">
-        <div className="relative inline-block">
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-            {title}
-          </h2>
-          <div className="absolute -bottom-1 left-0 w-1/3 h-1 bg-brand rounded-full transition-all duration-300 group-hover:w-full" />
-        </div>
+    <div className="flex items-end justify-between mb-8 md:mb-10 group">
+      <div className="space-y-2">
+        <h2 className="text-3xl md:text-4xl font-black tracking-tight text-zinc-900 leading-tight">
+          <span className="italic text-brand">{firstWord}</span>
+          {rest && <span> {rest}</span>}
+        </h2>
         {subtitle && (
-          <p className="text-sm md:text-base text-muted-foreground max-w-lg">
+          <p className="text-sm md:text-base text-zinc-500 max-w-lg font-medium">
             {subtitle}
           </p>
         )}
       </div>
-      {trailing && <div className="text-sm font-medium">{trailing}</div>}
+      {trailing && <div className="text-sm font-bold">{trailing}</div>}
     </div>
   );
 }

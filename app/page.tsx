@@ -24,13 +24,13 @@ export default async function Home() {
   const activeNewsletter = newsletterBanners.length > 0 ? newsletterBanners[0] : null;
 
   return (
-    <div className="flex flex-col gap-0 pb-10">
+    <div className="flex flex-col">
       <HeroBanner banners={heroBanners} />
+      <FeaturesStrip />
       <CategoryGrid categories={dbCategories} />
       <NewArrivals />
       <PromoBanner banner={activePromo} />
       <BestSellers />
-      <FeaturesStrip />
       <NewsletterBanner banner={activeNewsletter} />
     </div>
   );
