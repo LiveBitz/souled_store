@@ -32,11 +32,22 @@ declare global {
   var prisma: PrismaClientSingleton | undefined;
 }
 
+// In development, bust the globalThis cache if the Banner model is missing
+// (happens when the dev server runs with a pre-Banner Prisma client singleton)
+if (
+  process.env.NODE_ENV !== "production" &&
+  globalThis.prisma &&
+  !(globalThis.prisma as any)["banner"]
+) {
+  console.warn("[prisma] Stale singleton detected (missing models). Reinitialising...");
+  globalThis.prisma = undefined;
+}
+
 const prisma = globalThis.prisma ?? prismaClientSingleton();
 
 export default prisma;
 
-// Only cache in development to avoid connection pooling issues
+// Cache in development to avoid spawning a new pool on every hot-reload
 if (process.env.NODE_ENV !== "production") {
   globalThis.prisma = prisma;
 }
