@@ -6,13 +6,35 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  useCarousel,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { Banner } from "@prisma/client";
+
+// Custom nav buttons using useCarousel — avoids tailwind-merge fighting default positioning
+function CarouselControls() {
+  const { scrollPrev, scrollNext } = useCarousel();
+  return (
+    <>
+      <button
+        onClick={scrollPrev}
+        aria-label="Previous slide"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white flex items-center justify-center hover:bg-white/35 transition-all"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+      <button
+        onClick={scrollNext}
+        aria-label="Next slide"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white flex items-center justify-center hover:bg-white/35 transition-all"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
+    </>
+  );
+}
 
 interface HeroBannerProps {
   banners?: Banner[];
@@ -46,15 +68,13 @@ export function HeroBanner({ banners = [] }: HeroBannerProps) {
                     priority
                     quality={85}
                   />
-
-                  {/* Subtle gradient only on bottom-left so image design is not blocked */}
+                  {/* Bottom gradient for button readability */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
 
-                  {/* Button pinned to bottom-left */}
+                  {/* CTA button — bottom left */}
                   {slide.buttonText && (
-                    <div className="absolute bottom-6 left-6 md:bottom-10 md:left-12 lg:bottom-12 lg:left-16 z-10">
-                      <span className="inline-flex items-center gap-2 bg-white text-zinc-900 font-bold text-sm px-5 py-2.5 rounded-xl shadow-lg hover:bg-zinc-100 transition-all">
+                    <div className="absolute bottom-6 left-6 md:bottom-10 md:left-12 z-10">
+                      <span className="inline-flex items-center gap-2 bg-white text-zinc-900 font-bold text-sm px-5 py-2.5 rounded-xl shadow-lg">
                         {slide.buttonText}
                         <ArrowRight className="w-4 h-4" />
                       </span>
@@ -66,9 +86,8 @@ export function HeroBanner({ banners = [] }: HeroBannerProps) {
           ))}
         </CarouselContent>
 
-        {/* Nav arrows — inside the banner, vertically centered */}
-        <CarouselPrevious className="left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/40 h-10 w-10 rounded-xl transition-all" />
-        <CarouselNext className="right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/40 h-10 w-10 rounded-xl transition-all" />
+        {/* Custom arrows — no tailwind-merge conflict */}
+        <CarouselControls />
       </Carousel>
     </section>
   );
