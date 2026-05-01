@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, Sparkles } from "lucide-react";
@@ -20,7 +21,13 @@ export function NewsletterBanner({ banner }: NewsletterBannerProps) {
   return (
     <section className="py-10 md:py-16 px-4 md:px-6 lg:px-8">
       <div className="container mx-auto">
-        <div className="relative overflow-hidden rounded-3xl bg-zinc-900 text-white p-8 md:p-12 lg:p-16">
+        <motion.div
+          initial={{ opacity: 0, y: 22 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] }}
+          viewport={{ once: true, margin: "-56px" }}
+          className="relative overflow-hidden rounded-3xl bg-zinc-900 text-white p-8 md:p-12 lg:p-16"
+        >
 
           {/* Decorative blobs */}
           <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-brand/20 blur-3xl pointer-events-none" />
@@ -68,7 +75,7 @@ export function NewsletterBanner({ banner }: NewsletterBannerProps) {
               </p>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -3,6 +3,7 @@ import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { ArrowRight, TrendingUp } from "lucide-react";
+import { AnimateOnView } from "@/components/shared/AnimateOnView";
 
 async function getBestSellers() {
   const products = await prisma.product.findMany({
@@ -22,6 +23,7 @@ export async function BestSellers() {
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
 
         {/* Section header */}
+        <AnimateOnView>
         <div className="flex items-end justify-between mb-10 md:mb-12">
           <div className="space-y-2">
             {/* Label */}
@@ -48,15 +50,19 @@ export async function BestSellers() {
 
         {/* Divider */}
         <div className="w-full h-px bg-zinc-200 mb-8" />
+        </AnimateOnView>
 
         {/* Grid */}
+        <AnimateOnView delay={0.1}>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5">
           {bestsellerProducts.map((product) => (
             <ProductCard key={product.id} product={product as any} />
           ))}
         </div>
+        </AnimateOnView>
 
         {/* Bottom CTA */}
+        <AnimateOnView delay={0.15}>
         <div className="mt-10 md:mt-12 flex justify-center">
           <Link
             href="/category"
@@ -66,6 +72,7 @@ export async function BestSellers() {
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
+        </AnimateOnView>
 
       </div>
     </section>

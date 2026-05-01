@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { getTotalStock } from "@/lib/inventory";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { AnimateOnView } from "@/components/shared/AnimateOnView";
 
 async function getNewArrivals() {
   const products = await prisma.product.findMany({
@@ -23,6 +24,7 @@ export async function NewArrivals() {
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
 
         {/* Section header */}
+        <AnimateOnView>
         <div className="flex items-end justify-between mb-10 md:mb-12">
           <div className="space-y-2">
             {/* Label */}
@@ -49,15 +51,19 @@ export async function NewArrivals() {
 
         {/* Divider */}
         <div className="w-full h-px bg-zinc-100 mb-8" />
+        </AnimateOnView>
 
         {/* Grid */}
+        <AnimateOnView delay={0.1}>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5">
           {featuredProducts.map((product) => (
             <ProductCard key={product.id} product={product as any} />
           ))}
         </div>
+        </AnimateOnView>
 
         {/* Mobile view all */}
+        <AnimateOnView delay={0.15}>
         <div className="mt-8 flex justify-center sm:hidden">
           <Link
             href="/category"
@@ -67,6 +73,7 @@ export async function NewArrivals() {
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
+        </AnimateOnView>
 
       </div>
     </section>

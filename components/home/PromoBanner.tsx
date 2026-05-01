@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Banner } from "@prisma/client";
+import { AnimateOnView } from "@/components/shared/AnimateOnView";
 
 interface PromoBannerProps {
   banner?: Banner | null;
@@ -20,6 +21,7 @@ export function PromoBanner({ banner }: PromoBannerProps) {
   return (
     <section className="py-10 md:py-16 px-4 md:px-6 lg:px-8">
       <div className="container mx-auto">
+        <AnimateOnView direction="up">
         <Link href={displayLink} className="block group">
           <div className="relative w-full overflow-hidden rounded-3xl bg-zinc-950 min-h-[320px] md:min-h-[420px] flex items-center">
             <Image
@@ -61,6 +63,7 @@ export function PromoBanner({ banner }: PromoBannerProps) {
             </div>
           </div>
         </Link>
+        </AnimateOnView>
       </div>
     </section>
   );

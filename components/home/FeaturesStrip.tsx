@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
 import { Truck, RotateCcw, ShieldCheck, Gift } from "lucide-react";
+import { motion } from "framer-motion";
 
 const features = [
   {
@@ -38,28 +41,30 @@ export function FeaturesStrip() {
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {features.map((feature, idx) => (
-            <React.Fragment key={idx}>
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 md:gap-4 text-center sm:text-left">
-                <div
-                  className={`w-11 h-11 shrink-0 rounded-2xl ${feature.bg} flex items-center justify-center`}
-                >
-                  <feature.icon className={`w-5 h-5 ${feature.color}`} />
-                </div>
-                <div className="space-y-0.5">
-                  <h4 className="text-sm font-extrabold text-zinc-900">
-                    {feature.title}
-                  </h4>
-                  <p className="text-xs text-zinc-500 font-medium leading-relaxed">
-                    {feature.subtitle}
-                  </p>
-                </div>
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.5,
+                ease: [0.25, 0.1, 0.25, 1],
+                delay: idx * 0.09,
+              }}
+              viewport={{ once: true, margin: "-40px" }}
+              className="flex flex-col sm:flex-row items-center sm:items-start gap-3 md:gap-4 text-center sm:text-left"
+            >
+              <div className={`w-11 h-11 shrink-0 rounded-2xl ${feature.bg} flex items-center justify-center`}>
+                <feature.icon className={`w-5 h-5 ${feature.color}`} />
               </div>
-
-              {/* Vertical divider between items on desktop */}
-              {idx < features.length - 1 && (
-                <div className="hidden lg:block absolute" />
-              )}
-            </React.Fragment>
+              <div className="space-y-0.5">
+                <h4 className="text-sm font-extrabold text-zinc-900">
+                  {feature.title}
+                </h4>
+                <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                  {feature.subtitle}
+                </p>
+              </div>
+            </motion.div>
           ))}
         </div>
       </div>

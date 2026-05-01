@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SectionHeading } from "@/components/shared/SectionHeading";
+import { AnimateOnView } from "@/components/shared/AnimateOnView";
 import { Category } from "@prisma/client";
 
 interface CategoryGridProps {
@@ -18,12 +19,15 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
   return (
     <section id="categories" className="py-16 md:py-24 bg-zinc-50">
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
-        <SectionHeading
-          title="Shop by Category"
-          subtitle="Explore our curated collections for every style and occasion."
-        />
+        <AnimateOnView>
+          <SectionHeading
+            title="Shop by Category"
+            subtitle="Explore our curated collections for every style and occasion."
+          />
+        </AnimateOnView>
 
         {/* Mobile: 2-col grid — use inline style for height, same as desktop cards */}
+        <AnimateOnView delay={0.12}>
         <div className="grid grid-cols-2 gap-3 md:hidden">
           {categories.map((category) => (
             <Link
@@ -51,8 +55,10 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
             </Link>
           ))}
         </div>
+        </AnimateOnView>
 
         {/* Desktop: bento layout — explicit heights, no CSS grid row-span issues */}
+        <AnimateOnView delay={0.12}>
         <div className="hidden md:flex gap-4 lg:gap-5">
 
           {/* Featured large card (left half) */}
@@ -130,6 +136,7 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
               ))}
           </div>
         </div>
+        </AnimateOnView>
 
       </div>
     </section>
