@@ -48,6 +48,7 @@ const nextConfig: NextConfig = {
   // ============================================
   async headers() {
     return [
+      // Security headers on all routes (no Cache-Control here — let Next.js manage it per route type)
       {
         source: "/:path*",
         headers: [
@@ -76,7 +77,13 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "geolocation=(), microphone=(), camera=()",
           },
-          // Cache policy for static assets
+        ],
+      },
+      // Long-lived immutable cache ONLY for Next.js static assets (JS/CSS chunks)
+      // These filenames include content hashes so they are safe to cache forever.
+      {
+        source: "/_next/static/:path*",
+        headers: [
           {
             key: "Cache-Control",
             value: "public, max-age=31536000, immutable",
@@ -94,7 +101,6 @@ const nextConfig: NextConfig = {
             key: "X-Content-Type-Options",
             value: "nosniff",
           },
-          // CORS headers can be configured per endpoint
           {
             key: "Access-Control-Max-Age",
             value: "86400",
