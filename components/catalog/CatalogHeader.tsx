@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { motion } from "framer-motion";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,30 +25,43 @@ interface CatalogHeaderProps {
   setSortBy: (value: string) => void;
 }
 
+const ease = [0.25, 0.1, 0.25, 1] as const;
+
 export function CatalogHeader({ slug, count, sortBy, setSortBy }: CatalogHeaderProps) {
-  const categoryName = !slug 
-    ? "Collection" 
-    : slug === "sale" 
-      ? "Seasonal Sale" 
-      : slug === "new-arrivals" 
-        ? "New Arrivals" 
+  const categoryName = !slug
+    ? "Collection"
+    : slug === "sale"
+      ? "Seasonal Sale"
+      : slug === "new-arrivals"
+        ? "New Arrivals"
         : productsBySlug[slug] || (slug.charAt(0).toUpperCase() + slug.slice(1));
 
   return (
     <div className="space-y-6">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/" className="text-xs md:text-sm text-zinc-600 hover:text-zinc-900">Home</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator className="text-zinc-300" />
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/category/${slug}`} className="text-xs md:text-sm text-zinc-900 font-medium">{categoryName}</BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      
-      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease }}
+      >
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/" className="text-xs md:text-sm text-zinc-600 hover:text-zinc-900">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="text-zinc-300" />
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/category/${slug}`} className="text-xs md:text-sm text-zinc-900 font-medium">{categoryName}</BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease, delay: 0.07 }}
+        className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6"
+      >
         <div className="space-y-2">
           <h1 className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tight">
             {categoryName}
@@ -54,7 +70,7 @@ export function CatalogHeader({ slug, count, sortBy, setSortBy }: CatalogHeaderP
             {count} product{count !== 1 ? 's' : ''} available
           </p>
         </div>
-        
+
         <div className="hidden lg:flex items-center gap-4">
           <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Sort:</span>
           <Select value={sortBy} onValueChange={setSortBy}>
@@ -70,7 +86,7 @@ export function CatalogHeader({ slug, count, sortBy, setSortBy }: CatalogHeaderP
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Product } from "@/lib/data";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -93,13 +94,33 @@ export function ProductGrid({ products, isLoading, clearFilters }: ProductGridPr
   return (
     <div className="space-y-12">
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
-        {visibleProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+        <AnimatePresence mode="popLayout">
+          {visibleProducts.map((product, idx) => (
+            <motion.div
+              key={product.id}
+              layout
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{
+                duration: 0.38,
+                ease: [0.25, 0.1, 0.25, 1],
+                delay: Math.min(idx * 0.045, 0.28),
+              }}
+            >
+              <ProductCard product={product} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
       {hasMore && (
-        <div className="flex justify-center pt-8">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+          className="flex justify-center pt-8"
+        >
           <Button
             variant="outline"
             size="lg"
@@ -116,7 +137,7 @@ export function ProductGrid({ products, isLoading, clearFilters }: ProductGridPr
               `Load More Products (${products.length - displayCount} remaining)`
             )}
           </Button>
-        </div>
+        </motion.div>
       )}
     </div>
   );

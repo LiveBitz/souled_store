@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
 import { useProductFilter, Product } from "@/hooks/useProductFilter";
 import { CatalogHeader } from "@/components/catalog/CatalogHeader";
 import { FilterSidebar } from "@/components/catalog/FilterSidebar";
@@ -66,20 +67,30 @@ export function CategoryCatalog({ initialProducts, slug }: CategoryCatalogProps)
       <div className="container mx-auto px-4 md:px-6 lg:px-8 pb-20">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Desktop Filter Sidebar (Sticky) */}
-          <aside className="hidden lg:block w-80 shrink-0">
+          <motion.aside
+            initial={{ opacity: 0, x: -14 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1], delay: 0.12 }}
+            className="hidden lg:block w-80 shrink-0"
+          >
             <div className="sticky top-[102px] max-h-[calc(100vh-140px)] overflow-y-auto">
-              <FilterSidebar 
-                filters={filters} 
-                setFilters={setFilters} 
-                clearAll={clearAll} 
+              <FilterSidebar
+                filters={filters}
+                setFilters={setFilters}
+                clearAll={clearAll}
                 counts={counts}
                 slug={slug}
               />
             </div>
-          </aside>
+          </motion.aside>
 
           {/* Main Content Area */}
-          <div className="flex-1 min-w-0">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1], delay: 0.15 }}
+            className="flex-1 min-w-0"
+          >
             {/* Active Filters Row */}
             {(filters.sizes.length > 0 || filters.colors.length > 0 || filters.subCategories.length > 0 || filters.discount > 0 || filters.priceRange[0] > 0 || filters.priceRange[1] < 10000) && (
               <div className="mb-8 pb-6 border-b border-zinc-200">
@@ -92,11 +103,11 @@ export function CategoryCatalog({ initialProducts, slug }: CategoryCatalogProps)
             )}
 
             {/* Product Grid Section */}
-            <ProductGrid 
-              products={filteredProducts as any} 
-              clearFilters={clearAll} 
+            <ProductGrid
+              products={filteredProducts as any}
+              clearFilters={clearAll}
             />
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
