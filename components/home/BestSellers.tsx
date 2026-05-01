@@ -40,7 +40,7 @@ export async function BestSellers() {
           </div>
 
           <Link
-            href="/category"
+            href="/category/best-sellers"
             className="hidden sm:inline-flex items-center gap-1.5 text-sm font-bold text-zinc-500 hover:text-brand transition-colors border border-zinc-200 hover:border-brand px-4 py-2 rounded-xl bg-white"
           >
             View All
@@ -65,7 +65,7 @@ export async function BestSellers() {
         <AnimateOnView delay={0.15}>
         <div className="mt-10 md:mt-12 flex justify-center">
           <Link
-            href="/category"
+            href="/category/best-sellers"
             className="inline-flex items-center gap-2.5 bg-zinc-900 hover:bg-brand text-white text-sm font-bold px-8 py-3.5 rounded-xl transition-all duration-200 active:scale-[0.98] shadow-sm"
           >
             Browse All Products

@@ -14,17 +14,19 @@ export default async function CategoryPage({
 
   // ✅ PHASE 1: Selective field queries - only fetch needed fields
   const products = await prisma.product.findMany({
-    where: slug === "sale" 
+    where: slug === "sale"
       ? { discount: { gt: 0 } }
       : slug === "new-arrivals"
       ? { isNew: true }
-      : { 
+      : slug === "best-sellers"
+      ? { isBestSeller: true }
+      : {
           category: {
-             slug: {
-                equals: slug,
-                mode: "insensitive"
-             }
-          } 
+            slug: {
+              equals: slug,
+              mode: "insensitive",
+            },
+          },
         },
     select: {
       id: true,

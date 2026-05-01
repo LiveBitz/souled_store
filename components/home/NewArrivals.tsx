@@ -41,7 +41,7 @@ export async function NewArrivals() {
           </div>
 
           <Link
-            href="/category"
+            href="/category/new-arrivals"
             className="hidden sm:inline-flex items-center gap-1.5 text-sm font-bold text-zinc-500 hover:text-brand transition-colors border border-zinc-200 hover:border-brand px-4 py-2 rounded-xl"
           >
             View All
@@ -66,7 +66,7 @@ export async function NewArrivals() {
         <AnimateOnView delay={0.15}>
         <div className="mt-8 flex justify-center sm:hidden">
           <Link
-            href="/category"
+            href="/category/new-arrivals"
             className="inline-flex items-center gap-2 text-sm font-bold text-zinc-600 border border-zinc-200 px-6 py-2.5 rounded-xl hover:border-brand hover:text-brand transition-all"
           >
             View All Products

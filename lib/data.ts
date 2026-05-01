@@ -20,6 +20,9 @@ export const productsBySlug: Record<string, string> = {
   watches: "Watches Collection",
   perfumes: "Luxury Perfumes",
   accessories: "Premium Accessories",
+  "new-arrivals": "New Arrivals",
+  "best-sellers": "Best Sellers",
+  sale: "Seasonal Sale",
 };
 
 export const allProducts: any[] = [
