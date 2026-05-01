@@ -12,6 +12,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { ProductGallery } from "@/components/catalog/ProductGallery";
 import { ProductSelection } from "@/components/catalog/ProductSelection";
+import { AnimateOnView } from "@/components/shared/AnimateOnView";
 
 // Phase 7: Cache product pages for 1 hour with ISR
 export const revalidate = 3600;
@@ -95,17 +96,19 @@ export default async function ProductDetailsPage({
       {/* ── Breadcrumb ── */}
       <div className="border-b border-zinc-100">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-          <nav className="flex items-center gap-2 py-3.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400 overflow-x-auto whitespace-nowrap scrollbar-none">
-            <a href="/" className="hover:text-zinc-700 transition-colors shrink-0">Home</a>
-            <ChevronRight className="w-3 h-3 shrink-0 text-zinc-200" />
-            <a href={`/category/${product.category.slug}`} className="hover:text-zinc-700 transition-colors shrink-0">
-              {product.category.name}
-            </a>
-            <ChevronRight className="w-3 h-3 shrink-0 text-zinc-200" />
-            <span className="text-zinc-600 truncate max-w-[160px] sm:max-w-none font-semibold">
-              {product.name}
-            </span>
-          </nav>
+          <AnimateOnView direction="none">
+            <nav className="flex items-center gap-2 py-3.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400 overflow-x-auto whitespace-nowrap scrollbar-none">
+              <a href="/" className="hover:text-zinc-700 transition-colors shrink-0">Home</a>
+              <ChevronRight className="w-3 h-3 shrink-0 text-zinc-200" />
+              <a href={`/category/${product.category.slug}`} className="hover:text-zinc-700 transition-colors shrink-0">
+                {product.category.name}
+              </a>
+              <ChevronRight className="w-3 h-3 shrink-0 text-zinc-200" />
+              <span className="text-zinc-600 truncate max-w-[160px] sm:max-w-none font-semibold">
+                {product.name}
+              </span>
+            </nav>
+          </AnimateOnView>
         </div>
       </div>
 
@@ -114,7 +117,7 @@ export default async function ProductDetailsPage({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-16">
 
           {/* Gallery */}
-          <div className="lg:col-span-7">
+          <AnimateOnView className="lg:col-span-7">
             <ProductGallery
               mainImage={product.image}
               supplementalImages={(product as any).images || []}
@@ -122,10 +125,10 @@ export default async function ProductDetailsPage({
               isNew={product.isNew}
               isBestSeller={product.isBestSeller}
             />
-          </div>
+          </AnimateOnView>
 
           {/* Info Panel */}
-          <div className="lg:col-span-5">
+          <AnimateOnView delay={0.1} className="lg:col-span-5">
             <div className="lg:sticky lg:top-6 space-y-6">
 
               {/* Identity */}
@@ -221,7 +224,7 @@ export default async function ProductDetailsPage({
               </div>
 
             </div>
-          </div>
+          </AnimateOnView>
         </div>
       </div>
 
@@ -232,7 +235,7 @@ export default async function ProductDetailsPage({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
 
             {/* Left: Description + Features */}
-            <div className="lg:col-span-7 space-y-10">
+            <AnimateOnView className="lg:col-span-7 space-y-10">
 
               {/* Description */}
               <div>
@@ -265,10 +268,10 @@ export default async function ProductDetailsPage({
                   </ul>
                 </div>
               )}
-            </div>
+            </AnimateOnView>
 
             {/* Right: Spec Card */}
-            <div className="lg:col-span-5">
+            <AnimateOnView delay={0.1} className="lg:col-span-5">
               <div className="lg:sticky lg:top-8 rounded-2xl border border-zinc-200 overflow-hidden bg-white shadow-sm">
 
                 {/* Card header */}
@@ -302,7 +305,7 @@ export default async function ProductDetailsPage({
                   </p>
                 </div>
               </div>
-            </div>
+            </AnimateOnView>
 
           </div>
         </div>
