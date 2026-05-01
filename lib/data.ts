@@ -23,6 +23,7 @@ export const productsBySlug: Record<string, string> = {
   "new-arrivals": "New Arrivals",
   "best-sellers": "Best Sellers",
   sale: "Seasonal Sale",
+  all: "All Products",
 };
 
 export const allProducts: any[] = [
