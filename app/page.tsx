@@ -3,7 +3,6 @@ import { CategoryGrid } from "@/components/home/CategoryGrid";
 import { NewArrivals } from "@/components/home/NewArrivals";
 import { PromoBanner } from "@/components/home/PromoBanner";
 import { BestSellers } from "@/components/home/BestSellers";
-import { FeaturesStrip } from "@/components/home/FeaturesStrip";
 import { NewsletterBanner } from "@/components/home/NewsletterBanner";
 import { getBanners } from "@/lib/actions/banner-actions";
 import { getCategories } from "@/lib/actions/category-actions";
@@ -26,7 +25,6 @@ export default async function Home() {
   return (
     <div className="flex flex-col">
       <HeroBanner banners={heroBanners} />
-      <FeaturesStrip />
       <CategoryGrid categories={dbCategories} />
       <NewArrivals />
       <PromoBanner banner={activePromo} />
