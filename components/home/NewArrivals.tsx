@@ -1,9 +1,8 @@
 import React from "react";
-import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { getTotalStock } from "@/lib/inventory";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { AnimateOnView } from "@/components/shared/AnimateOnView";
 
 async function getNewArrivals() {
@@ -25,7 +24,7 @@ export async function NewArrivals() {
 
         {/* Section header */}
         <AnimateOnView>
-        <div className="flex items-end justify-between mb-10 md:mb-12">
+        <div className="mb-10 md:mb-12">
           <div className="space-y-2">
             {/* Label */}
             <div className="inline-flex items-center gap-1.5 text-brand text-xs font-black uppercase tracking-[0.15em]">
@@ -39,14 +38,6 @@ export async function NewArrivals() {
               Fresh styles added this week
             </p>
           </div>
-
-          <Link
-            href="/category/new-arrivals"
-            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-bold text-zinc-500 hover:text-brand transition-colors border border-zinc-200 hover:border-brand px-4 py-2 rounded-xl"
-          >
-            View All
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
         </div>
 
         {/* Divider */}
@@ -59,19 +50,6 @@ export async function NewArrivals() {
           {featuredProducts.map((product) => (
             <ProductCard key={product.id} product={product as any} />
           ))}
-        </div>
-        </AnimateOnView>
-
-        {/* Mobile view all */}
-        <AnimateOnView delay={0.15}>
-        <div className="mt-8 flex justify-center sm:hidden">
-          <Link
-            href="/category/new-arrivals"
-            className="inline-flex items-center gap-2 text-sm font-bold text-zinc-600 border border-zinc-200 px-6 py-2.5 rounded-xl hover:border-brand hover:text-brand transition-all"
-          >
-            View All Products
-            <ArrowRight className="w-4 h-4" />
-          </Link>
         </div>
         </AnimateOnView>
 

@@ -1,8 +1,7 @@
 import React from "react";
-import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { ProductCard } from "@/components/shared/ProductCard";
-import { ArrowRight, TrendingUp } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import { AnimateOnView } from "@/components/shared/AnimateOnView";
 
 async function getBestSellers() {
@@ -24,7 +23,7 @@ export async function BestSellers() {
 
         {/* Section header */}
         <AnimateOnView>
-        <div className="flex items-end justify-between mb-10 md:mb-12">
+        <div className="mb-10 md:mb-12">
           <div className="space-y-2">
             {/* Label */}
             <div className="inline-flex items-center gap-1.5 text-amber-600 text-xs font-black uppercase tracking-[0.15em]">
@@ -38,14 +37,6 @@ export async function BestSellers() {
               Loved by thousands of customers
             </p>
           </div>
-
-          <Link
-            href="/category/best-sellers"
-            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-bold text-zinc-500 hover:text-brand transition-colors border border-zinc-200 hover:border-brand px-4 py-2 rounded-xl bg-white"
-          >
-            View All
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
         </div>
 
         {/* Divider */}
@@ -58,19 +49,6 @@ export async function BestSellers() {
           {bestsellerProducts.map((product) => (
             <ProductCard key={product.id} product={product as any} />
           ))}
-        </div>
-        </AnimateOnView>
-
-        {/* Bottom CTA */}
-        <AnimateOnView delay={0.15}>
-        <div className="mt-10 md:mt-12 flex justify-center">
-          <Link
-            href="/category/best-sellers"
-            className="inline-flex items-center gap-2.5 bg-zinc-900 hover:bg-brand text-white text-sm font-bold px-8 py-3.5 rounded-xl transition-all duration-200 active:scale-[0.98] shadow-sm"
-          >
-            Browse All Products
-            <ArrowRight className="w-4 h-4" />
-          </Link>
         </div>
         </AnimateOnView>
 
