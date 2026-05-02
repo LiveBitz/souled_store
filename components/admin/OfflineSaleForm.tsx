@@ -11,6 +11,7 @@ import {
   Loader2,
   IndianRupee,
   Search,
+  Tag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,11 @@ type Product = {
   name: string;
   price: number;
   image: string;
+};
+
+type ItemTag = {
+  id: string;
+  name: string;
 };
 
 type SaleItem = {
@@ -129,7 +135,13 @@ function ProductSelector({
   );
 }
 
-export function OfflineSaleForm({ products }: { products: Product[] }) {
+export function OfflineSaleForm({
+  products,
+  tags = [],
+}: {
+  products: Product[];
+  tags?: ItemTag[];
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
@@ -281,6 +293,46 @@ export function OfflineSaleForm({ products }: { products: Product[] }) {
             Add Item
           </button>
         </div>
+
+        {/* Quick-add tag chips */}
+        {tags.length > 0 && (
+          <div className="mb-5 pb-5 border-b border-zinc-100">
+            <div className="flex items-center gap-2 mb-3">
+              <Tag className="w-3.5 h-3.5 text-zinc-400" />
+              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                Quick Add
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() =>
+                    setItems((prev) => {
+                      const taggedItem = {
+                        ...newItem(),
+                        isCustom: true,
+                        productName: tag.name,
+                      };
+                      // If the only row is the blank starter, replace it
+                      const isOnlyBlank =
+                        prev.length === 1 &&
+                        !prev[0].productName &&
+                        prev[0].price === 0 &&
+                        !prev[0].productId;
+                      return isOnlyBlank ? [taggedItem] : [...prev, taggedItem];
+                    })
+                  }
+                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-brand/8 text-brand border border-brand/15 text-xs font-bold hover:bg-brand/15 hover:border-brand/30 active:scale-95 transition-all"
+                >
+                  <Plus className="w-3 h-3" />
+                  {tag.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="space-y-3">
           {/* Header row — desktop */}

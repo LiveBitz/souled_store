@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useTransition } from "react";
+import React, { useState, useEffect, useCallback, useTransition } from "react";
 import Link from "next/link";
 import { deleteOfflineSale } from "@/app/admin/actions/offline-sales";
 import {
@@ -179,10 +179,15 @@ export function OfflineSalesDashboard({
         if (opts.withStats) params.set("stats", "1");
 
         const res = await fetch(`/api/admin/offline-sales?${params}`);
-        const data = await res.json();
-        setSales(data.sales);
-        setPagination(data.pagination);
+        const text = await res.text();
+        if (!text) throw new Error(`Empty response (status ${res.status})`);
+        const data = JSON.parse(text);
+        if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+        setSales(data.sales ?? []);
+        setPagination(data.pagination ?? null);
         if (data.stats) setStats(data.stats);
+      } catch (err) {
+        console.error("[fetchSales]", err);
       } finally {
         setLoading(false);
       }

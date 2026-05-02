@@ -13,7 +13,8 @@ import {
   ChevronRight,
   Store,
   Users,
-  ReceiptText
+  ReceiptText,
+  Tag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ const navItems = [
 
 export function AdminSidebarContent() {
   const pathname = usePathname();
+  const isOfflineSalesSection = pathname.startsWith("/admin/offline-sales");
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -46,29 +48,56 @@ export function AdminSidebarContent() {
 
       <nav className="flex-1 px-4 py-8 space-y-1">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href ||
+            (item.href !== "/admin" && pathname.startsWith(item.href) && item.href === "/admin/offline-sales"
+              ? pathname === item.href
+              : false);
+          const isExactActive = pathname === item.href;
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold transition-all group",
-                isActive 
-                  ? "text-brand bg-brand/5 shadow-sm shadow-brand/5" 
-                  : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50"
+            <React.Fragment key={item.href}>
+              <Link
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold transition-all group",
+                  isExactActive
+                    ? "text-brand bg-brand/5 shadow-sm shadow-brand/5"
+                    : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50"
+                )}
+              >
+                <item.icon className={cn(
+                  "w-5 h-5 transition-transform group-hover:scale-110",
+                  isExactActive ? "text-brand" : "text-zinc-400"
+                )} />
+                <span className="flex-1">{item.label}</span>
+                {isExactActive ? (
+                  <div className="w-1.5 h-1.5 rounded-full bg-brand" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                )}
+              </Link>
+
+              {/* Sub-items for Offline Sales */}
+              {item.href === "/admin/offline-sales" && isOfflineSalesSection && (
+                <Link
+                  href="/admin/offline-sales/tags"
+                  className={cn(
+                    "flex items-center gap-3 pl-11 pr-4 py-2.5 rounded-2xl font-bold transition-all group text-sm",
+                    pathname === "/admin/offline-sales/tags"
+                      ? "text-brand bg-brand/5"
+                      : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50"
+                  )}
+                >
+                  <Tag className={cn(
+                    "w-4 h-4 transition-transform group-hover:scale-110",
+                    pathname === "/admin/offline-sales/tags" ? "text-brand" : "text-zinc-300"
+                  )} />
+                  <span className="flex-1">Item Tags</span>
+                  {pathname === "/admin/offline-sales/tags" && (
+                    <div className="w-1.5 h-1.5 rounded-full bg-brand" />
+                  )}
+                </Link>
               )}
-            >
-              <item.icon className={cn(
-                "w-5 h-5 transition-transform group-hover:scale-110",
-                isActive ? "text-brand" : "text-zinc-400"
-              )} />
-              <span className="flex-1">{item.label}</span>
-              {isActive ? (
-                <div className="w-1.5 h-1.5 rounded-full bg-brand" />
-              ) : (
-                <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              )}
-            </Link>
+            </React.Fragment>
           );
         })}
       </nav>
