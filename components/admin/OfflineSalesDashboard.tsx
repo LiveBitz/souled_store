@@ -484,9 +484,8 @@ export function OfflineSalesDashboard({
                   {sales.map((sale) => {
                     const isExpanded = expandedId === sale.id;
                     return (
-                      <>
+                      <React.Fragment key={sale.id}>
                         <tr
-                          key={sale.id}
                           className="hover:bg-zinc-50/50 transition-colors cursor-pointer"
                           onClick={() =>
                             setExpandedId(isExpanded ? null : sale.id)
@@ -579,7 +578,7 @@ export function OfflineSalesDashboard({
 
                         {/* Expanded items row */}
                         {isExpanded && (
-                          <tr key={`${sale.id}-expanded`}>
+                          <tr>
                             <td
                               colSpan={8}
                               className="bg-zinc-50/80 px-5 py-4 border-t border-zinc-100"
@@ -622,7 +621,7 @@ export function OfflineSalesDashboard({
                             </td>
                           </tr>
                         )}
-                      </>
+                      </React.Fragment>
                     );
                   })}
                 </tbody>
