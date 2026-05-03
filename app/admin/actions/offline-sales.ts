@@ -23,6 +23,7 @@ function generateSaleNumber(): string {
 
 export type OfflineSaleItemInput = {
   productId?: string;
+  brandName?: string;
   productName: string;
   quantity: number;
   price: number;
@@ -80,6 +81,7 @@ export async function createOfflineSale(input: CreateOfflineSaleInput) {
         items: {
           create: input.items.map((item) => ({
             productId: item.productId || null,
+            brandName: item.brandName?.trim() || null,
             productName: item.productName.trim(),
             quantity: item.quantity,
             price: item.price,

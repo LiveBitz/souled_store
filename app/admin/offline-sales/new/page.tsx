@@ -1,5 +1,6 @@
 import { OfflineSaleForm } from "@/components/admin/OfflineSaleForm";
 import { getItemTags } from "@/app/admin/actions/item-tags";
+import { getBrandTags } from "@/app/admin/actions/brand-tags";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
@@ -13,7 +14,11 @@ async function getProducts() {
 }
 
 export default async function NewOfflineSalePage() {
-  const [products, tags] = await Promise.all([getProducts(), getItemTags()]);
+  const [products, tags, brandTags] = await Promise.all([
+    getProducts(),
+    getItemTags(),
+    getBrandTags(),
+  ]);
 
   return (
     <div className="min-h-screen bg-zinc-50/50 p-4 sm:p-6 lg:p-8">
@@ -35,7 +40,7 @@ export default async function NewOfflineSalePage() {
       </div>
 
       <div className="max-w-4xl">
-        <OfflineSaleForm products={products} tags={tags} />
+        <OfflineSaleForm products={products} tags={tags} brandTags={brandTags} />
       </div>
     </div>
   );

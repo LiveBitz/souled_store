@@ -15,6 +15,7 @@ import {
   Users,
   ReceiptText,
   Tag,
+  Bookmark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -78,24 +79,44 @@ export function AdminSidebarContent() {
 
               {/* Sub-items for Offline Sales */}
               {item.href === "/admin/offline-sales" && isOfflineSalesSection && (
-                <Link
-                  href="/admin/offline-sales/tags"
-                  className={cn(
-                    "flex items-center gap-3 pl-11 pr-4 py-2.5 rounded-2xl font-bold transition-all group text-sm",
-                    pathname === "/admin/offline-sales/tags"
-                      ? "text-brand bg-brand/5"
-                      : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50"
-                  )}
-                >
-                  <Tag className={cn(
-                    "w-4 h-4 transition-transform group-hover:scale-110",
-                    pathname === "/admin/offline-sales/tags" ? "text-brand" : "text-zinc-300"
-                  )} />
-                  <span className="flex-1">Item Tags</span>
-                  {pathname === "/admin/offline-sales/tags" && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-brand" />
-                  )}
-                </Link>
+                <>
+                  <Link
+                    href="/admin/offline-sales/tags"
+                    className={cn(
+                      "flex items-center gap-3 pl-11 pr-4 py-2.5 rounded-2xl font-bold transition-all group text-sm",
+                      pathname === "/admin/offline-sales/tags"
+                        ? "text-brand bg-brand/5"
+                        : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50"
+                    )}
+                  >
+                    <Tag className={cn(
+                      "w-4 h-4 transition-transform group-hover:scale-110",
+                      pathname === "/admin/offline-sales/tags" ? "text-brand" : "text-zinc-300"
+                    )} />
+                    <span className="flex-1">Item Tags</span>
+                    {pathname === "/admin/offline-sales/tags" && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-brand" />
+                    )}
+                  </Link>
+                  <Link
+                    href="/admin/offline-sales/brand-tags"
+                    className={cn(
+                      "flex items-center gap-3 pl-11 pr-4 py-2.5 rounded-2xl font-bold transition-all group text-sm",
+                      pathname === "/admin/offline-sales/brand-tags"
+                        ? "text-violet-600 bg-violet-50"
+                        : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50"
+                    )}
+                  >
+                    <Bookmark className={cn(
+                      "w-4 h-4 transition-transform group-hover:scale-110",
+                      pathname === "/admin/offline-sales/brand-tags" ? "text-violet-500" : "text-zinc-300"
+                    )} />
+                    <span className="flex-1">Brand Tags</span>
+                    {pathname === "/admin/offline-sales/brand-tags" && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+                    )}
+                  </Link>
+                </>
               )}
             </React.Fragment>
           );

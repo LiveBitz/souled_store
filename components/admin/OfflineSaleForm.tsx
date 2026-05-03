@@ -12,6 +12,7 @@ import {
   IndianRupee,
   Search,
   Tag,
+  Bookmark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,10 +28,16 @@ type ItemTag = {
   name: string;
 };
 
+type BrandTag = {
+  id: string;
+  name: string;
+};
+
 type SaleItem = {
   localId: string;
   isCustom: boolean;
   productId: string;
+  brandName: string;
   productName: string;
   price: number;
   quantity: number;
@@ -47,6 +54,7 @@ const newItem = (): SaleItem => ({
   localId: String(++itemCounter),
   isCustom: false,
   productId: "",
+  brandName: "",
   productName: "",
   price: 0,
   quantity: 1,
@@ -138,9 +146,11 @@ function ProductSelector({
 export function OfflineSaleForm({
   products,
   tags = [],
+  brandTags = [],
 }: {
   products: Product[];
   tags?: ItemTag[];
+  brandTags?: BrandTag[];
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -184,6 +194,7 @@ export function OfflineSaleForm({
         customerPhone,
         items: items.map((i) => ({
           productId: i.productId || undefined,
+          brandName: i.brandName || undefined,
           productName: i.productName,
           price: i.price,
           quantity: i.quantity,
@@ -294,43 +305,83 @@ export function OfflineSaleForm({
           </button>
         </div>
 
-        {/* Quick-add tag chips */}
-        {tags.length > 0 && (
-          <div className="mb-5 pb-5 border-b border-zinc-100">
-            <div className="flex items-center gap-2 mb-3">
-              <Tag className="w-3.5 h-3.5 text-zinc-400" />
-              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Quick Add
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <button
-                  key={tag.id}
-                  type="button"
-                  onClick={() =>
-                    setItems((prev) => {
-                      const taggedItem = {
-                        ...newItem(),
-                        isCustom: true,
-                        productName: tag.name,
-                      };
-                      // If the only row is the blank starter, replace it
-                      const isOnlyBlank =
-                        prev.length === 1 &&
-                        !prev[0].productName &&
-                        prev[0].price === 0 &&
-                        !prev[0].productId;
-                      return isOnlyBlank ? [taggedItem] : [...prev, taggedItem];
-                    })
-                  }
-                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-brand/8 text-brand border border-brand/15 text-xs font-bold hover:bg-brand/15 hover:border-brand/30 active:scale-95 transition-all"
-                >
-                  <Plus className="w-3 h-3" />
-                  {tag.name}
-                </button>
-              ))}
-            </div>
+        {/* Quick-add chips */}
+        {(tags.length > 0 || brandTags.length > 0) && (
+          <div className="mb-5 pb-5 border-b border-zinc-100 space-y-3">
+            {/* Item name tags */}
+            {tags.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Tag className="w-3.5 h-3.5 text-zinc-400" />
+                  <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                    Item
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      onClick={() =>
+                        setItems((prev) => {
+                          const taggedItem = {
+                            ...newItem(),
+                            isCustom: true,
+                            productName: tag.name,
+                          };
+                          const isOnlyBlank =
+                            prev.length === 1 &&
+                            !prev[0].productName &&
+                            prev[0].price === 0 &&
+                            !prev[0].productId;
+                          return isOnlyBlank ? [taggedItem] : [...prev, taggedItem];
+                        })
+                      }
+                      className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-brand/8 text-brand border border-brand/15 text-xs font-bold hover:bg-brand/15 hover:border-brand/30 active:scale-95 transition-all"
+                    >
+                      <Plus className="w-3 h-3" />
+                      {tag.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Brand tags */}
+            {brandTags.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Bookmark className="w-3.5 h-3.5 text-zinc-400" />
+                  <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                    Brand
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {brandTags.map((bt) => (
+                    <button
+                      key={bt.id}
+                      type="button"
+                      onClick={() =>
+                        setItems((prev) => {
+                          if (prev.length === 0) return prev;
+                          // Set brand on the last item
+                          const updated = [...prev];
+                          updated[updated.length - 1] = {
+                            ...updated[updated.length - 1],
+                            brandName: bt.name,
+                          };
+                          return updated;
+                        })
+                      }
+                      className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-violet-50 text-violet-600 border border-violet-200 text-xs font-bold hover:bg-violet-100 hover:border-violet-300 active:scale-95 transition-all"
+                    >
+                      <Bookmark className="w-3 h-3" />
+                      {bt.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -391,19 +442,30 @@ export function OfflineSaleForm({
                 </button>
               </div>
 
-              {/* Name field */}
+              {/* Name + Brand field */}
               <div className="md:contents">
-                <div className="md:col-span-1">
+                <div className="md:col-span-1 flex flex-col gap-1.5">
                   {item.isCustom ? (
-                    <input
-                      type="text"
-                      value={item.productName}
-                      onChange={(e) =>
-                        updateItem(item.localId, { productName: e.target.value })
-                      }
-                      placeholder="Item name"
-                      className="w-full h-11 px-3 rounded-xl border border-zinc-200 text-sm outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/10 transition-all placeholder:text-zinc-400 bg-white"
-                    />
+                    <>
+                      <input
+                        type="text"
+                        value={item.productName}
+                        onChange={(e) =>
+                          updateItem(item.localId, { productName: e.target.value })
+                        }
+                        placeholder="Item name"
+                        className="w-full h-11 px-3 rounded-xl border border-zinc-200 text-sm outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/10 transition-all placeholder:text-zinc-400 bg-white"
+                      />
+                      <input
+                        type="text"
+                        value={item.brandName}
+                        onChange={(e) =>
+                          updateItem(item.localId, { brandName: e.target.value })
+                        }
+                        placeholder="Brand (optional)"
+                        className="w-full h-8 px-3 rounded-lg border border-zinc-200 text-xs outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all placeholder:text-zinc-300 bg-white text-violet-700 font-medium"
+                      />
+                    </>
                   ) : (
                     <ProductSelector
                       products={products}

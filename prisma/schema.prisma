@@ -66,6 +66,13 @@ model ItemTag {
   updatedAt DateTime @updatedAt
 }
 
+model BrandTag {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Banner {
   id          String   @id @default(cuid())
   type        String   // HERO, PROMO, etc.
@@ -192,6 +199,7 @@ model OfflineSaleItem {
   sale        OfflineSale  @relation(fields: [saleId], references: [id], onDelete: Cascade)
   productId   String?
   product     Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
+  brandName   String?
   productName String
   quantity    Int
   price       Float
