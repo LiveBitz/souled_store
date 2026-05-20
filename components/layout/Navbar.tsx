@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Heart, ShoppingBag, User, Menu, X, ChevronRight, LogIn, HelpCircle, PhoneCall, LogOut, Shield, Loader2 } from "lucide-react";
+import { Search, Heart, ShoppingBag, User, Menu, X, ChevronRight, LogIn, LogOut, Shield, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -163,14 +163,6 @@ export function Navbar() {
                         </button>
                       </>
                     )}
-                    <Link href="/track-order" onClick={() => setIsOpen(false)} className="flex items-center gap-3 w-full p-4 hover:bg-zinc-50 transition-colors">
-                      <HelpCircle className="w-5 h-5 text-zinc-500" />
-                      <span className="font-bold text-zinc-800">Track Order</span>
-                    </Link>
-                    <Link href="/contact" onClick={() => setIsOpen(false)} className="flex items-center gap-3 w-full p-4 hover:bg-zinc-50 transition-colors">
-                      <PhoneCall className="w-5 h-5 text-zinc-500" />
-                      <span className="font-bold text-zinc-800">Contact Us</span>
-                    </Link>
                   </div>
                 </div>
               </div>
