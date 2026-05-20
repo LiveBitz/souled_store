@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import {
   LayoutDashboard,
   Package,
@@ -31,7 +32,15 @@ const navItems = [
 
 export function AdminSidebarContent() {
   const pathname = usePathname();
+  const router = useRouter();
   const isOfflineSalesSection = pathname.startsWith("/admin/offline-sales");
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -129,6 +138,7 @@ export function AdminSidebarContent() {
         </Link>
         
         <button
+          onClick={handleLogout}
           className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-rose-500 font-bold hover:bg-rose-50 transition-all group"
         >
           <LogOut className="w-5 h-5" />

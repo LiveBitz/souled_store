@@ -332,6 +332,7 @@ export function OfflineSaleForm({
                           const isOnlyBlank =
                             prev.length === 1 &&
                             !prev[0].productName &&
+                            !prev[0].brandName &&
                             prev[0].price === 0 &&
                             !prev[0].productId;
                           return isOnlyBlank ? [taggedItem] : [...prev, taggedItem];
@@ -395,7 +396,7 @@ export function OfflineSaleForm({
             <span />
           </div>
 
-          {items.map((item, idx) => (
+          {items.map((item) => (
             <div
               key={item.localId}
               className="grid grid-cols-1 md:grid-cols-[1fr_1fr_100px_110px_36px] gap-3 items-start p-4 md:p-0 rounded-xl md:rounded-none bg-zinc-50 md:bg-transparent border border-zinc-100 md:border-0"
