@@ -147,6 +147,7 @@ export function OfflineSalesDashboard({
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
   const [stats, setStats] = useState<Stats>(initialStats);
   const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -169,6 +170,7 @@ export function OfflineSalesDashboard({
       withStats?: boolean;
     }) => {
       setLoading(true);
+      setFetchError("");
       try {
         const params = new URLSearchParams();
         if (opts.search) params.set("search", opts.search);
@@ -183,10 +185,13 @@ export function OfflineSalesDashboard({
         if (!text) throw new Error(`Empty response (status ${res.status})`);
         const data = JSON.parse(text);
         if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+        // Only update state on success — never wipe existing data on error
         setSales(data.sales ?? []);
         setPagination(data.pagination ?? null);
         if (data.stats) setStats(data.stats);
       } catch (err) {
+        const msg = err instanceof Error ? err.message : "Failed to load sales.";
+        setFetchError(msg);
         console.error("[fetchSales]", err);
       } finally {
         setLoading(false);
@@ -435,6 +440,18 @@ export function OfflineSalesDashboard({
         </div>
 
         {/* Table */}
+        {fetchError && !loading && (
+          <div className="flex items-center gap-2 px-4 py-3 mb-2 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-sm font-medium">
+            <span>{fetchError}</span>
+            <button
+              onClick={() => fetchSales({ search, payment, from, to, page })}
+              className="ml-auto text-xs font-bold underline underline-offset-2 hover:text-rose-800"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex items-center justify-center py-16 gap-2 text-zinc-400">
             <Loader2 className="w-5 h-5 animate-spin" />

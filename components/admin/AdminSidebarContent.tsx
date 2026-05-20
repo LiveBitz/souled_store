@@ -49,10 +49,6 @@ export function AdminSidebarContent() {
 
       <nav className="flex-1 px-4 py-8 space-y-1">
         {navItems.map((item) => {
-          const isActive = pathname === item.href ||
-            (item.href !== "/admin" && pathname.startsWith(item.href) && item.href === "/admin/offline-sales"
-              ? pathname === item.href
-              : false);
           const isExactActive = pathname === item.href;
           return (
             <React.Fragment key={item.href}>

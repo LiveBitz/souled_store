@@ -116,11 +116,8 @@ export function ItemTagsManager({ initialTags }: ItemTagsManagerProps) {
     }
     startTransition(async () => {
       const res = await createItemTag(newName);
-      if (res.success) {
-        setTags((prev) => [
-          ...prev,
-          { id: Date.now().toString(), name: newName.trim() },
-        ]);
+      if (res.success && res.tag) {
+        setTags((prev) => [...prev, { id: res.tag!.id, name: res.tag!.name }]);
         setNewName("");
       } else {
         setError(res.error || "Failed.");
