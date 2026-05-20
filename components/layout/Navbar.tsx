@@ -182,7 +182,7 @@ export function Navbar() {
                   <span className="text-sm font-bold text-zinc-950">English (IN)</span>
                 </div>
                 <div className="text-[10px] text-zinc-400 font-medium">
-                  © 2026 SOULED Minimal. All Rights Reserved.
+                  © 2026 Unique Hub. All Rights Reserved.
                 </div>
               </div>
             </SheetContent>
@@ -191,8 +191,8 @@ export function Navbar() {
 
         {/* Logo */}
         <Link href="/" className="flex items-center">
-          <span className="text-2xl md:text-3xl font-bold tracking-tighter text-brand">
-            SOULED
+          <span className="text-xl md:text-2xl font-bold tracking-tight text-brand whitespace-nowrap">
+            Unique Hub
           </span>
         </Link>
 

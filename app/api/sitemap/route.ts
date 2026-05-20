@@ -15,7 +15,7 @@ export async function GET() {
     });
 
     // Generate XML sitemap
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://souled.com';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://uniquehub.store';
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

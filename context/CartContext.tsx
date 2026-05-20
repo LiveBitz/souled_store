@@ -34,7 +34,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Persistence Orchestration
   useEffect(() => {
-    const savedCart = localStorage.getItem("souled_cart");
+    const savedCart = localStorage.getItem("unique_hub_cart");
     if (savedCart) {
       try {
         setItems(JSON.parse(savedCart));
@@ -47,7 +47,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (isInitialized) {
-      localStorage.setItem("souled_cart", JSON.stringify(items));
+      localStorage.setItem("unique_hub_cart", JSON.stringify(items));
     }
   }, [items, isInitialized]);
 

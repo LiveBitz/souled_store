@@ -104,20 +104,20 @@ export function ProductCard({ product }: ProductCardProps) {
           onClick={handleWishlistClick}
           disabled={isAddingToWishlist}
           className={cn(
-            "absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all disabled:opacity-50",
+            "absolute top-3 right-3 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all disabled:opacity-50",
             wishlisted
               ? "bg-brand text-white shadow-md shadow-brand/30"
               : "bg-white/90 text-zinc-400 border border-zinc-200 hover:border-brand hover:text-brand"
           )}
           aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
         >
-          <Heart className={cn("w-3.5 h-3.5 transition-all", wishlisted && "fill-white stroke-white")} />
+          <Heart className={cn("w-4 h-4 transition-all", wishlisted && "fill-white stroke-white")} />
         </button>
 
         {/* Discount badge — top left */}
         {product.discount > 0 && (
-          <div className="absolute top-2.5 left-2.5 z-10">
-            <span className="bg-emerald-500 text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">
+          <div className="absolute top-3 left-3 z-10">
+            <span className="bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full">
               {product.discount}% off
             </span>
           </div>
@@ -125,28 +125,28 @@ export function ProductCard({ product }: ProductCardProps) {
       </Link>
 
       {/* ── Info ── */}
-      <div className="flex flex-col gap-2.5 p-3 flex-1">
+      <div className="flex flex-col gap-3 p-4 flex-1">
 
         {/* Name + NEW badge inline */}
         <Link href={`/product/${product.slug}`}>
-          <div className="flex items-start gap-1.5">
-            <h3 className="font-semibold text-[13px] text-zinc-800 line-clamp-2 leading-snug group-hover:text-brand transition-colors flex-1">
+          <div className="flex items-start gap-2">
+            <h3 className="font-semibold text-sm text-zinc-800 line-clamp-2 leading-snug group-hover:text-brand transition-colors flex-1">
               {product.name}
             </h3>
             {product.isNew && (
-              <span className="shrink-0 text-[8px] font-black uppercase tracking-wider bg-zinc-900 text-white px-1.5 py-0.5 rounded-md mt-0.5">
+              <span className="shrink-0 text-[9px] font-black uppercase tracking-wider bg-zinc-900 text-white px-2 py-0.5 rounded-md mt-0.5">
                 New
               </span>
             )}
           </div>
 
           {/* Price */}
-          <div className="flex items-baseline gap-1.5 mt-1.5 tabular-nums">
-            <span className="text-base font-black text-zinc-900">
+          <div className="flex items-baseline gap-2 mt-2 tabular-nums">
+            <span className="text-lg font-black text-zinc-900">
               ₹{product.price.toLocaleString("en-IN")}
             </span>
             {product.originalPrice > product.price && (
-              <span className="text-xs text-zinc-400 line-through font-medium">
+              <span className="text-sm text-zinc-400 line-through font-medium">
                 ₹{product.originalPrice.toLocaleString("en-IN")}
               </span>
             )}
@@ -158,13 +158,13 @@ export function ProductCard({ product }: ProductCardProps) {
           <button
             disabled={isOutOfStock}
             className={cn(
-              "w-full h-9 rounded-xl text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-[0.98]",
+              "w-full h-11 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98]",
               isOutOfStock
                 ? "bg-zinc-50 text-zinc-300 border border-zinc-100 cursor-not-allowed"
                 : "bg-zinc-900 text-white hover:bg-brand border border-zinc-900 hover:border-brand"
             )}
           >
-            <ShoppingBag className="w-3 h-3" />
+            <ShoppingBag className="w-3.5 h-3.5" />
             {isOutOfStock ? "Unavailable" : "Add to Cart"}
           </button>
         </Link>

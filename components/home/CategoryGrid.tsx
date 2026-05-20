@@ -11,10 +11,12 @@ interface CategoryGridProps {
 }
 
 export function CategoryGrid({ categories }: CategoryGridProps) {
-  if (categories.length === 0) return null;
+  // Only show categories that have an image so no blank grey cards appear
+  const withImages = categories.filter((c) => c.image);
+  if (withImages.length === 0) return null;
 
-  const featured = categories[0];
-  const rest = categories.slice(1, 5);
+  const featured = withImages[0];
+  const rest = withImages.slice(1, 5);
 
   return (
     <section id="categories" className="py-16 md:py-24 bg-zinc-50">
@@ -29,10 +31,10 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
         {/* Mobile: 2-col grid — use inline style for height, same as desktop cards */}
         <AnimateOnView delay={0.12}>
         <div className="grid grid-cols-2 gap-3 md:hidden">
-          {categories.map((category) => (
+          {withImages.slice(0, 6).map((category) => (
             <Link
               key={category.id}
-              href={`/category/${category.name.toLowerCase()}`}
+              href={`/category/${category.name.toLowerCase().replace(/\s+/g, "-")}`}
               className="group relative block overflow-hidden rounded-2xl bg-zinc-300"
               style={{ height: "160px" }}
             >
@@ -63,7 +65,7 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
 
           {/* Featured large card (left half) */}
           <Link
-            href={`/category/${featured.name.toLowerCase()}`}
+            href={`/category/${featured.name.toLowerCase().replace(/\s+/g, "-")}`}
             className="group relative w-1/2 shrink-0 overflow-hidden rounded-2xl bg-zinc-200 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
             style={{ height: "460px" }}
           >
@@ -98,7 +100,7 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
             {rest.map((category) => (
               <Link
                 key={category.id}
-                href={`/category/${category.name.toLowerCase()}`}
+                href={`/category/${category.name.toLowerCase().replace(/\s+/g, "-")}`}
                 className="group relative overflow-hidden rounded-2xl bg-zinc-200 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
                 style={{ height: "220px" }}
               >
@@ -129,11 +131,6 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
               </Link>
             ))}
 
-            {/* If fewer than 4 rest items, fill with placeholders so grid doesn't collapse */}
-            {rest.length < 4 &&
-              Array.from({ length: 4 - rest.length }).map((_, i) => (
-                <div key={`ph-${i}`} style={{ height: "220px" }} className="rounded-2xl bg-zinc-100" />
-              ))}
           </div>
         </div>
         </AnimateOnView>

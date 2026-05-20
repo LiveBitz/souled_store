@@ -81,8 +81,8 @@ export default function Error({ error, reset }: ErrorProps) {
         <div className="text-xs text-zinc-500 pt-4 border-t">
           <p>
             If this problem persists, please contact our support team at{' '}
-            <a href="mailto:support@souled.com" className="text-brand hover:underline">
-              support@souled.com
+            <a href="mailto:support@uniquehub.store" className="text-brand hover:underline">
+              support@uniquehub.store
             </a>
           </p>
         </div>

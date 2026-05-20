@@ -78,9 +78,9 @@ function TagRow({
   }
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-100 bg-white hover:border-zinc-200 transition-colors group">
-      <div className="w-8 h-8 rounded-lg bg-brand/8 flex items-center justify-center shrink-0">
-        <Tag className="w-3.5 h-3.5 text-brand" />
+    <div className="flex items-center gap-3 px-5 py-4 rounded-xl border border-zinc-100 bg-white hover:border-zinc-200 hover:shadow-sm transition-all group">
+      <div className="w-9 h-9 rounded-xl bg-brand/8 flex items-center justify-center shrink-0">
+        <Tag className="w-4 h-4 text-brand" />
       </div>
       <span className="flex-1 text-sm font-semibold text-zinc-800 truncate">{tag.name}</span>
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -126,33 +126,33 @@ export function ItemTagsManager({ initialTags }: ItemTagsManagerProps) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-10 px-4 space-y-8">
+    <div className="w-full max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 space-y-8">
       {/* Header */}
-      <div className="space-y-1">
-        <h1 className="text-3xl font-black tracking-tight text-zinc-950">Item Tags</h1>
-        <p className="text-sm text-zinc-400 font-medium">
+      <div className="space-y-1.5">
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-950">Item Tags</h1>
+        <p className="text-sm sm:text-base text-zinc-400 font-medium">
           Create reusable quick-add tags for your offline sales. One click fills the item name.
         </p>
       </div>
 
       {/* Create new tag */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-4">
-        <h2 className="text-sm font-bold text-zinc-700 uppercase tracking-wider">New Tag</h2>
-        <div className="flex gap-3">
+      <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 sm:p-8 space-y-5">
+        <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">New Tag</h2>
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
             placeholder="Tag name (e.g. Casual T-Shirt)"
-            className="flex-1 h-11 px-3 rounded-xl border border-zinc-200 text-sm outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/10 transition-all placeholder:text-zinc-400"
+            className="flex-1 h-12 px-4 rounded-xl border border-zinc-200 text-sm outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/10 transition-all placeholder:text-zinc-400"
           />
           <button
             onClick={handleCreate}
             disabled={isPending}
-            className="h-11 px-5 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2 shrink-0"
+            className="h-12 px-6 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shrink-0"
           >
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-            Add
+            Add Tag
           </button>
         </div>
         {error && (
@@ -161,27 +161,29 @@ export function ItemTagsManager({ initialTags }: ItemTagsManagerProps) {
       </div>
 
       {/* Tag list */}
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         {tags.length === 0 ? (
-          <div className="text-center py-16 rounded-2xl border border-dashed border-zinc-200 space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-zinc-50 flex items-center justify-center mx-auto">
-              <Tag className="w-5 h-5 text-zinc-300" />
+          <div className="text-center py-20 rounded-2xl border border-dashed border-zinc-200 space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-zinc-50 flex items-center justify-center mx-auto">
+              <Tag className="w-6 h-6 text-zinc-300" />
             </div>
             <p className="text-sm font-semibold text-zinc-400">No tags yet — add your first one above.</p>
           </div>
         ) : (
-          tags.map((tag) => (
-            <TagRow
-              key={tag.id}
-              tag={tag}
-              onUpdated={(updated) =>
-                setTags((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
-              }
-              onDeleted={(id) =>
-                setTags((prev) => prev.filter((t) => t.id !== id))
-              }
-            />
-          ))
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {tags.map((tag) => (
+              <TagRow
+                key={tag.id}
+                tag={tag}
+                onUpdated={(updated) =>
+                  setTags((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
+                }
+                onDeleted={(id) =>
+                  setTags((prev) => prev.filter((t) => t.id !== id))
+                }
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>

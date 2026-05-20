@@ -7,14 +7,14 @@ export function Footer() {
 
   return (
     <footer className="bg-zinc-50 border-t border-zinc-200 mt-20 pt-16 pb-8">
-      <div className="container mx-auto px-4 md:px-8 lg:px-16 grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+      <div className="container mx-auto px-4 md:px-8 lg:px-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
         {/* Column 1: Brand */}
-        <div className="flex flex-col gap-6">
-          <Link href="/" className="text-3xl font-bold tracking-tighter text-brand">
-            SOULED
+        <div className="flex flex-col gap-6 sm:col-span-2 lg:col-span-1">
+          <Link href="/" className="text-2xl font-bold tracking-tight text-brand">
+            Unique Hub
           </Link>
           <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
-            Premium streetwear and casual clothing for the urban adventurer.
+            Premium clothing and lifestyle products for the modern individual.
           </p>
         </div>
 
@@ -32,7 +32,18 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Column 3: Contact */}
+        {/* Column 3: Legal */}
+        <div className="flex flex-col gap-6">
+          <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-900 font-heading">
+            Legal
+          </h4>
+          <div className="flex flex-col gap-3 text-sm text-muted-foreground">
+            <Link href="/terms" className="hover:text-brand transition-colors">Terms &amp; Conditions</Link>
+            <Link href="/privacy" className="hover:text-brand transition-colors">Privacy Policy</Link>
+          </div>
+        </div>
+
+        {/* Column 4: Contact */}
         <div className="flex flex-col gap-6">
           <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-900 font-heading">
             Contact Us
@@ -40,7 +51,7 @@ export function Footer() {
           <div className="flex flex-col gap-4 text-sm text-muted-foreground">
             <div className="flex gap-3 items-start">
               <Mail className="w-5 h-5 text-zinc-700 shrink-0" />
-              <a href="mailto:support@souled.store" className="hover:text-brand transition-colors">support@souled.store</a>
+              <a href="mailto:support@uniquehub.store" className="hover:text-brand transition-colors">support@uniquehub.store</a>
             </div>
             <div className="flex gap-3 items-start">
               <Phone className="w-5 h-5 text-zinc-700 shrink-0" />
@@ -53,12 +64,19 @@ export function Footer() {
           </div>
         </div>
       </div>
-      
+
       {/* Footer Bottom */}
       <div className="container mx-auto px-4 md:px-8 lg:px-16 pt-8 border-t border-zinc-200 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-        <p>© {currentYear} SOULED. All rights reserved.</p>
+        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6">
+          <p>© {currentYear} Unique Hub. All rights reserved.</p>
+          <div className="flex items-center gap-4 text-xs text-zinc-400">
+            <Link href="/terms" className="hover:text-brand transition-colors font-medium">Terms</Link>
+            <span>·</span>
+            <Link href="/privacy" className="hover:text-brand transition-colors font-medium">Privacy</Link>
+          </div>
+        </div>
         <p className="text-xs text-zinc-400 font-medium">
-          Built by <span className="font-semibold text-zinc-600">Himanshu Meena</span> & <span className="font-semibold text-zinc-600">Ashibur Rehman</span>
+          Built by <span className="font-semibold text-zinc-600">Himanshu Meena</span> &amp; <span className="font-semibold text-zinc-600">Ashibur Rehman</span>
         </p>
       </div>
     </footer>

@@ -19,7 +19,7 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: "SOULED | Premium Clothing Store",
+  title: "Unique Hub | Premium Clothing Store",
   description: "Experience premium, conversion-focused clothing shop.",
 };
 
