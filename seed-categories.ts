@@ -21,8 +21,8 @@ async function seedCategories() {
         image: "https://picsum.photos/seed/cat-perf/600/600",
       },
       {
-        name: "Accessories",
-        slug: "accessories",
+        name: "Foot Wears",
+        slug: "foot-wears",
         image: "https://picsum.photos/seed/cat-acc/600/600",
       },
     ];

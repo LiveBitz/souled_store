@@ -21,7 +21,7 @@ const navLinks = [
   { name: "Men", href: "/category/men" },
   { name: "Watches", href: "/category/watches" },
   { name: "Perfumes", href: "/category/perfumes" },
-  { name: "Accessories", href: "/category/accessories" },
+  { name: "Foot Wears", href: "/category/foot-wears" },
 ];
 
 export function Navbar() {

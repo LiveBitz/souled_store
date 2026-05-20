@@ -28,7 +28,7 @@ export function Footer() {
             <Link href="/category/men" className="hover:text-brand transition-colors">Men</Link>
             <Link href="/category/watches" className="hover:text-brand transition-colors">Watches</Link>
             <Link href="/category/perfumes" className="hover:text-brand transition-colors">Perfumes</Link>
-            <Link href="/category/accessories" className="hover:text-brand transition-colors">Accessories</Link>
+            <Link href="/category/foot-wears" className="hover:text-brand transition-colors">Foot Wears</Link>
           </div>
         </div>
 

@@ -361,8 +361,8 @@ export function BannerForm({ banner, allBanners, navData, onClose, onSuccess }: 
                     <SelectItem value="/category/perfumes" className="rounded-xl text-[11px] font-bold tracking-tight py-3 text-zinc-300 focus:bg-zinc-800 focus:text-white">
                       Perfumes
                     </SelectItem>
-                    <SelectItem value="/category/accessories" className="rounded-xl text-[11px] font-bold tracking-tight py-3 text-zinc-300 focus:bg-zinc-800 focus:text-white">
-                      Accessories
+                    <SelectItem value="/category/foot-wears" className="rounded-xl text-[11px] font-bold tracking-tight py-3 text-zinc-300 focus:bg-zinc-800 focus:text-white">
+                      Foot Wears
                     </SelectItem>
                   </SelectGroup>
                 </SelectContent>

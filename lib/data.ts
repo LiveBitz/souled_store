@@ -19,7 +19,7 @@ export const productsBySlug: Record<string, string> = {
   men: "Men's Collection",
   watches: "Watches Collection",
   perfumes: "Luxury Perfumes",
-  accessories: "Premium Accessories",
+  "foot-wears": "Foot Wears",
   "new-arrivals": "New Arrivals",
   "best-sellers": "Best Sellers",
   sale: "Seasonal Sale",
@@ -52,11 +52,11 @@ export const allProducts: any[] = [
   { id: 19, name: "Midnight Musk", category: "perfumes", subCategory: "EDP", price: 2799, originalPrice: 3999, discount: 30, stock: 14, sizes: ["100ml"], colors: ["Black"], image: "https://picsum.photos/seed/perf3/400/400", isNew: true, isBestSeller: false },
   { id: 20, name: "Citrus Bloom", category: "perfumes", subCategory: "EDT", price: 1499, originalPrice: 1999, discount: 25, stock: 36, sizes: ["50ml"], colors: ["Orange"], image: "https://picsum.photos/seed/perf4/400/400", isNew: false, isBestSeller: false },
   
-  // Accessories
-  { id: 21, name: "Genuine Leather Belt", category: "accessories", subCategory: "Belts", price: 1299, originalPrice: 1799, discount: 28, stock: 19, sizes: ["32","34","36"], colors: ["Brown","Black"], image: "https://picsum.photos/seed/acc1/400/400", isNew: true, isBestSeller: true },
-  { id: 22, name: "Aviator Sunglasses", category: "accessories", subCategory: "Eyewear", price: 1999, originalPrice: 2999, discount: 33, stock: 0, sizes: ["One Size"], colors: ["Black","Gold"], image: "https://picsum.photos/seed/acc2/400/400", isNew: false, isBestSeller: true },
-  { id: 23, name: "Slim Leather Wallet", category: "accessories", subCategory: "Wallets", price: 899, originalPrice: 1299, discount: 31, stock: 42, sizes: ["One Size"], colors: ["Tan","Black"], image: "https://picsum.photos/seed/acc3/400/400", isNew: true, isBestSeller: false },
-  { id: 24, name: "Silver Cufflinks", category: "accessories", subCategory: "Jewelry", price: 1499, originalPrice: 1999, discount: 25, stock: 11, sizes: ["One Size"], colors: ["Grey"], image: "https://picsum.photos/seed/acc4/400/400", isNew: false, isBestSeller: false },
+  // Foot Wears
+  { id: 21, name: "Genuine Leather Belt", category: "foot-wears", subCategory: "Belts", price: 1299, originalPrice: 1799, discount: 28, stock: 19, sizes: ["32","34","36"], colors: ["Brown","Black"], image: "https://picsum.photos/seed/acc1/400/400", isNew: true, isBestSeller: true },
+  { id: 22, name: "Aviator Sunglasses", category: "foot-wears", subCategory: "Eyewear", price: 1999, originalPrice: 2999, discount: 33, stock: 0, sizes: ["One Size"], colors: ["Black","Gold"], image: "https://picsum.photos/seed/acc2/400/400", isNew: false, isBestSeller: true },
+  { id: 23, name: "Slim Leather Wallet", category: "foot-wears", subCategory: "Wallets", price: 899, originalPrice: 1299, discount: 31, stock: 42, sizes: ["One Size"], colors: ["Tan","Black"], image: "https://picsum.photos/seed/acc3/400/400", isNew: true, isBestSeller: false },
+  { id: 24, name: "Silver Cufflinks", category: "foot-wears", subCategory: "Jewelry", price: 1499, originalPrice: 1999, discount: 25, stock: 11, sizes: ["One Size"], colors: ["Grey"], image: "https://picsum.photos/seed/acc4/400/400", isNew: false, isBestSeller: false },
 ];
 
 export const products = (allProducts as any[]).map(p => ({
@@ -80,7 +80,7 @@ export const categories = [
   { id: 1, name: "Men", image: "https://picsum.photos/seed/cat-men/600/600" },
   { id: 2, name: "Watches", image: "https://picsum.photos/seed/cat-watch/600/600" },
   { id: 3, name: "Perfumes", image: "https://picsum.photos/seed/cat-perf/600/600" },
-  { id: 4, name: "Accessories", image: "https://picsum.photos/seed/cat-acc/600/600" },
+  { id: 4, name: "Foot Wears", image: "https://picsum.photos/seed/cat-acc/600/600" },
 ];
 
 export const heroSlides = [

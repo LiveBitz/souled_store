@@ -25,9 +25,9 @@ const CATEGORY_CONFIG: Record<string, {
     icon: Shirt,
     description: "Apparel & premium wear",
   },
-  accessories: {
+  "foot-wears": {
     icon: Briefcase,
-    description: "Bags & lifestyle essentials",
+    description: "Footwear & lifestyle essentials",
   },
   perfumes: {
     icon: FlaskConical,
@@ -56,7 +56,7 @@ export function CategorySelectionModal({
   if (!isOpen) return null;
 
   const coreCategories = categories.filter((c) =>
-    ["men", "watches", "perfumes", "accessories"].includes(c.name.toLowerCase())
+    ["men", "watches", "perfumes", "foot wears"].includes(c.name.toLowerCase())
   );
 
   const handleSelect = (categoryId: string) => {

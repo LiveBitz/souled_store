@@ -59,7 +59,7 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
 
   const isPerfume = slug === "perfumes";
   const isWatch = slug === "watches";
-  const isAccessory = slug === "accessories";
+  const isAccessory = slug === "foot-wears";
   const isMen = slug === "men";
 
   const availableSizes = React.useMemo(() => {

@@ -11,7 +11,7 @@ export async function GET() {
       { name: "Men", slug: "men", image: "https://picsum.photos/seed/cat-men/600/600" },
       { name: "Watches", slug: "watches", image: "https://picsum.photos/seed/cat-watch/600/600" },
       { name: "Perfumes", slug: "perfumes", image: "https://picsum.photos/seed/cat-perf/600/600" },
-      { name: "Accessories", slug: "accessories", image: "https://picsum.photos/seed/cat-acc/600/600" },
+      { name: "Foot Wears", slug: "foot-wears", image: "https://picsum.photos/seed/cat-acc/600/600" },
     ];
 
     const categoryMap: Record<string, string> = {};
