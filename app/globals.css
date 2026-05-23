@@ -62,9 +62,5 @@
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* ─── Navbar logo ─────────────────────────────────────────────────────────── */
-
-@keyframes logo-sweep {
-  0%   { background-position: 200% center; }
-  100% { background-position: -200% center; }
-}
+/* shimmer animated via WAAPI in Navbar.tsx — no keyframes needed here */
 

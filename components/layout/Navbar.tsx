@@ -24,7 +24,6 @@ const UNIQUE_STYLE: React.CSSProperties = {
   backgroundClip: "text",
   WebkitTextFillColor: "transparent",
   color: "transparent",
-  animation: "logo-sweep 2.5s linear infinite",
 };
 
 const HUB_STYLE: React.CSSProperties = {
@@ -34,7 +33,6 @@ const HUB_STYLE: React.CSSProperties = {
   backgroundClip: "text",
   WebkitTextFillColor: "transparent",
   color: "transparent",
-  animation: "logo-sweep 2.5s linear infinite",
 };
 
 const navLinks = [
@@ -55,6 +53,19 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
+
+  // Refs for all logo spans (mobile + desktop, UNIQUE + HUB)
+  const logoRefs = React.useRef<(HTMLSpanElement | null)[]>([]);
+
+  // Web Animations API — animate background-position directly in JS, no CSS keyframes needed
+  useEffect(() => {
+    const keyframes = [
+      { backgroundPosition: "200% center" },
+      { backgroundPosition: "-200% center" },
+    ];
+    const opts: KeyframeAnimationOptions = { duration: 2500, iterations: Infinity, easing: "linear" };
+    logoRefs.current.forEach((el) => el?.animate(keyframes, opts));
+  }, []);
   const { totalItems, setIsOpen: setOpenCart } = useCart();
   const { items: wishlistItems } = useWishlist();
   const supabase = createClient();
@@ -205,14 +216,14 @@ export function Navbar() {
 
         {/* Logo — mobile only, absolutely centred */}
         <Link href="/" className="flex md:hidden items-center gap-[5px] absolute left-1/2 -translate-x-1/2">
-          <span style={UNIQUE_STYLE} className="text-lg font-black tracking-tight whitespace-nowrap">UNIQUE</span>
-          <span style={HUB_STYLE}    className="text-lg font-black tracking-tight whitespace-nowrap">HUB</span>
+          <span ref={(el) => { logoRefs.current[0] = el; }} style={UNIQUE_STYLE} className="text-lg font-black tracking-tight whitespace-nowrap">UNIQUE</span>
+          <span ref={(el) => { logoRefs.current[1] = el; }} style={HUB_STYLE}    className="text-lg font-black tracking-tight whitespace-nowrap">HUB</span>
         </Link>
 
         {/* Logo — desktop only, left-aligned in normal flow */}
         <Link href="/" className="hidden md:flex items-center gap-[5px]">
-          <span style={UNIQUE_STYLE} className="text-xl font-black tracking-tight whitespace-nowrap">UNIQUE</span>
-          <span style={HUB_STYLE}    className="text-xl font-black tracking-tight whitespace-nowrap">HUB</span>
+          <span ref={(el) => { logoRefs.current[2] = el; }} style={UNIQUE_STYLE} className="text-xl font-black tracking-tight whitespace-nowrap">UNIQUE</span>
+          <span ref={(el) => { logoRefs.current[3] = el; }} style={HUB_STYLE}    className="text-xl font-black tracking-tight whitespace-nowrap">HUB</span>
         </Link>
 
         {/* Desktop Nav */}
