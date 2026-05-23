@@ -16,6 +16,27 @@ import { createClient } from "@/lib/supabase/client";
 import { signOut } from "@/lib/actions/auth-actions";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
+
+const UNIQUE_STYLE: React.CSSProperties = {
+  background: "linear-gradient(90deg,#09090b 0%,#09090b 28%,#555 42%,#bbb 48%,#fff 50%,#bbb 52%,#555 58%,#09090b 72%,#09090b 100%)",
+  backgroundSize: "300% 100%",
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  color: "transparent",
+  animation: "logo-sweep 2.5s linear infinite",
+};
+
+const HUB_STYLE: React.CSSProperties = {
+  background: "linear-gradient(90deg,#E84A4A 0%,#E84A4A 28%,#f88 42%,#fcc 48%,#fff 50%,#fcc 52%,#f88 58%,#E84A4A 72%,#E84A4A 100%)",
+  backgroundSize: "300% 100%",
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  color: "transparent",
+  animation: "logo-sweep 2.5s linear infinite",
+};
+
 const navLinks = [
   { name: "Home", href: "/" },
   { name: "Men", href: "/category/men" },
@@ -101,7 +122,7 @@ export function Navbar() {
           : "bg-white py-4 border-transparent"
       )}
     >
-      <div className="container mx-auto px-4 md:px-8 lg:px-16 flex items-center justify-between">
+      <div className="container mx-auto px-4 md:px-8 lg:px-16 flex items-center justify-between relative">
         {/* Mobile Menu */}
         <div className="flex items-center md:hidden">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -112,8 +133,9 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side="left" className="w-[85vw] max-w-[320px] p-0 flex flex-col bg-white border-r">
               <SheetHeader className="p-6 border-b">
-                <SheetTitle className="text-2xl font-bold tracking-tighter text-zinc-950 flex items-center justify-between">
-                  MENU
+                <SheetTitle className="flex items-center gap-[5px]">
+                  <span style={UNIQUE_STYLE} className="text-xl font-black tracking-tight whitespace-nowrap">UNIQUE</span>
+                  <span style={HUB_STYLE}    className="text-xl font-black tracking-tight whitespace-nowrap">HUB</span>
                 </SheetTitle>
               </SheetHeader>
               
@@ -181,11 +203,16 @@ export function Navbar() {
           </Sheet>
         </div>
 
-        {/* Logo */}
-        <Link href="/" className="flex items-center">
-          <span className="text-xl md:text-2xl font-bold tracking-tight text-brand whitespace-nowrap">
-            Unique Hub
-          </span>
+        {/* Logo — mobile only, absolutely centred */}
+        <Link href="/" className="flex md:hidden items-center gap-[5px] absolute left-1/2 -translate-x-1/2">
+          <span style={UNIQUE_STYLE} className="text-lg font-black tracking-tight whitespace-nowrap">UNIQUE</span>
+          <span style={HUB_STYLE}    className="text-lg font-black tracking-tight whitespace-nowrap">HUB</span>
+        </Link>
+
+        {/* Logo — desktop only, left-aligned in normal flow */}
+        <Link href="/" className="hidden md:flex items-center gap-[5px]">
+          <span style={UNIQUE_STYLE} className="text-xl font-black tracking-tight whitespace-nowrap">UNIQUE</span>
+          <span style={HUB_STYLE}    className="text-xl font-black tracking-tight whitespace-nowrap">HUB</span>
         </Link>
 
         {/* Desktop Nav */}
