@@ -29,6 +29,69 @@ export const hasStock = (sizes: string[] = []): boolean => {
 };
 
 /**
+ * SINGLE SOURCE OF TRUTH for a product's available stock.
+ * Used by the product card, catalog grid, and filter hook so the listing,
+ * the "N products available" count, the filter facets, and the SOLD OUT badge
+ * all agree.
+ *
+ * Availability is driven purely by purchasable VARIANT stock — the same thing
+ * the product page uses to enable "Add to Cart". A product with only a legacy
+ * `stock` field but no variant quantities cannot actually be bought, so it
+ * counts as unavailable.
+ *
+ *  - Variant array (["S-Black:5", "100ml:3"]) → sum of quantities
+ *  - Single variant string ("S:10")          → its quantity
+ *  - No variant quantities                    → 0 (unavailable)
+ */
+export const getProductStock = (product: { sizes?: any; stock?: number }): number => {
+  const sizes = product?.sizes;
+
+  if (Array.isArray(sizes)) {
+    return getTotalStock(sizes);
+  }
+
+  if (typeof sizes === "string" && sizes.includes(":")) {
+    return parseInt(sizes.split(":")[1]) || 0;
+  }
+
+  return 0;
+};
+
+/**
+ * Returns the set of colors that have at least one IN-STOCK variant.
+ * For legacy products (no color-coded variants) returns all listed colors
+ * as long as the product has any stock.
+ */
+export const getInStockColors = (
+  sizes: string[] = [],
+  fallbackColors: string[] = [],
+  legacyStock = 0
+): string[] => {
+  const inStock = new Set<string>();
+  let hasVariantEntries = false;
+
+  sizes.forEach((entry) => {
+    if (typeof entry !== "string" || !entry.includes(":")) return;
+    hasVariantEntries = true;
+    const qty = parseInt(entry.split(":").pop() || "0") || 0;
+    const key = entry.split(":")[0]; // "S-Black" or "100ml"
+    if (qty > 0 && key.includes("-")) {
+      // color is everything after the first dash (handles "Off-White")
+      inStock.add(key.substring(key.indexOf("-") + 1));
+    }
+  });
+
+  // Legacy / colorless-variant products: surface all colors if there's any stock
+  if (!hasVariantEntries) {
+    if (legacyStock > 0 || getTotalStock(sizes) > 0) {
+      fallbackColors.forEach((c) => inStock.add(c));
+    }
+  }
+
+  return Array.from(inStock);
+};
+
+/**
  * Extracts base size from inventory entry
  * "S-Purple:5" → "S"
  * "S:10" → "S"

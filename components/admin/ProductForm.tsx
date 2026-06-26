@@ -49,6 +49,83 @@ interface ProductFormProps {
   existingSubCategories?: Record<string, string[]>;
 }
 
+/**
+ * Per-category variant logic.
+ * Each product type exposes a different "size" axis and may or may not have colors.
+ *  - Men (apparel) : clothing sizes + colors
+ *  - Foot Wears    : UK shoe sizes + colors
+ *  - Watches       : case sizes + strap colors
+ *  - Perfumes      : volumes ONLY — no color axis at all
+ */
+type CategoryKind = "apparel" | "footwear" | "watches" | "perfumes" | "default";
+
+interface VariantConfig {
+  sizeLabel: string;        // Heading for the primary variant axis
+  sizeHint: string;
+  sizeOptions: string[];    // Preset options shown as pickers
+  defaultSizes: string[];   // Auto-selected when category is first chosen
+  hasColor: boolean;        // Whether a color axis applies
+  colorLabel: string;
+  subCategoryHint: string;
+}
+
+const getCategoryKind = (name?: string): CategoryKind => {
+  const n = (name || "").toLowerCase().trim();
+  if (n === "perfumes" || n === "perfume") return "perfumes";
+  if (n === "watches" || n === "watch") return "watches";
+  if (n === "foot-wears" || n === "foot wears" || n === "footwear" || n === "shoes") return "footwear";
+  if (n === "men" || n === "women" || n === "apparel" || n === "clothing") return "apparel";
+  return "default";
+};
+
+const VARIANT_CONFIG: Record<CategoryKind, VariantConfig> = {
+  apparel: {
+    sizeLabel: "Sizes",
+    sizeHint: "Choose available clothing sizes",
+    sizeOptions: ["XS", "S", "M", "L", "XL", "XXL", "3XL"],
+    defaultSizes: ["S", "M", "L", "XL"],
+    hasColor: true,
+    colorLabel: "Colors",
+    subCategoryHint: "e.g. T-Shirts, Hoodies, Jackets...",
+  },
+  footwear: {
+    sizeLabel: "Sizes (UK)",
+    sizeHint: "Choose available UK shoe sizes",
+    sizeOptions: ["5", "6", "7", "8", "9", "10", "11", "12"],
+    defaultSizes: ["7", "8", "9", "10"],
+    hasColor: true,
+    colorLabel: "Colors",
+    subCategoryHint: "e.g. Sneakers, Loafers, Boots...",
+  },
+  watches: {
+    sizeLabel: "Case Size",
+    sizeHint: "Choose available case diameters",
+    sizeOptions: ["One Size", "38mm", "40mm", "42mm", "44mm", "46mm"],
+    defaultSizes: ["One Size"],
+    hasColor: true,
+    colorLabel: "Strap / Dial Colors",
+    subCategoryHint: "e.g. Analog, Digital, Chronograph...",
+  },
+  perfumes: {
+    sizeLabel: "Volume",
+    sizeHint: "Choose available bottle volumes",
+    sizeOptions: ["30ml", "50ml", "75ml", "100ml", "200ml"],
+    defaultSizes: ["50ml", "100ml"],
+    hasColor: false, // perfumes have no color variants
+    colorLabel: "",
+    subCategoryHint: "e.g. Eau de Parfum, Eau de Toilette...",
+  },
+  default: {
+    sizeLabel: "Sizes",
+    sizeHint: "Choose available options",
+    sizeOptions: ["XS", "S", "M", "L", "XL"],
+    defaultSizes: [],
+    hasColor: true,
+    colorLabel: "Colors",
+    subCategoryHint: "e.g. Product type...",
+  },
+};
+
 export function ProductForm({
   categories,
   initialData,
@@ -99,10 +176,10 @@ export function ProductForm({
   const parseSizeColorStock = (sizes: string[] = []) => {
     const stock: Record<string, number> = {};
     sizes.forEach((entry: string) => {
-      if (entry.includes("-") && entry.includes(":")) {
-        // New format: "S-Purple:5"
+      if (entry.includes(":")) {
+        // Handles BOTH "S-Purple:5" (size-color) and "100ml:5" (size-only, e.g. perfumes)
         const [key, quantity] = entry.split(":");
-        stock[key] = parseInt(quantity) || 0;
+        if (key) stock[key] = parseInt(quantity) || 0;
       }
     });
     return stock;
@@ -134,22 +211,19 @@ export function ProductForm({
   );
 
   const selectedCategory = categories.find((c) => c.id === formData.categoryId);
-  const isPerfume =
-    selectedCategory?.name?.toLowerCase() === "perfumes";
-  const isWatch =
-    selectedCategory?.name?.toLowerCase() === "watches";
-  const isApparel =
-    selectedCategory?.name?.toLowerCase() === "men";
+  const categoryKind = getCategoryKind(selectedCategory?.name);
+  const variantConfig = VARIANT_CONFIG[categoryKind];
+  const hasColor = variantConfig.hasColor;
+  const isPerfume = categoryKind === "perfumes";
 
   useEffect(() => {
-    if (!isEdit && !initialData && formData.categoryId) {
-      if (isPerfume) {
-        setFormData((p) => ({ ...p, sizes: ["50ml", "100ml"] }));
-      } else if (isApparel) {
-        setFormData((p) => ({ ...p, sizes: ["S", "M", "L", "XL"] }));
+    // Seed sensible default variants the first time a category is picked (create mode only)
+    if (!isEdit && !initialData && formData.categoryId && formData.sizes.length === 0) {
+      if (variantConfig.defaultSizes.length > 0) {
+        setFormData((p) => ({ ...p, sizes: variantConfig.defaultSizes }));
       }
     }
-  }, [formData.categoryId, isPerfume, isApparel, isEdit]);
+  }, [formData.categoryId, isEdit]);
 
   const handleSlugify = (name: string) => {
     const slug = name
@@ -276,20 +350,24 @@ export function ProductForm({
       errors.push("Main product image is required");
     }
 
-    // Sizes validation
+    // Sizes / volume validation
     if (formData.sizes.length === 0) {
-      errors.push("At least one size must be selected");
+      errors.push(`At least one ${isPerfume ? "volume" : "size"} must be selected`);
     }
 
-    // Colors validation
-    if (formData.colors.length === 0) {
+    // Colors validation — only for categories that have a color axis
+    if (hasColor && formData.colors.length === 0) {
       errors.push("At least one color must be selected");
     }
 
-    // Inventory validation - check if matrix has at least some values
+    // Inventory validation - check if at least one variant has stock
     const hasInventory = Object.values(sizeColorStock).some((qty) => qty > 0);
     if (!hasInventory) {
-      errors.push("Please add inventory for at least one size-color combination");
+      errors.push(
+        hasColor
+          ? "Please add inventory for at least one size-color combination"
+          : `Please add inventory for at least one ${isPerfume ? "volume" : "size"}`
+      );
     }
 
     // Check for negative inventory
@@ -804,16 +882,21 @@ export function ProductForm({
                     <Select
                       value={formData.categoryId}
                       onValueChange={(v) => {
-                        setFormData((prev) => ({ ...prev, categoryId: v }));
-                        // Auto-set sizes based on category
-                        const category = categories.find(c => c.id === v);
-                        if (!isEdit) {
-                          if (category?.name?.toLowerCase() === "perfumes") {
-                            setFormData((prev) => ({ ...prev, sizes: ["50ml", "100ml"] }));
-                          } else if (category?.name?.toLowerCase() === "men") {
-                            setFormData((prev) => ({ ...prev, sizes: ["S", "M", "L", "XL"] }));
-                          }
-                        }
+                        const category = categories.find((c) => c.id === v);
+                        const kind = getCategoryKind(category?.name);
+                        const cfg = VARIANT_CONFIG[kind];
+
+                        setFormData((prev) => ({
+                          ...prev,
+                          categoryId: v,
+                          // Reset variants to the new category's defaults (create mode)
+                          sizes: isEdit ? prev.sizes : cfg.defaultSizes,
+                          // Colorless categories (perfumes) must not carry colors
+                          colors: cfg.hasColor ? prev.colors : [],
+                        }));
+
+                        // Clear any stale inventory when the variant model changes
+                        if (!isEdit) setSizeColorStock({});
                       }}
                     >
                       <SelectTrigger className="w-full h-13 sm:h-14 rounded-2xl border-zinc-100 bg-white px-5 font-bold text-zinc-900 shadow-sm transition-all focus:ring-2 focus:ring-brand/20 hover:border-brand/20 border-brand/0">
@@ -858,7 +941,7 @@ export function ProductForm({
                       )}
                     </div>
                     <Input
-                      placeholder="e.g., T-Shirts, Hoodies, Analog..."
+                      placeholder={variantConfig.subCategoryHint}
                       value={formData.subCategory || ""}
                       onChange={(e) =>
                         setFormData((p) => ({
@@ -969,20 +1052,15 @@ export function ProductForm({
                 <div className="space-y-5 pb-8 border-b border-zinc-100">
                   <div className="flex flex-col gap-1 px-1">
                     <label className="text-[12px] font-bold text-zinc-700 uppercase tracking-[0.1em]">
-                      Step 1: Select Sizes
+                      Step 1: Select {variantConfig.sizeLabel}
                     </label>
                     <p className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wide">
-                      Choose available sizes for this product
+                      {variantConfig.sizeHint}
                     </p>
                   </div>
 
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-                  {(isPerfume
-                    ? ["50ml", "100ml"]
-                    : isWatch
-                    ? ["40mm", "42mm", "44mm"]
-                      : ["XS", "S", "M", "L", "XL", "XXL", "3XL"]
-                    ).map((sizeLabel) => {
+                  {variantConfig.sizeOptions.map((sizeLabel) => {
                       const isSelected = formData.sizes.includes(sizeLabel);
 
                       return (
@@ -1033,11 +1111,12 @@ export function ProductForm({
                                           (s: string) => s !== sizeLabel
                                         ),
                                       }));
-                                      // Clean up size-color stock entries for this size
+                                      // Clean up stock entries for this size
+                                      // (matches "S-Black" with color AND "100ml" size-only)
                                       setSizeColorStock((prev) => {
                                         const updated = { ...prev };
                                         Object.keys(updated).forEach((key) => {
-                                          if (key.startsWith(sizeLabel + "-")) {
+                                          if (key === sizeLabel || key.startsWith(sizeLabel + "-")) {
                                             delete updated[key];
                                           }
                                         });
@@ -1058,11 +1137,12 @@ export function ProductForm({
                     </div>
                   </div>
 
-                {/* Section 2: Color Palette */}
+                {/* Section 2: Color Palette — hidden for colorless categories (e.g. Perfumes) */}
+                {hasColor && (
                 <div className="space-y-5 pt-8">
                   <div className="flex flex-col gap-1 px-1">
                     <label className="text-[12px] font-bold text-zinc-700 uppercase tracking-[0.1em]">
-                      Step 2: Select Colors
+                      Step 2: Select {variantConfig.colorLabel}
                     </label>
                     <p className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wide">
                       Choose available colors
@@ -1190,9 +1270,10 @@ export function ProductForm({
                       </Button>
                     </div>
                   </div>
+                )}
 
-                  {/* Size-Color Stock Matrix */}
-                  {formData.sizes.length > 0 && formData.colors.length > 0 && (
+                  {/* Inventory — Size × Color matrix (color categories) */}
+                  {hasColor && formData.sizes.length > 0 && formData.colors.length > 0 && (
                     <div className="space-y-4 pt-6 border-t border-zinc-100">
                       <div className="flex items-center justify-between px-1">
                         <div>
@@ -1283,6 +1364,64 @@ export function ProductForm({
                         </table>
                       </div>
 
+                    </div>
+                  )}
+
+                  {/* Inventory — simple per-size stock (colorless categories e.g. Perfumes) */}
+                  {!hasColor && formData.sizes.length > 0 && (
+                    <div className="space-y-4 pt-6 border-t border-zinc-100">
+                      <div className="flex items-center justify-between px-1">
+                        <div>
+                          <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em]">
+                            Inventory
+                          </label>
+                          <p className="text-[9px] text-zinc-300 font-bold uppercase tracking-widest mt-0.5">
+                            Stock per {variantConfig.sizeLabel}
+                          </p>
+                        </div>
+                        <span className="text-[9px] font-extrabold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+                          Stock Tracking
+                        </span>
+                      </div>
+
+                      <div className="space-y-3">
+                        {formData.sizes.map((size: string) => {
+                          const quantity = sizeColorStock[size] || 0;
+                          return (
+                            <div
+                              key={`stock-${size}`}
+                              className="flex items-center justify-between gap-4 rounded-2xl border border-zinc-100 bg-zinc-50/50 px-4 py-3"
+                            >
+                              <span className="text-sm font-bold text-zinc-900">{size}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
+                                  Units
+                                </span>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={quantity > 0 ? quantity : ""}
+                                  placeholder="0"
+                                  onChange={(e) => {
+                                    const val = e.target.value.trim();
+                                    const newQuantity = val ? parseInt(val) || 0 : 0;
+                                    setSizeColorStock((prev) => {
+                                      const updated = { ...prev };
+                                      if (newQuantity > 0) {
+                                        updated[size] = newQuantity;
+                                      } else {
+                                        delete updated[size];
+                                      }
+                                      return updated;
+                                    });
+                                  }}
+                                  className="w-24 h-11 text-center rounded-xl border-emerald-200 bg-emerald-50 font-bold text-emerald-700 text-sm focus:ring-2 focus:ring-emerald-300"
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
               </div>

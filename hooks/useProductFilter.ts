@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { getProductStock, getInStockColors } from "@/lib/inventory";
 
 export type Product = {
   id: string;
@@ -42,18 +43,6 @@ const normalizeArray = (val: any): string[] => {
   return [];
 };
 
-// Calculate total stock from size variants (format: "S:10", "S-White:5", etc.)
-const getTotalStock = (sizes: string[]): number => {
-  if (!Array.isArray(sizes)) return 0;
-  return sizes.reduce((total, sizeStr) => {
-    if (typeof sizeStr === "string" && sizeStr.includes(":")) {
-      const [_, quantity] = sizeStr.split(":");
-      return total + (parseInt(quantity) || 0);
-    }
-    return total;
-  }, 0);
-};
-
 export function useProductFilter(products: Product[], slug: string) {
   const [filters, setFilters] = useState<Filters>({
     sizes: [],
@@ -81,13 +70,12 @@ export function useProductFilter(products: Product[], slug: string) {
       });
     }
     
-    // Filter out products with no available stock (sum of all size variants)
-    return filtered.filter((p) => {
-      const totalStock = getTotalStock(normalizeArray(p.sizes));
-      const legacyStock = (p as any).stock || 0;
-      // Show if either has stock: total from variants OR legacy stock field
-      return totalStock > 0 || legacyStock > 0;
-    });
+    // Keep only products that are genuinely in stock.
+    // Uses the SAME stock calc as the product grid so the listing, the
+    // "N products available" count, and the filter facets always agree.
+    return filtered.filter(
+      (p) => getProductStock({ sizes: normalizeArray(p.sizes), stock: (p as any).stock }) > 0
+    );
   }, [products, slug]);
 
   // Compute counts based on data in this category
@@ -132,8 +120,16 @@ export function useProductFilter(products: Product[], slug: string) {
         }
       });
       
-      normalizeArray(p.colors).forEach((c) => (cCounts[c] = (cCounts[c] || 0) + 1));
-      subCounts[p.subCategory] = (subCounts[p.subCategory] || 0) + 1;
+      // Only surface colors that have at least one in-stock variant
+      getInStockColors(
+        normalizeArray(p.sizes),
+        normalizeArray(p.colors),
+        (p as any).stock || 0
+      ).forEach((c) => (cCounts[c] = (cCounts[c] || 0) + 1));
+
+      if (p.subCategory) {
+        subCounts[p.subCategory] = (subCounts[p.subCategory] || 0) + 1;
+      }
     });
 
     const calculatedMax = max > 0 ? Math.ceil(max / 100) * 100 : 1000;

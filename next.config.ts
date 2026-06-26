@@ -48,6 +48,8 @@ const nextConfig: NextConfig = {
   // SECURITY HEADERS
   // ============================================
   async headers() {
+    const isProd = process.env.NODE_ENV === "production";
+
     return [
       // Security headers on all routes (no Cache-Control here — let Next.js manage it per route type)
       {
@@ -80,17 +82,22 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      // Long-lived immutable cache ONLY for Next.js static assets (JS/CSS chunks)
-      // These filenames include content hashes so they are safe to cache forever.
-      {
-        source: "/_next/static/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
+      // Long-lived immutable cache ONLY for Next.js static assets (JS/CSS chunks).
+      // PRODUCTION ONLY — a custom Cache-Control on /_next/static breaks hot-reload
+      // (HMR) during `next dev`, so we skip it in development.
+      ...(isProd
+        ? [
+            {
+              source: "/_next/static/:path*",
+              headers: [
+                {
+                  key: "Cache-Control",
+                  value: "public, max-age=31536000, immutable",
+                },
+              ],
+            },
+          ]
+        : []),
       {
         source: "/api/:path*",
         headers: [

@@ -19,8 +19,9 @@ export async function GET() {
     });
 
     const response = NextResponse.json(addresses);
-    // Phase 7: Cache addresses for 5 minutes on client
-    response.headers.set("Cache-Control", "private, max-age=300, s-maxage=0");
+    // User-specific and changes whenever an address is added/edited/defaulted —
+    // never cache, otherwise checkout can load a stale (empty) list.
+    response.headers.set("Cache-Control", "no-store");
     return response;
   } catch (error: any) {
     console.error("Error fetching addresses:", error);

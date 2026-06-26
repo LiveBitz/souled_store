@@ -7,7 +7,6 @@ import {
   RotateCcw,
   ChevronRight,
   Check,
-  Zap,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { ProductGallery } from "@/components/catalog/ProductGallery";
@@ -91,7 +90,7 @@ export default async function ProductDetailsPage({
   ].filter(Boolean) as { label: string; value: string }[];
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white min-h-screen pb-24 lg:pb-0">
 
       {/* ── Breadcrumb ── */}
       <div className="border-b border-zinc-100">
@@ -207,20 +206,6 @@ export default async function ProductDetailsPage({
                     </div>
                   </div>
                 ))}
-              </div>
-
-              {/* Delivery strip */}
-              <div className="flex items-center gap-3 p-3.5 rounded-xl border border-zinc-100 bg-zinc-50">
-                <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                  <Zap className="w-3.5 h-3.5 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-zinc-800">
-                    Order within <span className="text-brand font-bold">4 hrs 23 mins</span> — get it by{" "}
-                    <span className="text-brand font-bold">Tomorrow, 10 AM</span>
-                  </p>
-                  <p className="text-[10px] text-zinc-400 mt-0.5">Express dispatch from Jaipur warehouse</p>
-                </div>
               </div>
 
             </div>

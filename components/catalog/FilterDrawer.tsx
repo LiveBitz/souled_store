@@ -54,15 +54,17 @@ export function FilterDrawer({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button
-          className="flex-1 rounded-xl py-4 h-auto text-black font-semibold bg-white hover:bg-zinc-50 border border-zinc-200 flex flex-col items-start gap-1.5 justify-start px-4 transition-all duration-200 hover:shadow-md"
+        <button
+          className="w-full h-[52px] rounded-none bg-white hover:bg-zinc-50 active:bg-zinc-100 flex items-center justify-center gap-2 transition-colors duration-150"
         >
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="w-4 h-4 text-gray-600" />
-            <span className="text-xs font-medium text-gray-600">Filters</span>
-          </div>
-          <span className="text-base font-bold text-black">{activeFilterCount > 0 ? `${activeFilterCount} active` : "All products"}</span>
-        </Button>
+          <SlidersHorizontal className="w-[18px] h-[18px] text-zinc-700" />
+          <span className="text-sm font-semibold text-zinc-900">Filters</span>
+          {activeFilterCount > 0 && (
+            <span className="ml-0.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand text-white text-[11px] font-bold leading-none">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
       </SheetTrigger>
       <SheetContent side="bottom" className="h-[85dvh] rounded-t-3xl p-0 flex flex-col overflow-hidden border-none bg-white">
         <SheetHeader className="p-6 pb-3 border-b shrink-0 bg-white">
@@ -83,18 +85,19 @@ export function FilterDrawer({
         
         <div className="flex-1 overflow-y-auto bg-white">
           <ScrollArea className="h-full">
-            <FilterSidebar 
-              filters={filters} 
-              setFilters={setFilters} 
-              clearAll={clearAll} 
+            <FilterSidebar
+              filters={filters}
+              setFilters={setFilters}
+              clearAll={clearAll}
               counts={counts}
               slug={slug}
+              hideHeader
               className="border-0 shadow-none rounded-none"
             />
           </ScrollArea>
         </div>
 
-        <div className="p-6 pt-4 border-t bg-white shrink-0 flex gap-3">
+        <div className="p-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] border-t bg-white shrink-0 flex gap-3">
           <Button 
             variant="outline"
             className="flex-1 h-12 rounded-xl border-zinc-200 text-zinc-900 font-semibold hover:bg-zinc-50" 

@@ -309,11 +309,12 @@ export async function POST(request: NextRequest) {
 
     // ✅ REVALIDATE AFFECTED PATHS FOR REAL-TIME UI UPDATE
     try {
-      revalidatePath("/");                    // Home page
-      revalidatePath("/category");            // Category pages
-      revalidatePath("/cart");                // Cart page
-      revalidatePath("/admin/products");      // Admin products
-      
+      revalidatePath("/");                       // Home page
+      revalidatePath("/category");               // All-products listing
+      revalidatePath("/category/[slug]", "page"); // Every category listing (stock changed)
+      revalidatePath("/cart");                   // Cart page
+      revalidatePath("/admin/products");         // Admin products
+
       // Revalidate product detail pages
       for (const orderItem of order.items) {
         const product = orderItem.product;

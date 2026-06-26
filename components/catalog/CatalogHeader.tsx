@@ -77,12 +77,12 @@ export function CatalogHeader({ slug, count, sortBy, setSortBy }: CatalogHeaderP
             <SelectTrigger className="w-[200px] rounded-lg bg-white border border-zinc-200 h-10 text-black">
               <SelectValue placeholder="Sort by" className="text-black" />
             </SelectTrigger>
-            <SelectContent className="rounded-lg bg-black border-slate-800">
-              <SelectItem value="relevance" className="bg-black text-white hover:bg-slate-900 focus:bg-slate-900">Relevance</SelectItem>
-              <SelectItem value="price-asc" className="bg-black text-white hover:bg-slate-900 focus:bg-slate-900">Price: Low to High</SelectItem>
-              <SelectItem value="price-desc" className="bg-black text-white hover:bg-slate-900 focus:bg-slate-900">Price: High to Low</SelectItem>
-              <SelectItem value="newest" className="bg-black text-white hover:bg-slate-900 focus:bg-slate-900">Newest First</SelectItem>
-              <SelectItem value="discount" className="bg-black text-white hover:bg-slate-900 focus:bg-slate-900">Best Discount</SelectItem>
+            <SelectContent className="rounded-lg bg-white border-zinc-200">
+              <SelectItem value="relevance" className="text-zinc-700 focus:bg-zinc-100 focus:text-zinc-900">Relevance</SelectItem>
+              <SelectItem value="price-asc" className="text-zinc-700 focus:bg-zinc-100 focus:text-zinc-900">Price: Low to High</SelectItem>
+              <SelectItem value="price-desc" className="text-zinc-700 focus:bg-zinc-100 focus:text-zinc-900">Price: High to Low</SelectItem>
+              <SelectItem value="newest" className="text-zinc-700 focus:bg-zinc-100 focus:text-zinc-900">Newest First</SelectItem>
+              <SelectItem value="discount" className="text-zinc-700 focus:bg-zinc-100 focus:text-zinc-900">Best Discount</SelectItem>
             </SelectContent>
           </Select>
         </div>

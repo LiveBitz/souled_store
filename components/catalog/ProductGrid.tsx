@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/shared/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { PackageSearch, Loader2 } from "lucide-react";
+import { getProductStock } from "@/lib/inventory";
 
 interface ProductGridProps {
   products: Product[];
@@ -18,27 +19,8 @@ export function ProductGrid({ products, isLoading, clearFilters }: ProductGridPr
   const [displayCount, setDisplayCount] = useState(8);
   const [isMoreLoading, setIsMoreLoading] = useState(false);
 
-  // Calculate total stock from size variants and filter available products
-  const getProductTotalStock = (product: any): number => {
-    if (typeof product.sizes === 'string' && product.sizes.includes(':')) {
-      // Single size with stock: "S:10"
-      return parseInt(product.sizes.split(':')[1]) || 0;
-    }
-    if (Array.isArray(product.sizes)) {
-      // Multiple sizes: ["S:10", "M:15", "L:12"]
-      return product.sizes.reduce((total: number, sizeStr: string) => {
-        if (typeof sizeStr === "string" && sizeStr.includes(":")) {
-          const [_, quantity] = sizeStr.split(":");
-          return total + (parseInt(quantity) || 0);
-        }
-        return total;
-      }, 0);
-    }
-    // Fallback to legacy stock field
-    return product.stock || 0;
-  };
-
-  const availableProducts = products.filter(p => getProductTotalStock(p) > 0);
+  // Shared stock calc — same source of truth as the filter hook
+  const availableProducts = products.filter((p) => getProductStock(p as any) > 0);
   const visibleProducts = availableProducts.slice(0, displayCount);
   const hasMore = displayCount < availableProducts.length;
 

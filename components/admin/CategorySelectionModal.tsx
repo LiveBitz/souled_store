@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Shirt, Watch, FlaskConical, Briefcase, Sparkles, X } from "lucide-react";
+import { Shirt, Watch, FlaskConical, Footprints, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Category {
@@ -26,7 +26,7 @@ const CATEGORY_CONFIG: Record<string, {
     description: "Apparel & premium wear",
   },
   "foot-wears": {
-    icon: Briefcase,
+    icon: Footprints,
     description: "Footwear & lifestyle essentials",
   },
   perfumes: {
@@ -55,9 +55,10 @@ export function CategorySelectionModal({
 
   if (!isOpen) return null;
 
-  const coreCategories = categories.filter((c) =>
-    ["men", "watches", "perfumes", "foot wears"].includes(c.name.toLowerCase())
-  );
+  // Normalize names to config keys ("Foot Wears" → "foot-wears") so lookups never miss
+  const toKey = (name: string) => name.toLowerCase().trim().replace(/\s+/g, "-");
+
+  const coreCategories = categories.filter((c) => !!CATEGORY_CONFIG[toKey(c.name)]);
 
   const handleSelect = (categoryId: string) => {
     onClose();
@@ -110,8 +111,7 @@ export function CategorySelectionModal({
           <div className="px-6 sm:px-8 py-6 sm:py-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               {coreCategories.map((cat) => {
-                const key = cat.name.toLowerCase();
-                const config = CATEGORY_CONFIG[key];
+                const config = CATEGORY_CONFIG[toKey(cat.name)];
                 if (!config) return null;
                 const Icon = config.icon;
 
@@ -153,7 +153,7 @@ export function CategorySelectionModal({
             </p>
             <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-zinc-400">
               <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-              Souled Standard
+              Unique Hub Standard
             </div>
           </div>
 

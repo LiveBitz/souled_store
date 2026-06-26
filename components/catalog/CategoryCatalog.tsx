@@ -49,13 +49,13 @@ export function CategoryCatalog({ initialProducts, slug }: CategoryCatalogProps)
         />
       </div>
 
-      {/* Mobile Filter & Sort Bar (Sticky) */}
-      <div className="lg:hidden sticky top-[72px] md:top-[84px] z-30 border-b bg-white/95 backdrop-blur-sm">
-        <div className="flex items-center">
-          <FilterDrawer 
-            filters={filters} 
-            setFilters={setFilters} 
-            clearAll={clearAll} 
+      {/* Mobile Filter & Sort Bar — scrolls away with the page (not sticky) */}
+      <div className="lg:hidden bg-white border-y border-zinc-200">
+        <div className="container mx-auto px-4 grid grid-cols-2 divide-x divide-zinc-200">
+          <FilterDrawer
+            filters={filters}
+            setFilters={setFilters}
+            clearAll={clearAll}
             activeFilterCount={activeFilterCount}
             counts={counts}
             slug={slug}

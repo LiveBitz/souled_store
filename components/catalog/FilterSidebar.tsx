@@ -22,6 +22,7 @@ interface FilterSidebarProps {
   };
   className?: string;
   slug?: string;
+  hideHeader?: boolean;
 }
 
 const sizeOrder = ["One Size", "50ml", "100ml", "32", "34", "36", "XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL"];
@@ -48,7 +49,7 @@ const colorMap: Record<string, { hex: string; border?: string }> = {
 
 const discounts = [10, 20, 30, 40, 50];
 
-export function FilterSidebar({ filters, setFilters, clearAll, counts, className, slug }: FilterSidebarProps) {
+export function FilterSidebar({ filters, setFilters, clearAll, counts, className, slug, hideHeader }: FilterSidebarProps) {
   const [expanded, setExpanded] = React.useState<Record<string, boolean>>({
     price: true,
     size: true,
@@ -107,17 +108,19 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
 
   return (
     <div className={cn("flex flex-col h-full bg-white rounded-lg border border-zinc-200 overflow-hidden", className)}>
-      <div className="p-5 border-b border-zinc-200 flex items-center justify-between sticky top-0 bg-white z-10">
-        <h3 className="font-bold text-base tracking-tight text-zinc-900">Filters</h3>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={clearAll}
-          className="text-xs font-semibold text-brand hover:text-brand/80 hover:bg-transparent p-0 h-auto"
-        >
-          Clear
-        </Button>
-      </div>
+      {!hideHeader && (
+        <div className="p-5 border-b border-zinc-200 flex items-center justify-between sticky top-0 bg-white z-10">
+          <h3 className="font-bold text-base tracking-tight text-zinc-900">Filters</h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearAll}
+            className="text-xs font-semibold text-brand hover:text-brand/80 hover:bg-transparent p-0 h-auto"
+          >
+            Clear
+          </Button>
+        </div>
+      )}
 
       <ScrollArea className="flex-1">
         <div className="p-5 space-y-3">
@@ -144,14 +147,15 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
                   onValueChange={(val) => setFilters({ ...filters, priceRange: val as [number, number] })}
                   className="py-4"
                 />
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <span className="text-xs text-zinc-500 font-medium">Min</span>
-                    <div className="border border-zinc-200 rounded-lg p-2 text-sm font-semibold text-zinc-900">₹{filters.priceRange[0]}</div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 min-w-0 rounded-xl bg-zinc-50 border border-zinc-100 px-3 py-2.5">
+                    <span className="block text-[11px] text-zinc-400 font-medium leading-none mb-1">Min</span>
+                    <span className="text-sm font-bold text-zinc-900">₹{filters.priceRange[0].toLocaleString("en-IN")}</span>
                   </div>
-                  <div className="flex-1 min-w-0 text-right">
-                    <span className="text-xs text-zinc-500 font-medium">Max</span>
-                    <div className="border border-zinc-200 rounded-lg p-2 text-sm font-semibold text-zinc-900">₹{filters.priceRange[1]}</div>
+                  <div className="w-3 h-px bg-zinc-300 shrink-0" />
+                  <div className="flex-1 min-w-0 rounded-xl bg-zinc-50 border border-zinc-100 px-3 py-2.5 text-right">
+                    <span className="block text-[11px] text-zinc-400 font-medium leading-none mb-1">Max</span>
+                    <span className="text-sm font-bold text-zinc-900">₹{filters.priceRange[1].toLocaleString("en-IN")}</span>
                   </div>
                 </div>
               </div>
@@ -175,27 +179,25 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
                 </button>
                 
                 {expanded.size && (
-                  <div className="grid grid-cols-2 gap-2 pt-2 text-sm">
+                  <div className="flex flex-wrap gap-2 pt-2">
                     {availableSizes.map((size) => {
                       const count = counts.sizes[size] || 0;
-                      // Hide sizes with 0 available units (unless currently selected for display)
+                      // Hide sizes with 0 available units
                       if (count === 0) return null;
+                      const active = filters.sizes.includes(size);
                       return (
-                        <div 
-                          key={size} 
-                          className="flex items-center space-x-2 group cursor-pointer"
+                        <button
+                          key={size}
+                          onClick={() => toggleArrayFilter("sizes", size)}
+                          className={cn(
+                            "min-w-[44px] px-3.5 h-10 rounded-xl border text-sm font-semibold transition-all active:scale-95",
+                            active
+                              ? "bg-zinc-900 text-white border-zinc-900"
+                              : "bg-white text-zinc-700 border-zinc-200 hover:border-zinc-400"
+                          )}
                         >
-                          <Checkbox 
-                            id={`size-${size}`} 
-                            checked={filters.sizes.includes(size)}
-                            onCheckedChange={() => toggleArrayFilter("sizes", size)}
-                            className="data-[state=checked]:bg-brand data-[state=checked]:border-brand"
-                          />
-                          <label htmlFor={`size-${size}`} className="font-medium text-zinc-700 cursor-pointer group-hover:text-brand transition-colors flex-1 flex items-center justify-between">
-                            {size}
-                            <span className="text-xs text-zinc-400 ml-1">({count} units)</span>
-                          </label>
-                        </div>
+                          {size}
+                        </button>
                       );
                     })}
                   </div>
@@ -242,7 +244,10 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
                               <Check className={cn("w-4 h-4", ["White", "Yellow", "Beige"].includes(colorName) ? "text-zinc-900" : "text-white")} />
                             )}
                           </button>
-                          <span className="text-[9px] font-medium text-zinc-400 truncate max-w-[48px]">
+                          <span className={cn(
+                            "text-[11px] font-medium truncate max-w-[48px] transition-colors",
+                            filters.colors.includes(colorName) ? "text-zinc-900 font-semibold" : "text-zinc-500"
+                          )}>
                             {colorName}
                           </span>
                         </div>
@@ -267,20 +272,24 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
             </button>
             
             {expanded.discount && (
-              <div className="space-y-2 pt-2">
-                {discounts.map((discount) => (
-                  <div key={discount} className="flex items-center space-x-2 cursor-pointer group">
-                    <Checkbox 
-                      id={`discount-${discount}`} 
-                      checked={filters.discount === discount}
-                      onCheckedChange={() => setFilters({ ...filters, discount: filters.discount === discount ? 0 : discount })}
-                      className="data-[state=checked]:bg-brand data-[state=checked]:border-brand"
-                    />
-                    <label htmlFor={`discount-${discount}`} className="font-medium text-zinc-700 cursor-pointer group-hover:text-brand transition-colors text-sm">
-                      {discount}% and above
-                    </label>
-                  </div>
-                ))}
+              <div className="flex flex-wrap gap-2 pt-2">
+                {discounts.map((discount) => {
+                  const active = filters.discount === discount;
+                  return (
+                    <button
+                      key={discount}
+                      onClick={() => setFilters({ ...filters, discount: active ? 0 : discount })}
+                      className={cn(
+                        "px-3.5 h-10 rounded-xl border text-sm font-semibold transition-all active:scale-95",
+                        active
+                          ? "bg-brand text-white border-brand"
+                          : "bg-white text-zinc-700 border-zinc-200 hover:border-zinc-400"
+                      )}
+                    >
+                      {discount}% +
+                    </button>
+                  );
+                })}
               </div>
             )}
           </section>
@@ -302,26 +311,26 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
               </button>
               
               {expanded.category && (
-                <div className="space-y-2 pt-2">
-                  {availableSubCategories
-                  .map((sub) => {
+                <div className="space-y-1 pt-1">
+                  {availableSubCategories.map((sub) => {
                     const count = counts.subCategories[sub] || 0;
                     return (
-                      <div 
-                        key={sub} 
-                        className="flex items-center space-x-2 cursor-pointer group"
+                      <label
+                        key={sub}
+                        htmlFor={`sub-${sub}`}
+                        className="flex items-center justify-between gap-3 w-full px-3 py-2.5 -mx-1 rounded-xl cursor-pointer hover:bg-zinc-50 active:bg-zinc-100 transition-colors"
                       >
-                        <Checkbox 
-                          id={`sub-${sub}`} 
-                          checked={filters.subCategories.includes(sub)}
-                          onCheckedChange={() => toggleArrayFilter("subCategories", sub)}
-                          className="data-[state=checked]:bg-brand data-[state=checked]:border-brand"
-                        />
-                        <label htmlFor={`sub-${sub}`} className="font-medium text-zinc-700 cursor-pointer group-hover:text-brand transition-colors text-sm flex-1 flex items-center justify-between">
-                          {sub}
-                          <span className="text-xs text-zinc-400 ml-1">({count})</span>
-                        </label>
-                      </div>
+                        <span className="flex items-center gap-3 min-w-0">
+                          <Checkbox
+                            id={`sub-${sub}`}
+                            checked={filters.subCategories.includes(sub)}
+                            onCheckedChange={() => toggleArrayFilter("subCategories", sub)}
+                            className="data-[state=checked]:bg-brand data-[state=checked]:border-brand shrink-0"
+                          />
+                          <span className="font-medium text-zinc-800 text-sm truncate">{sub}</span>
+                        </span>
+                        <span className="text-xs font-medium text-zinc-400 shrink-0">{count}</span>
+                      </label>
                     );
                   })}
               </div>

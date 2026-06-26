@@ -36,7 +36,6 @@ export default function CheckoutPage() {
   const [userEmail, setUserEmail] = useState("");
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
-  const [showManualEntry, setShowManualEntry] = useState(false);
   const [address, setAddress] = useState<Address>({
     name: "",
     phone: "",
@@ -60,9 +59,9 @@ export default function CheckoutPage() {
       setIsAuthenticated(true);
       setUserEmail(data.user.email || "");
 
-      // Fetch saved addresses
+      // Fetch saved addresses (always fresh — no stale cache)
       try {
-        const response = await fetch("/api/addresses");
+        const response = await fetch("/api/addresses", { cache: "no-store" });
         if (response.ok) {
           const addresses = await response.json();
           setSavedAddresses(addresses);
@@ -90,6 +89,8 @@ export default function CheckoutPage() {
   }, [items, isAuthenticated, router]);
 
   const handleAddressChange = (field: keyof Address, value: string) => {
+    // Editing a field means it no longer exactly matches a saved address
+    setSelectedAddressId(null);
     setAddress({ ...address, [field]: value });
   };
 
@@ -241,8 +242,8 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Checkout Form */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Saved Addresses */}
-            {savedAddresses.length > 0 && !showManualEntry && (
+            {/* Saved Addresses — quick pick (pre-fills the form below) */}
+            {savedAddresses.length > 0 && (
               <Card className="p-6 border-zinc-100 rounded-2xl">
                 <div className="flex items-center gap-3 mb-6">
                   <MapPin className="w-5 h-5 text-zinc-950" />
@@ -251,7 +252,7 @@ export default function CheckoutPage() {
                   </h2>
                 </div>
 
-                <div className="space-y-3 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {savedAddresses.map((savedAddr) => (
                     <button
                       key={savedAddr.id}
@@ -271,10 +272,10 @@ export default function CheckoutPage() {
                           <p className="font-bold text-sm text-zinc-950">
                             {savedAddr.name}
                           </p>
-                          <p className="text-xs text-zinc-500 mt-1">
+                          <p className="text-xs text-zinc-500 mt-1 truncate">
                             {savedAddr.street}
                           </p>
-                          <p className="text-xs text-zinc-500">
+                          <p className="text-xs text-zinc-500 truncate">
                             {savedAddr.city}, {savedAddr.state} {savedAddr.zipCode}
                           </p>
                           <p className="text-xs text-zinc-500 mt-2">
@@ -293,34 +294,17 @@ export default function CheckoutPage() {
                     </button>
                   ))}
                 </div>
-
-                <button
-                  onClick={() => setShowManualEntry(!showManualEntry)}
-                  className="w-full py-2 text-xs font-bold text-zinc-600 uppercase tracking-widest border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-all"
-                >
-                  {showManualEntry ? "Use Saved Address" : "Enter Different Address"}
-                </button>
               </Card>
             )}
 
-            {/* Delivery Address - Manual Entry */}
-            {(showManualEntry || savedAddresses.length === 0) && (
-              <Card className="p-6 border-zinc-100 rounded-2xl">
+            {/* Delivery Address — always shown, pre-filled from the default/selected address */}
+            <Card className="p-6 border-zinc-100 rounded-2xl">
                 <div className="flex items-center gap-3 mb-6">
                   <Truck className="w-5 h-5 text-zinc-950" />
                   <h2 className="text-lg font-black uppercase tracking-tight">
                     Delivery Address
                   </h2>
                 </div>
-
-                {savedAddresses.length > 0 && showManualEntry && (
-                  <button
-                    onClick={() => setShowManualEntry(false)}
-                    className="w-full py-2 mb-6 text-xs font-bold text-zinc-600 uppercase tracking-widest border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-all"
-                  >
-                    Back to Saved Addresses
-                  </button>
-                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -408,7 +392,6 @@ export default function CheckoutPage() {
                 </div>
               </div>
             </Card>
-            )}
 
             {/* Payment Method */}
             <Card className="p-6 border-zinc-100 rounded-2xl">

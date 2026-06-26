@@ -75,9 +75,26 @@ export function Footer() {
             <Link href="/privacy" className="hover:text-brand transition-colors font-medium">Privacy</Link>
           </div>
         </div>
-        <p className="text-xs text-zinc-400 font-medium">
-          Built by <span className="font-semibold text-zinc-600">Himanshu Meena</span> &amp; <span className="font-semibold text-zinc-600">Ashibur Rehman</span>
-        </p>
+        <a
+          href="https://scalisite.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group inline-flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white px-3.5 py-1.5 shadow-sm transition-all duration-300 hover:border-brand/30 hover:shadow-md"
+        >
+          <span className="text-[11px] font-medium uppercase tracking-[0.15em] text-zinc-400">
+            Built by
+          </span>
+          <span className="flex items-center gap-1.5">
+            <img
+              src="https://www.scalisite.com/Logo.png"
+              alt="Scalisite"
+              className="h-4 w-auto object-contain transition-transform duration-300 group-hover:scale-110"
+            />
+            <span className="bg-gradient-to-r from-zinc-900 to-zinc-600 bg-clip-text text-sm font-extrabold tracking-tight text-transparent transition-all duration-300 group-hover:from-brand group-hover:to-brand/70">
+              Scalisite
+            </span>
+          </span>
+        </a>
       </div>
     </footer>
   );

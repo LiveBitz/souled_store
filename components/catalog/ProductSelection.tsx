@@ -19,6 +19,8 @@ interface ProductSelectionProps {
     id: string;
     name: string;
     price: number;
+    originalPrice?: number;
+    discount?: number;
     image: string;
     sizes: string[];
     colors: string[];
@@ -26,7 +28,7 @@ interface ProductSelectionProps {
 }
 
 export function ProductSelection({ product }: ProductSelectionProps) {
-  const { addItem } = useCart();
+  const { addItem, setIsOpen: setCartOpen } = useCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const { toast } = useToast();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -58,14 +60,14 @@ export function ProductSelection({ product }: ProductSelectionProps) {
 
   const hasColors = availableColors.length > 0;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (): boolean => {
     const isSizeMissing = hasSizes && !selectedSize;
     const isColorMissing = hasColors && !selectedColor;
 
     if (isSizeMissing || isColorMissing) {
       setShowError(true);
       setTimeout(() => setShowError(false), 3000);
-      return;
+      return false;
     }
 
     addItem({
@@ -76,8 +78,16 @@ export function ProductSelection({ product }: ProductSelectionProps) {
       size: selectedSize || undefined,
       color: selectedColor || undefined,
     });
-    
+
     setShowError(false);
+    return true;
+  };
+
+  const handleBuyNow = () => {
+    if (handleAddToCart()) {
+      // Open the cart sheet so the customer can proceed to checkout
+      setCartOpen(true);
+    }
   };
 
   const handleWishlistClick = async () => {
@@ -147,22 +157,21 @@ export function ProductSelection({ product }: ProductSelectionProps) {
           <div className="flex items-center justify-between">
             <p className={cn(
               "text-[11px] font-black uppercase tracking-[0.2em] transition-colors",
-              showError && !selectedSize ? "text-rose-500" : "text-zinc-400"
+              showError && !selectedSize ? "text-rose-500" : "text-zinc-500"
             )}>
-              Select Archetype (Size)
+              Select Size
+              {selectedSize && <span className="text-zinc-900"> · {selectedSize}</span>}
             </p>
-            <button className="text-[10px] font-bold text-zinc-400 underline underline-offset-4 hover:text-zinc-900 transition-colors uppercase tracking-widest">
-              Scale Matrix
-            </button>
           </div>
 
-          <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 gap-3">
+          <div className="flex flex-wrap gap-2.5">
             {cleanSizes.map((size: string) => {
               const isSelected = selectedSize === size;
-              
-              // Check if this size has any inventory
-              const hasInventory = product.sizes.some((entry: string) => 
-                entry.startsWith(size + "-")
+
+              // Check if this size has any inventory.
+              // Matches "S-Black:5" (size-color) AND "100ml:5" (size-only, e.g. perfumes)
+              const hasInventory = product.sizes.some((entry: string) =>
+                entry.startsWith(size + "-") || entry.startsWith(size + ":")
               );
 
               return (
@@ -175,12 +184,12 @@ export function ProductSelection({ product }: ProductSelectionProps) {
                     setShowError(false);
                   }}
                   className={cn(
-                    "relative group h-14 rounded-2xl border-2 flex flex-col items-center justify-center transition-all duration-300 overflow-hidden",
+                    "relative group h-12 min-w-[3rem] px-4 rounded-xl border-2 flex items-center justify-center transition-all duration-300 overflow-hidden",
                     !hasInventory
                       ? "bg-zinc-50 border-zinc-100 text-zinc-200 cursor-not-allowed"
                       : isSelected
-                      ? "bg-zinc-950 border-zinc-950 text-white shadow-xl shadow-zinc-200"
-                      : "bg-white border-zinc-100 text-zinc-900 hover:border-zinc-200 active:scale-95"
+                      ? "bg-zinc-950 border-zinc-950 text-white shadow-md"
+                      : "bg-white border-zinc-200 text-zinc-900 hover:border-zinc-400 active:scale-95"
                   )}
                 >
                   <span className="text-[13px] font-black tracking-tight z-10">
@@ -203,9 +212,10 @@ export function ProductSelection({ product }: ProductSelectionProps) {
         <div className="space-y-5">
           <p className={cn(
             "text-[11px] font-black uppercase tracking-[0.2em] transition-colors",
-            showError && !selectedColor ? "text-rose-500" : "text-zinc-400"
+            showError && !selectedColor ? "text-rose-500" : "text-zinc-500"
           )}>
-            Visual Palette (Color) {selectedSize && `• Available for ${selectedSize}`}
+            Select Color
+            {selectedColor && <span className="text-zinc-900"> · {selectedColor}</span>}
           </p>
           <div className="flex flex-wrap gap-4">
             {availableColors.map((color: string) => (
@@ -238,39 +248,76 @@ export function ProductSelection({ product }: ProductSelectionProps) {
         </div>
       )}
 
-      {/* ── Call to Action ── */}
-      <div className="flex flex-col gap-4 pt-4">
+      {/* ── Call to Action (inline) ── */}
+      <div className="flex flex-col gap-3 pt-4">
         <div className="flex gap-3">
-          <Button 
+          <Button
             onClick={handleAddToCart}
-            className="flex-1 h-16 rounded-[2rem] bg-zinc-950 hover:bg-zinc-800 text-white font-black text-sm uppercase tracking-[0.15em] shadow-2xl shadow-zinc-200 transition-all duration-300 active:scale-95 gap-3 group"
+            className="flex-1 h-14 sm:h-16 rounded-2xl sm:rounded-[2rem] bg-zinc-950 hover:bg-zinc-800 text-white font-black text-xs sm:text-sm uppercase tracking-[0.15em] shadow-xl shadow-zinc-200/70 transition-all duration-300 active:scale-[0.98] gap-2.5 group"
           >
             <ShoppingBag className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
-            Add to Collective
+            Add to Cart
           </Button>
           <Button
             onClick={handleWishlistClick}
             disabled={isAddingToWishlist}
+            aria-label={isWishlisted(product.id) ? "Remove from wishlist" : "Add to wishlist"}
             className={cn(
-              "h-16 w-16 rounded-full transition-all duration-300 active:scale-90 flex items-center justify-center p-0 shrink-0",
+              "h-14 w-14 sm:h-16 sm:w-16 rounded-2xl sm:rounded-full transition-all duration-300 active:scale-90 flex items-center justify-center p-0 shrink-0",
               isWishlisted(product.id)
                 ? "border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-500 border"
-                : "border-zinc-100 bg-white hover:border-zinc-200 hover:bg-zinc-50 hover:text-rose-400 border text-zinc-300"
+                : "border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50 hover:text-rose-400 border text-zinc-400"
             )}
           >
             <Heart className={cn(
-              "w-5 h-5 transition-colors stroke-black",
+              "w-5 h-5 transition-colors stroke-zinc-900",
               isWishlisted(product.id) && "fill-rose-500 stroke-rose-500"
             )} />
           </Button>
         </div>
-        
+
         <Button
-          onClick={handleAddToCart}
-          className="w-full h-14 rounded-full bg-brand hover:bg-brand/90 text-white font-black text-sm uppercase tracking-[0.15em] transition-all duration-300 active:scale-95"
+          onClick={handleBuyNow}
+          className="w-full h-14 rounded-2xl sm:rounded-full bg-brand hover:bg-brand/90 text-white font-black text-xs sm:text-sm uppercase tracking-[0.15em] transition-all duration-300 active:scale-[0.98]"
         >
           Buy Now
         </Button>
+      </div>
+
+      {/* ── Mobile Sticky CTA Bar ── */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-zinc-200 shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.15)] px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="flex items-center gap-3">
+          <div className="shrink-0">
+            <p className="text-lg font-black text-zinc-950 leading-none">
+              ₹{product.price.toLocaleString("en-IN")}
+            </p>
+            {product.originalPrice && product.discount && product.discount > 0 && (
+              <p className="text-[10px] text-zinc-400 line-through font-medium mt-0.5">
+                ₹{product.originalPrice.toLocaleString("en-IN")}
+              </p>
+            )}
+          </div>
+          <Button
+            onClick={handleWishlistClick}
+            disabled={isAddingToWishlist}
+            aria-label="Toggle wishlist"
+            className={cn(
+              "h-12 w-12 rounded-xl border shrink-0 flex items-center justify-center p-0 transition-all active:scale-90",
+              isWishlisted(product.id)
+                ? "border-rose-200 bg-rose-50 text-rose-500"
+                : "border-zinc-200 bg-white text-zinc-500"
+            )}
+          >
+            <Heart className={cn("w-5 h-5", isWishlisted(product.id) && "fill-rose-500 stroke-rose-500")} />
+          </Button>
+          <Button
+            onClick={handleBuyNow}
+            className="flex-1 h-12 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white font-black text-xs uppercase tracking-[0.15em] active:scale-[0.98] gap-2"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            Add to Cart
+          </Button>
+        </div>
       </div>
     </div>
   );

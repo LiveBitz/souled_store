@@ -6,7 +6,7 @@ import { Heart, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/hooks/use-toast";
-import { getTotalStock } from "@/lib/inventory";
+import { getProductStock } from "@/lib/inventory";
 import Link from "next/link";
 
 interface ProductCardProps {
@@ -32,7 +32,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const { isWishlisted, toggleWishlist } = useWishlist();
   const { toast } = useToast();
 
-  const totalStock = getTotalStock(product.sizes);
+  const totalStock = getProductStock(product);
   const isOutOfStock = totalStock === 0;
   const wishlisted = isWishlisted(String(product.id));
 
@@ -114,14 +114,6 @@ export function ProductCard({ product }: ProductCardProps) {
           <Heart className={cn("w-4 h-4 transition-all", wishlisted && "fill-white stroke-white")} />
         </button>
 
-        {/* Discount badge — top left */}
-        {product.discount > 0 && (
-          <div className="absolute top-3 left-3 z-10">
-            <span className="bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full">
-              {product.discount}% off
-            </span>
-          </div>
-        )}
       </Link>
 
       {/* ── Info ── */}

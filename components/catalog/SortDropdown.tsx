@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Check } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -36,32 +35,34 @@ export function SortDropdown({ sortBy, setSortBy }: SortDropdownProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button className="flex-1 rounded-xl py-4 h-auto text-black font-semibold bg-white hover:bg-zinc-50 border border-zinc-200 flex flex-col items-start gap-1.5 justify-start px-4 transition-all duration-200 hover:shadow-md">
-          <div className="flex items-center gap-2">
-            <ArrowUpDown className="w-4 h-4 text-gray-600" />
-            <span className="text-xs font-medium text-gray-600">Sort</span>
-          </div>
-          <span className="text-base font-bold text-black">{currentSort?.label || "Relevance"}</span>
-        </Button>
+        <button className="w-full h-[52px] rounded-none bg-white hover:bg-zinc-50 active:bg-zinc-100 flex items-center justify-center gap-2 transition-colors duration-150 px-2 min-w-0">
+          <ArrowUpDown className="w-[18px] h-[18px] text-zinc-700 shrink-0" />
+          <span className="text-sm font-semibold text-zinc-900 shrink-0">Sort</span>
+          <span className="text-xs font-medium text-zinc-400 truncate">· {currentSort?.label}</span>
+        </button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="rounded-t-3xl p-0 bg-black">
-        <SheetHeader className="px-6 pt-6 pb-3 border-b border-slate-800">
-          <SheetTitle className="text-xl font-bold text-white">Sort Products</SheetTitle>
+      <SheetContent side="bottom" className="rounded-t-3xl p-0 bg-white border-none">
+        <SheetHeader className="px-6 pt-6 pb-4 border-b border-zinc-100">
+          <SheetTitle className="text-xl font-bold tracking-tight text-zinc-900">Sort By</SheetTitle>
         </SheetHeader>
-        <div className="py-4 px-6 space-y-2 max-h-[60vh] overflow-y-auto">
-          {sortOptions.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => handleSortSelect(option.value)}
-              className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                sortBy === option.value
-                  ? "bg-white text-black"
-                  : "bg-slate-900 text-white border border-slate-700 hover:bg-slate-800"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
+        <div className="py-3 px-3 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-1 max-h-[60vh] overflow-y-auto">
+          {sortOptions.map((option) => {
+            const active = sortBy === option.value;
+            return (
+              <button
+                key={option.value}
+                onClick={() => handleSortSelect(option.value)}
+                className={`w-full flex items-center justify-between text-left px-4 py-3.5 rounded-xl font-medium transition-colors ${
+                  active
+                    ? "bg-zinc-900 text-white"
+                    : "text-zinc-700 hover:bg-zinc-100 active:bg-zinc-200"
+                }`}
+              >
+                <span className="text-[15px]">{option.label}</span>
+                {active && <Check className="w-4 h-4 shrink-0" />}
+              </button>
+            );
+          })}
         </div>
       </SheetContent>
     </Sheet>

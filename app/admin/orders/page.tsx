@@ -270,7 +270,7 @@ export default function AdminOrdersPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="font-black text-zinc-950">
-                      ₹{order.total.toLocaleString()}
+                      ₹{(order.total ?? 0).toLocaleString("en-IN")}
                     </p>
                     <p className="text-xs text-zinc-500 mt-1">
                       {order.items.length} item{order.items.length !== 1 ? "s" : ""}
@@ -350,7 +350,7 @@ export default function AdminOrdersPage() {
                             )}
                           </div>
                           <p className="font-bold text-zinc-950 shrink-0">
-                            ₹{(item.price * item.quantity).toLocaleString()}
+                            ₹{((item.price ?? 0) * (item.quantity ?? 0)).toLocaleString("en-IN")}
                           </p>
                         </div>
                       ))}
@@ -362,7 +362,7 @@ export default function AdminOrdersPage() {
                     <div className="flex justify-between text-xs">
                       <span className="text-zinc-600">Subtotal</span>
                       <span className="font-bold">
-                        ₹{order.subtotal.toLocaleString()}
+                        ₹{(order.subtotal ?? 0).toLocaleString("en-IN")}
                       </span>
                     </div>
                     <div className="flex justify-between text-xs">
@@ -378,7 +378,7 @@ export default function AdminOrdersPage() {
                     <div className="border-t border-zinc-100 pt-3 flex justify-between">
                       <span className="font-bold text-zinc-600">TOTAL</span>
                       <span className="font-black text-zinc-950">
-                        ₹{order.total.toLocaleString()}
+                        ₹{(order.total ?? 0).toLocaleString("en-IN")}
                       </span>
                     </div>
                   </div>

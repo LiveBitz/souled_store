@@ -7,6 +7,19 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * Verify admin authentication
  */
+/**
+ * Revalidate every storefront surface that lists or displays products.
+ * Uses the dynamic route patterns with type "page" so ALL category and
+ * product-detail segments are purged — not just the home page.
+ */
+const revalidateStorefront = () => {
+  revalidatePath("/admin/products");
+  revalidatePath("/");                          // Home (featured/new/bestseller)
+  revalidatePath("/category");                  // All-products listing
+  revalidatePath("/category/[slug]", "page");   // Every category listing
+  revalidatePath("/product/[slug]", "page");    // Every product detail page
+};
+
 const verifyAdminAuth = async (): Promise<{ isValid: boolean; error?: string }> => {
   try {
     const supabase = await createClient();
@@ -74,9 +87,10 @@ const validateProductData = (data: any): { isValid: boolean; errors: string[] } 
     errors.push("At least one size must be specified");
   }
 
-  // Colors validation
-  if (!Array.isArray(data.colors) || data.colors.length === 0) {
-    errors.push("At least one color must be specified");
+  // Colors validation — colors are optional (e.g. perfumes have no color axis),
+  // but if provided must be an array
+  if (!Array.isArray(data.colors)) {
+    errors.push("Colors must be a valid list");
   }
 
   // Inventory validation - check format and values
@@ -164,8 +178,7 @@ export async function createProduct(data: any) {
       }
     });
 
-    revalidatePath("/admin/products");
-    revalidatePath("/");
+    revalidateStorefront();
     return { success: true, product };
   } catch (error: any) {
     console.error("Failed to create product:", error);
@@ -233,8 +246,7 @@ export async function updateProduct(id: string, data: any) {
       }
     });
 
-    revalidatePath("/admin/products");
-    revalidatePath("/");
+    revalidateStorefront();
     return { success: true, product };
   } catch (error) {
     console.error("Failed to update product:", error);
@@ -254,8 +266,7 @@ export async function deleteProduct(id: string) {
       where: { id }
     });
 
-    revalidatePath("/admin/products");
-    revalidatePath("/");
+    revalidateStorefront();
     return { success: true };
   } catch (error) {
     console.error("Failed to delete product:", error);

@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 
 interface ProductGalleryProps {
   mainImage: string;
@@ -63,20 +62,6 @@ export function ProductGallery({
             className="md:object-contain object-cover transition-all duration-700 group-hover:scale-102"
             quality={85}
           />
-
-          {/* Floating Badges */}
-          <div className="absolute top-6 left-6 flex flex-col gap-2.5 pointer-events-none">
-            {isNew && (
-              <Badge className="bg-zinc-950 text-white hover:bg-zinc-950 px-4 py-2 rounded-full text-[9px] font-bold tracking-[0.15em] shadow-xl animate-in fade-in slide-in-from-left duration-700">
-                NEW ARRIVAL
-              </Badge>
-            )}
-            {isBestSeller && (
-              <Badge className="bg-brand text-white hover:bg-brand px-4 py-2 rounded-full text-[9px] font-bold tracking-[0.15em] shadow-xl animate-in fade-in slide-in-from-left duration-700 delay-150">
-                BEST SELLER
-              </Badge>
-            )}
-          </div>
         </div>
 
         {/* Mobile Horizontal Thumbnails */}

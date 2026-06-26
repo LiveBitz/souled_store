@@ -26,14 +26,25 @@ export async function GET(request: NextRequest) {
         orderNumber: true,
         customerName: true,
         customerEmail: true,
+        customerPhone: true,
+        street: true,
+        city: true,
+        state: true,
+        zipCode: true,
+        subtotal: true,
+        tax: true,
+        shipping: true,
         total: true,
         status: true,
+        paymentMethod: true,
+        paymentStatus: true,
         createdAt: true,
         items: {
           select: {
             id: true,
             quantity: true,
             size: true,
+            color: true,
             price: true,
             product: {
               select: {
