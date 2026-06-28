@@ -66,7 +66,7 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="group flex flex-col bg-white border border-zinc-100 rounded-2xl overflow-hidden transition-all duration-300 hover:border-zinc-200 hover:shadow-lg">
+    <div className="group flex flex-col bg-white border border-zinc-900 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg">
 
       {/* ── Image ── */}
       <Link href={`/product/${product.slug}`} className="relative aspect-square block overflow-hidden bg-zinc-50">

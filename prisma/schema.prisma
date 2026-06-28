@@ -78,7 +78,8 @@ model Banner {
   type        String   // HERO, PROMO, etc.
   title       String
   subtitle    String?
-  image       String
+  image       String   // Desktop / primary image (landscape)
+  mobileImage String?  // Optional portrait image shown on mobile
   buttonText  String?  @default("Shop Now")
   link        String?  @default("/")
   order       Int      @default(1)

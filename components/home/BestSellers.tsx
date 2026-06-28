@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { TrendingUp } from "lucide-react";
 import { AnimateOnView } from "@/components/shared/AnimateOnView";
+import { SectionHeading } from "@/components/shared/SectionHeading";
 
 async function getBestSellers() {
   const products = await prisma.product.findMany({
@@ -23,24 +24,13 @@ export async function BestSellers() {
 
         {/* Section header */}
         <AnimateOnView>
-        <div className="mb-10 md:mb-12">
-          <div className="space-y-2">
-            {/* Label */}
-            <div className="inline-flex items-center gap-1.5 text-amber-600 text-xs font-black uppercase tracking-[0.15em]">
-              <TrendingUp className="w-3 h-3" />
-              Most popular
-            </div>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-zinc-900 leading-tight">
-              Best <span className="italic text-brand">Sellers</span>
-            </h2>
-            <p className="text-sm text-zinc-400 font-medium max-w-sm">
-              Loved by thousands of customers
-            </p>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="w-full h-px bg-zinc-200 mb-8" />
+          <SectionHeading
+            eyebrow="Most popular"
+            eyebrowIcon={TrendingUp}
+            eyebrowClassName="text-amber-600"
+            title="Best Sellers"
+            subtitle="Loved by thousands of customers."
+          />
         </AnimateOnView>
 
         {/* Grid */}

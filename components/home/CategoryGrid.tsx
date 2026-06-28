@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, LayoutGrid } from "lucide-react";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { AnimateOnView } from "@/components/shared/AnimateOnView";
 import { Category } from "@prisma/client";
@@ -23,6 +23,8 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
         <AnimateOnView>
           <SectionHeading
+            eyebrow="Collections"
+            eyebrowIcon={LayoutGrid}
             title="Shop by Category"
             subtitle="Explore our curated collections for every style and occasion."
           />

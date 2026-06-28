@@ -38,6 +38,7 @@ export function BannerForm({ banner, allBanners, navData, onClose, onSuccess }: 
     title: banner?.title || "",
     subtitle: banner?.subtitle || "",
     image: banner?.image || "",
+    mobileImage: (banner as any)?.mobileImage || "",
     link: banner?.link || "/",
     type: banner?.type || "HERO",
     order: banner?.order || 1,
@@ -47,6 +48,7 @@ export function BannerForm({ banner, allBanners, navData, onClose, onSuccess }: 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mobileFileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,7 +82,10 @@ export function BannerForm({ banner, allBanners, navData, onClose, onSuccess }: 
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: "image" | "mobileImage" = "image"
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -106,7 +111,7 @@ export function BannerForm({ banner, allBanners, navData, onClose, onSuccess }: 
         data: { publicUrl },
       } = supabase.storage.from("banner").getPublicUrl(filePath);
 
-      setFormData((prev) => ({ ...prev, image: publicUrl }));
+      setFormData((prev) => ({ ...prev, [field]: publicUrl }));
       setUploadProgress(100);
       
       toast({
@@ -179,21 +184,21 @@ export function BannerForm({ banner, allBanners, navData, onClose, onSuccess }: 
         {/* ── Scrollable body ── */}
         <div className="overflow-y-auto flex-1 px-6 py-8 sm:px-10 sm:py-10 space-y-10 max-h-[60vh] sm:max-h-[65vh] custom-scrollbar">
 
-          {/* Image Preview */}
+          {/* Image Preview — Desktop / wide */}
           <div className="space-y-4">
             <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 px-1">
-              Asset Visualization
+              Desktop Image · Wide 16:9 (e.g. 1920×1080)
             </Label>
 
-            <div 
+            <div
               className="relative w-full overflow-hidden rounded-[2rem] border-2 border-dashed border-zinc-100 bg-zinc-50 group/preview transition-colors hover:border-zinc-200 cursor-pointer"
-              style={{ aspectRatio: "21/9" }}
+              style={{ aspectRatio: "16/9" }}
               onClick={() => fileInputRef.current?.click()}
             >
               <input
                 type="file"
                 ref={fileInputRef}
-                onChange={handleImageUpload}
+                onChange={(e) => handleImageUpload(e, "image")}
                 accept="image/*"
                 className="hidden"
               />
@@ -256,6 +261,76 @@ export function BannerForm({ banner, allBanners, navData, onClose, onSuccess }: 
                 value={formData.image}
                 onChange={(e) =>
                   setFormData({ ...formData, image: e.target.value })
+                }
+                className="h-12 rounded-xl bg-zinc-50 border-zinc-100 text-[11px] font-mono placeholder:text-zinc-300 focus:border-zinc-300 transition-all shadow-sm"
+              />
+            </div>
+          </div>
+
+          {/* Image Preview — Mobile / portrait (optional, mainly for HERO) */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                Mobile Image · Portrait 4:5 (e.g. 1080×1350)
+              </Label>
+              <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-300">Optional</span>
+            </div>
+            <p className="text-[10px] text-zinc-400 px-1 -mt-2 leading-relaxed">
+              Shown on phones for a taller, immersive hero. Falls back to the desktop image if left empty.
+            </p>
+
+            <div
+              className="relative w-full max-w-[260px] overflow-hidden rounded-[2rem] border-2 border-dashed border-zinc-100 bg-zinc-50 group/mpreview transition-colors hover:border-zinc-200 cursor-pointer"
+              style={{ aspectRatio: "4/5" }}
+              onClick={() => mobileFileInputRef.current?.click()}
+            >
+              <input
+                type="file"
+                ref={mobileFileInputRef}
+                onChange={(e) => handleImageUpload(e, "mobileImage")}
+                accept="image/*"
+                className="hidden"
+              />
+              {formData.mobileImage ? (
+                <>
+                  <Image
+                    src={formData.mobileImage}
+                    alt="Mobile banner preview"
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover/mpreview:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover/mpreview:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="bg-white/90 text-zinc-900 px-5 py-2.5 rounded-full font-bold text-[10px] uppercase tracking-widest shadow-xl border-none hover:scale-105 active:scale-95 transition-all"
+                    >
+                      <Upload className="w-3.5 h-3.5 mr-2" />
+                      Swap
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-zinc-300 px-6 text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-sm group-hover/mpreview:scale-110 transition-transform">
+                    <Upload className="w-6 h-6 text-zinc-200" />
+                  </div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 italic">
+                    Add Portrait Image
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 px-1">
+                Manual Override (Source URL)
+              </Label>
+              <Input
+                placeholder="https://..."
+                value={formData.mobileImage}
+                onChange={(e) =>
+                  setFormData({ ...formData, mobileImage: e.target.value })
                 }
                 className="h-12 rounded-xl bg-zinc-50 border-zinc-100 text-[11px] font-mono placeholder:text-zinc-300 focus:border-zinc-300 transition-all shadow-sm"
               />

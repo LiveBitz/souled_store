@@ -2,8 +2,9 @@ import React from "react";
 import prisma from "@/lib/prisma";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { getTotalStock } from "@/lib/inventory";
-import { Sparkles } from "lucide-react";
+import { Flame } from "lucide-react";
 import { AnimateOnView } from "@/components/shared/AnimateOnView";
+import { SectionHeading } from "@/components/shared/SectionHeading";
 
 async function getNewArrivals() {
   const products = await prisma.product.findMany({
@@ -24,24 +25,12 @@ export async function NewArrivals() {
 
         {/* Section header */}
         <AnimateOnView>
-        <div className="mb-10 md:mb-12">
-          <div className="space-y-2">
-            {/* Label */}
-            <div className="inline-flex items-center gap-1.5 text-brand text-xs font-black uppercase tracking-[0.15em]">
-              <Sparkles className="w-3 h-3" />
-              Just dropped
-            </div>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-zinc-900 leading-tight">
-              New <span className="italic text-brand">Arrivals</span>
-            </h2>
-            <p className="text-sm text-zinc-400 font-medium max-w-sm">
-              Fresh styles added this week
-            </p>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="w-full h-px bg-zinc-100 mb-8" />
+          <SectionHeading
+            eyebrow="Just dropped"
+            eyebrowIcon={Flame}
+            title="New Arrivals"
+            subtitle="Fresh styles added this week."
+          />
         </AnimateOnView>
 
         {/* Grid */}
