@@ -94,14 +94,15 @@ export function ProductSelection({ product }: ProductSelectionProps) {
     setIsAddingToWishlist(true);
 
     try {
+      // Capture state BEFORE toggling — toggle flips it, so this tells us the action
+      const wasWishlisted = isWishlisted(product.id);
       await toggleWishlist(product.id);
-      const wishlisted = isWishlisted(product.id);
-      
+
       toast({
-        title: wishlisted ? "Added to Wishlist" : "Removed from Wishlist",
-        description: wishlisted 
-          ? `${product.name} has been added to your wishlist` 
-          : `${product.name} has been removed from your wishlist`,
+        title: wasWishlisted ? "Removed from Wishlist" : "Added to Wishlist",
+        description: wasWishlisted
+          ? `${product.name} has been removed from your wishlist`
+          : `${product.name} has been added to your wishlist`,
         duration: 2000,
       });
     } catch (error: any) {

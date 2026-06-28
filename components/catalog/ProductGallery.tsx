@@ -45,6 +45,7 @@ export function ProductGallery({
                 className="object-cover"
                 quality={75}
                 loading="lazy"
+                referrerPolicy="no-referrer"
               />
             </button>
           ))}
@@ -61,6 +62,7 @@ export function ProductGallery({
             priority
             className="md:object-contain object-cover transition-all duration-700 group-hover:scale-102"
             quality={85}
+            referrerPolicy="no-referrer"
           />
         </div>
 

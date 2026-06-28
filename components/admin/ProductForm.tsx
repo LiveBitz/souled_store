@@ -233,6 +233,58 @@ export function ProductForm({
     setFormData((prev) => ({ ...prev, name, slug }));
   };
 
+  // Add an image by URL: fetch it server-side and re-host it in our own storage,
+  // so it always renders (no hotlink / referrer / expiry issues) like an upload.
+  const applyImageUrl = async (rawUrl: string, slot: 'main' | number) => {
+    const url = rawUrl.trim();
+    if (!url) return;
+    if (!/^https?:\/\/.+/i.test(url)) {
+      toast({
+        title: "Invalid image URL",
+        description: "The URL must start with http:// or https://",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const id = slot === 'main' ? 'main' : `gallery-${slot}`;
+    try {
+      setIsUploading((prev) => ({ ...prev, [id]: true }));
+
+      const res = await fetch("/api/admin/upload-from-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to import image");
+
+      const hostedUrl = data.url as string;
+      if (slot === 'main') {
+        setFormData((prev) => ({ ...prev, image: hostedUrl }));
+      } else {
+        setFormData((prev) => {
+          const newImages = [...prev.images];
+          newImages[slot] = hostedUrl;
+          return { ...prev, images: newImages };
+        });
+      }
+
+      toast({
+        title: "Image imported",
+        description: `Image saved to ${slot === 'main' ? 'Primary' : 'Gallery'} slot.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Couldn't import image",
+        description: error.message || "Check the URL and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading((prev) => ({ ...prev, [id]: false }));
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, slot: 'main' | number) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -465,6 +517,7 @@ export function ProductForm({
             <img
               src={formData.image}
               alt="Simulation"
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-1000"
             />
           ) : (
@@ -696,6 +749,7 @@ export function ProductForm({
                           <img
                             src={formData.image}
                             alt="Primary"
+                            referrerPolicy="no-referrer"
                             className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700"
                           />
                           <button
@@ -737,6 +791,38 @@ export function ProductForm({
                           </div>
                         </div>
                       </div>
+
+                      {/* OR paste image URL */}
+                      <div className="flex items-center gap-3">
+                        <div className="h-px flex-1 bg-zinc-100" />
+                        <span className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest">or paste URL</span>
+                        <div className="h-px flex-1 bg-zinc-100" />
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          id="mainImageUrl"
+                          type="url"
+                          placeholder="https://example.com/image.jpg"
+                          defaultValue={formData.image || ""}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              applyImageUrl(e.currentTarget.value, "main");
+                            }
+                          }}
+                          className="h-11 rounded-xl border-zinc-100 text-sm font-medium"
+                        />
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            const input = document.getElementById("mainImageUrl") as HTMLInputElement;
+                            applyImageUrl(input?.value || "", "main");
+                          }}
+                          className="h-11 rounded-xl bg-zinc-900 text-white px-5 text-xs font-bold uppercase tracking-widest shadow-sm active:scale-95 shrink-0"
+                        >
+                          Add
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -774,6 +860,7 @@ export function ProductForm({
                                 <img
                                   src={imageUrl}
                                   alt={`Gallery ${idx + 1}`}
+                                  referrerPolicy="no-referrer"
                                   className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700"
                                 />
                                 <button
@@ -804,6 +891,44 @@ export function ProductForm({
                         </div>
                       );
                     })}
+                  </div>
+
+                  {/* Add gallery image by URL → fills the next empty slot */}
+                  <div className="flex gap-2 pt-1">
+                    <Input
+                      id="galleryImageUrl"
+                      type="url"
+                      placeholder="Paste a gallery image URL..."
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const nextSlot = [0, 1, 2].find((i) => !formData.images[i]);
+                          if (nextSlot === undefined) {
+                            toast({ title: "Gallery full", description: "All 3 gallery slots are filled.", variant: "destructive" });
+                            return;
+                          }
+                          applyImageUrl(e.currentTarget.value, nextSlot);
+                          e.currentTarget.value = "";
+                        }
+                      }}
+                      className="h-11 rounded-xl border-zinc-100 text-sm font-medium"
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        const input = document.getElementById("galleryImageUrl") as HTMLInputElement;
+                        const nextSlot = [0, 1, 2].find((i) => !formData.images[i]);
+                        if (nextSlot === undefined) {
+                          toast({ title: "Gallery full", description: "All 3 gallery slots are filled.", variant: "destructive" });
+                          return;
+                        }
+                        applyImageUrl(input?.value || "", nextSlot);
+                        if (input) input.value = "";
+                      }}
+                      className="h-11 rounded-xl bg-zinc-900 text-white px-5 text-xs font-bold uppercase tracking-widest shadow-sm active:scale-95 shrink-0"
+                    >
+                      Add
+                    </Button>
                   </div>
                 </div>
               </div>

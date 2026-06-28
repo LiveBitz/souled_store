@@ -40,13 +40,14 @@ export function ProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     setIsAddingToWishlist(true);
     try {
+      // Capture state BEFORE toggling — toggle flips it, so this tells us the action
+      const wasWishlisted = isWishlisted(String(product.id));
       await toggleWishlist(String(product.id));
-      const after = isWishlisted(String(product.id));
       toast({
-        title: after ? "Added to Wishlist" : "Removed from Wishlist",
-        description: after
-          ? `${product.name} has been added to your wishlist`
-          : `${product.name} has been removed from your wishlist`,
+        title: wasWishlisted ? "Removed from Wishlist" : "Added to Wishlist",
+        description: wasWishlisted
+          ? `${product.name} has been removed from your wishlist`
+          : `${product.name} has been added to your wishlist`,
         duration: 2000,
       });
     } catch (error: any) {
@@ -80,6 +81,7 @@ export function ProductCard({ product }: ProductCardProps) {
           onError={() => setImgError(true)}
           quality={75}
           loading="lazy"
+          referrerPolicy="no-referrer"
         />
 
         {/* Hover overlay — "Shop Now" strip */}
