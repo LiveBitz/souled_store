@@ -23,20 +23,20 @@ export async function NewArrivals() {
     <section id="new-arrivals" className="relative overflow-hidden py-16 md:py-24 bg-white">
       {/* Aurora glow — drifts continuously up from the bottom corners */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        {/* Footer blend */}
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#14090b] via-[#2a0f13]/60 to-transparent" />
+
         <div
-          className="aurora-blob aurora-blob-left -bottom-52 -left-40 w-[36rem] h-[36rem] blur-[110px] opacity-65"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(255,170,60,0.45) 0%, rgba(232,74,74,0.30) 45%, transparent 70%)",
-          }}
+          className="absolute bottom-[-8rem] left-[-6rem] h-[28rem] w-[28rem] rounded-full blur-[220px]"
+          style={{ background: "radial-gradient(circle, rgba(68,18,24,0.95) 0%, rgba(40,12,15,0.46) 36%, rgba(24,10,12,0.12) 68%, transparent 100%)" }}
         />
         <div
-          className="aurora-blob aurora-blob-right -bottom-56 -right-40 w-[36rem] h-[36rem] blur-[110px] opacity-60"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(232,74,74,0.45) 0%, rgba(150,80,255,0.28) 45%, transparent 70%)",
-          }}
+          className="absolute bottom-[-8rem] right-[-6rem] h-[28rem] w-[28rem] rounded-full blur-[220px]"
+          style={{ background: "radial-gradient(circle, rgba(92,24,29,0.88) 0%, rgba(48,14,16,0.34) 40%, rgba(24,10,12,0.08) 72%, transparent 100%)" }}
         />
+
+        {/* Subtle vignette layer */}
+        <div className="absolute inset-x-0 bottom-0 h-36 bg-[radial-gradient(ellipse_at_center_bottom,rgba(45,10,13,0.18),transparent_70%)]" />
       </div>
 
       <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
@@ -47,7 +47,6 @@ export async function NewArrivals() {
             eyebrow="Just dropped"
             eyebrowIcon={Flame}
             title="New Arrivals"
-            subtitle="Fresh styles added this week."
           />
         </AnimateOnView>
 

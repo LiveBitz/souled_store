@@ -69,14 +69,14 @@ export function ProductCard({ product, dark = false }: ProductCardProps) {
 
   return (
     <div className={cn(
-      "group flex flex-col rounded-2xl overflow-hidden border transition-all duration-300",
+      "group flex flex-col h-full rounded-2xl overflow-hidden border transition-all duration-300",
       dark
         ? "bg-zinc-900 border-white/10 hover:shadow-2xl hover:shadow-black/50 hover:border-white/20"
         : "bg-white border-zinc-900 hover:shadow-lg"
     )}>
 
       {/* ── Image ── */}
-      <Link href={`/product/${product.slug}`} className={cn("relative aspect-square block overflow-hidden", dark ? "bg-zinc-800" : "bg-zinc-50")}>
+      <Link href={`/product/${product.slug}`} className={cn("relative aspect-[3/4] block overflow-hidden", dark ? "bg-zinc-800" : "bg-zinc-100")}>
         <Image
           src={imgError ? "https://picsum.photos/seed/error/600/600" : product.image}
           alt={product.name}
@@ -132,7 +132,7 @@ export function ProductCard({ product, dark = false }: ProductCardProps) {
         <Link href={`/product/${product.slug}`}>
           <div className="flex items-start gap-2">
             <h3 className={cn(
-              "font-semibold text-sm line-clamp-2 leading-snug group-hover:text-brand transition-colors flex-1",
+              "font-semibold text-sm line-clamp-2 leading-snug group-hover:text-brand transition-colors flex-1 min-h-[2.5rem]",
               dark ? "text-zinc-100" : "text-zinc-800"
             )}>
               {product.name}

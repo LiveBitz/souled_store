@@ -50,15 +50,17 @@ function CarouselDots({ count }: { count: number }) {
   if (count <= 1) return null;
 
   return (
-    <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 rounded-full bg-black/20 backdrop-blur-md px-3 py-2 border border-white/15">
+    <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center justify-center gap-2.5 sm:bottom-5">
       {Array.from({ length: count }).map((_, i) => (
         <button
           key={i}
           onClick={() => api?.scrollTo(i)}
           aria-label={`Go to slide ${i + 1}`}
           className={cn(
-            "h-1.5 rounded-full transition-all duration-500 ease-out",
-            selected === i ? "w-7 bg-white" : "w-1.5 bg-white/50 hover:bg-white/80"
+            "h-2.5 w-2.5 rounded-full border border-white/60 shadow-sm transition-all duration-300 sm:h-3 sm:w-3",
+            selected === i
+              ? "scale-110 bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.15)]"
+              : "bg-white/35 hover:bg-white/60"
           )}
         />
       ))}

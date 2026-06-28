@@ -32,7 +32,6 @@ export async function BestSellers() {
             eyebrowIcon={TrendingUp}
             eyebrowClassName="text-amber-400"
             title="Best Sellers"
-            subtitle="Loved by thousands of customers."
             inverted
           />
         </AnimateOnView>

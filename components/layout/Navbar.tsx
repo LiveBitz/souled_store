@@ -17,6 +17,7 @@ import { signOut } from "@/lib/actions/auth-actions";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 
+
 const UNIQUE_STYLE: React.CSSProperties = {
   background: "linear-gradient(90deg,#09090b 0%,#09090b 28%,#555 42%,#bbb 48%,#fff 50%,#bbb 52%,#555 58%,#09090b 72%,#09090b 100%)",
   backgroundSize: "300% 100%",
@@ -137,11 +138,16 @@ export function Navbar() {
       className={cn(
         "fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b",
         isScrolled
-          ? "bg-white/80 backdrop-blur-md py-3 shadow-sm border-zinc-200"
-          : "bg-white py-4 border-transparent"
+          ? "bg-white/80 backdrop-blur-md shadow-sm border-zinc-200"
+          : "bg-white border-transparent"
       )}
     >
-      <div className="container mx-auto px-4 md:px-8 lg:px-16 flex items-center justify-between relative">
+      <div
+        className={cn(
+          "container mx-auto px-4 md:px-8 lg:px-16 flex items-center justify-between relative transition-all duration-300",
+          isScrolled ? "py-3" : "py-4"
+        )}
+      >
         {/* Mobile Menu */}
         <div className="flex items-center md:hidden">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -467,8 +473,8 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile category tabs — premium underline indicator */}
-      <div className="md:hidden border-t border-zinc-100 mt-2">
+      {/* Mobile category tabs — red strip, white text, premium underline */}
+      <div className="md:hidden bg-brand shadow-sm">
         <div className="flex items-stretch">
           {categoryTabs.map((tab) => {
             const active = pathname === tab.href;
@@ -477,14 +483,14 @@ export function Navbar() {
                 key={tab.name}
                 href={tab.href}
                 className={cn(
-                  "relative flex-1 text-center py-3 text-[11px] font-bold uppercase tracking-[0.08em] whitespace-nowrap transition-colors",
-                  active ? "text-zinc-950" : "text-zinc-400"
+                  "relative flex-1 text-center py-3.5 text-[11px] font-bold uppercase tracking-[0.08em] whitespace-nowrap transition-colors",
+                  active ? "text-white" : "text-white/70 hover:text-white"
                 )}
               >
                 {tab.name}
                 <span
                   className={cn(
-                    "absolute -bottom-px left-2 right-2 h-0.5 rounded-full bg-brand origin-center transition-transform duration-300",
+                    "absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-white origin-center transition-transform duration-300",
                     active ? "scale-x-100" : "scale-x-0"
                   )}
                 />

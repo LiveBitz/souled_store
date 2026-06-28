@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, LayoutGrid } from "lucide-react";
+import { ArrowRight, Shirt, Footprints, Watch, SprayCan, ShoppingBag, Glasses } from "lucide-react";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { AnimateOnView } from "@/components/shared/AnimateOnView";
 import { Category } from "@prisma/client";
@@ -9,6 +9,16 @@ import { Category } from "@prisma/client";
 interface CategoryGridProps {
   categories: Category[];
 }
+
+// Minimal product icons that drift up and vanish across the top of the section.
+const floatingIcons = [
+  { Icon: Shirt, left: "8%", delay: 0, dur: 11, size: 26 },
+  { Icon: Footprints, left: "24%", delay: 2.5, dur: 13, size: 30 },
+  { Icon: Watch, left: "42%", delay: 5, dur: 12, size: 24 },
+  { Icon: SprayCan, left: "60%", delay: 1.5, dur: 12.5, size: 28 },
+  { Icon: ShoppingBag, left: "77%", delay: 3.8, dur: 11.5, size: 26 },
+  { Icon: Glasses, left: "90%", delay: 6.2, dur: 13, size: 28 },
+];
 
 export function CategoryGrid({ categories }: CategoryGridProps) {
   // Only show categories that have an image so no blank grey cards appear
@@ -20,31 +30,23 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
 
   return (
     <section id="categories" className="relative overflow-hidden py-16 md:py-24 bg-white">
-      {/* Aurora glow — drifts continuously from the top corners */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className="aurora-blob aurora-blob-left -top-48 -left-40 w-[36rem] h-[36rem] blur-[110px] opacity-70"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(232,74,74,0.55) 0%, rgba(255,140,80,0.30) 42%, transparent 70%)",
-          }}
-        />
-        <div
-          className="aurora-blob aurora-blob-right -top-52 -right-40 w-[36rem] h-[36rem] blur-[110px] opacity-60"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(150,80,255,0.45) 0%, rgba(232,74,74,0.28) 45%, transparent 70%)",
-          }}
-        />
+      {/* Floating product icons drifting down and vanishing across the top */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-72 overflow-hidden z-0">
+        {floatingIcons.map(({ Icon, left, delay, dur, size }, i) => (
+          <span
+            key={i}
+            className={`float-icon absolute top-0 ${i % 2 === 0 ? "text-brand/70" : "text-zinc-500/60"}`}
+            style={{ left, animationDelay: `${delay}s`, animationDuration: `${dur}s` }}
+          >
+            <Icon style={{ width: size, height: size }} strokeWidth={1.5} />
+          </span>
+        ))}
       </div>
 
       <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
         <AnimateOnView>
           <SectionHeading
-            eyebrow="Collections"
-            eyebrowIcon={LayoutGrid}
             title="Shop by Category"
-            subtitle="Explore our curated collections for every style and occasion."
           />
         </AnimateOnView>
 

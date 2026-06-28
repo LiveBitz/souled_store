@@ -136,3 +136,24 @@
   }
 }
 
+/* ─── Floating category icons ─────────────────────────────────────────────── */
+/* Minimal product icons drift slowly DOWN from the top, then fade out. */
+.float-icon {
+  animation: icon-fall 10s linear infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes icon-fall {
+  0%   { transform: translateY(-24px) scale(0.75) rotate(-6deg); opacity: 0; }
+  18%  { opacity: 0.9; }
+  75%  { opacity: 0.6; }
+  100% { transform: translateY(150px) scale(1.05) rotate(6deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-icon {
+    animation: none;
+    opacity: 0;
+  }
+}
+

@@ -37,7 +37,7 @@ export default function RootLayout({
         <CartProvider>
           <WishlistProvider>
             <Navbar />
-            <main className="flex-1 pt-[116px] md:pt-[84px] lg:pt-[92px]">
+            <main className="flex-1 pt-[88px] md:pt-[84px] lg:pt-[92px]">
               {children}
             </main>
             <Footer />
