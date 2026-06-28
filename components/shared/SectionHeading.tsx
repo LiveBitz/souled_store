@@ -12,6 +12,8 @@ interface SectionHeadingProps {
   title: string;
   subtitle?: string;
   trailing?: React.ReactNode;
+  /** Use on dark section backgrounds — flips title/subtitle to light */
+  inverted?: boolean;
 }
 
 export function SectionHeading({
@@ -21,8 +23,9 @@ export function SectionHeading({
   title,
   subtitle,
   trailing,
+  inverted = false,
 }: SectionHeadingProps) {
-  // Consistent accent rule across every section: the LAST word is italic + brand.
+  // Consistent accent rule across every section: the LAST word is brand-colored.
   const words = title.split(" ");
   const lead = words.slice(0, -1).join(" ");
   const accent = words[words.length - 1];
@@ -41,12 +44,22 @@ export function SectionHeading({
             {eyebrow}
           </div>
         )}
-        <h2 className="font-heading text-3xl md:text-4xl lg:text-[2.75rem] font-black tracking-tight text-zinc-900 leading-[1.1]">
+        <h2
+          className={cn(
+            "font-heading text-3xl md:text-4xl lg:text-[2.75rem] font-black tracking-tight leading-[1.1]",
+            inverted ? "text-white" : "text-zinc-900"
+          )}
+        >
           {lead && <span>{lead} </span>}
-          <span className="italic text-brand">{accent}</span>
+          <span className="text-brand">{accent}</span>
         </h2>
         {subtitle && (
-          <p className="text-sm md:text-base text-zinc-500 font-medium max-w-lg leading-relaxed">
+          <p
+            className={cn(
+              "text-sm md:text-base font-medium max-w-lg leading-relaxed",
+              inverted ? "text-white/60" : "text-zinc-500"
+            )}
+          >
             {subtitle}
           </p>
         )}

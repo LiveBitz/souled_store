@@ -24,9 +24,11 @@ interface ProductCardProps {
     isNew?: boolean;
     isBestSeller?: boolean;
   };
+  /** Dark variant — for use on dark section backgrounds (e.g. Best Sellers) */
+  dark?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, dark = false }: ProductCardProps) {
   const [imgError, setImgError] = useState(false);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const { isWishlisted, toggleWishlist } = useWishlist();
@@ -66,10 +68,15 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="group flex flex-col bg-white border border-zinc-900 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg">
+    <div className={cn(
+      "group flex flex-col rounded-2xl overflow-hidden border transition-all duration-300",
+      dark
+        ? "bg-zinc-900 border-white/10 hover:shadow-2xl hover:shadow-black/50 hover:border-white/20"
+        : "bg-white border-zinc-900 hover:shadow-lg"
+    )}>
 
       {/* ── Image ── */}
-      <Link href={`/product/${product.slug}`} className="relative aspect-square block overflow-hidden bg-zinc-50">
+      <Link href={`/product/${product.slug}`} className={cn("relative aspect-square block overflow-hidden", dark ? "bg-zinc-800" : "bg-zinc-50")}>
         <Image
           src={imgError ? "https://picsum.photos/seed/error/600/600" : product.image}
           alt={product.name}
@@ -124,11 +131,17 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Name + NEW badge inline */}
         <Link href={`/product/${product.slug}`}>
           <div className="flex items-start gap-2">
-            <h3 className="font-semibold text-sm text-zinc-800 line-clamp-2 leading-snug group-hover:text-brand transition-colors flex-1">
+            <h3 className={cn(
+              "font-semibold text-sm line-clamp-2 leading-snug group-hover:text-brand transition-colors flex-1",
+              dark ? "text-zinc-100" : "text-zinc-800"
+            )}>
               {product.name}
             </h3>
             {product.isNew && (
-              <span className="shrink-0 text-[9px] font-black uppercase tracking-wider bg-zinc-900 text-white px-2 py-0.5 rounded-md mt-0.5">
+              <span className={cn(
+                "shrink-0 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md mt-0.5",
+                dark ? "bg-white text-zinc-900" : "bg-zinc-900 text-white"
+              )}>
                 New
               </span>
             )}
@@ -136,11 +149,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* Price */}
           <div className="flex items-baseline gap-2 mt-2 tabular-nums">
-            <span className="text-lg font-black text-zinc-900">
+            <span className={cn("text-lg font-black", dark ? "text-white" : "text-zinc-900")}>
               ₹{product.price.toLocaleString("en-IN")}
             </span>
             {product.originalPrice > product.price && (
-              <span className="text-sm text-zinc-400 line-through font-medium">
+              <span className={cn("text-sm line-through font-medium", dark ? "text-zinc-500" : "text-zinc-400")}>
                 ₹{product.originalPrice.toLocaleString("en-IN")}
               </span>
             )}
@@ -154,7 +167,11 @@ export function ProductCard({ product }: ProductCardProps) {
             className={cn(
               "w-full h-11 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98]",
               isOutOfStock
-                ? "bg-zinc-50 text-zinc-300 border border-zinc-100 cursor-not-allowed"
+                ? dark
+                  ? "bg-zinc-800 text-zinc-600 border border-zinc-700 cursor-not-allowed"
+                  : "bg-zinc-50 text-zinc-300 border border-zinc-100 cursor-not-allowed"
+                : dark
+                ? "bg-white text-zinc-900 hover:bg-brand hover:text-white border border-white hover:border-brand"
                 : "bg-zinc-900 text-white hover:bg-brand border border-zinc-900 hover:border-brand"
             )}
           >

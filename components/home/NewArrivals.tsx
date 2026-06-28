@@ -20,8 +20,26 @@ export async function NewArrivals() {
   if (featuredProducts.length === 0) return null;
 
   return (
-    <section id="new-arrivals" className="py-16 md:py-24 bg-white">
-      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+    <section id="new-arrivals" className="relative overflow-hidden py-16 md:py-24 bg-white">
+      {/* Aurora glow — drifts continuously up from the bottom corners */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div
+          className="aurora-blob aurora-blob-left -bottom-52 -left-40 w-[36rem] h-[36rem] blur-[110px] opacity-65"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(255,170,60,0.45) 0%, rgba(232,74,74,0.30) 45%, transparent 70%)",
+          }}
+        />
+        <div
+          className="aurora-blob aurora-blob-right -bottom-56 -right-40 w-[36rem] h-[36rem] blur-[110px] opacity-60"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(232,74,74,0.45) 0%, rgba(150,80,255,0.28) 45%, transparent 70%)",
+          }}
+        />
+      </div>
+
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
 
         {/* Section header */}
         <AnimateOnView>

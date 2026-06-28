@@ -1,5 +1,6 @@
 import { HeroBanner } from "@/components/home/HeroBanner";
 import { CategoryGrid } from "@/components/home/CategoryGrid";
+import { BrandMarquee } from "@/components/home/BrandMarquee";
 import { NewArrivals } from "@/components/home/NewArrivals";
 import { PromoBanner } from "@/components/home/PromoBanner";
 import { BestSellers } from "@/components/home/BestSellers";
@@ -26,6 +27,7 @@ export default async function Home() {
     <div className="flex flex-col">
       <HeroBanner banners={heroBanners} />
       <CategoryGrid categories={dbCategories} />
+      <BrandMarquee />
       <NewArrivals />
       <PromoBanner banner={activePromo} />
       <BestSellers />

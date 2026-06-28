@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Search, Heart, ShoppingBag, User, Menu, X, ChevronRight, LogIn, LogOut, Shield, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,8 +43,16 @@ const navLinks = [
   { name: "Foot Wears", href: "/category/foot-wears" },
 ];
 
+const categoryTabs = [
+  { name: "Men", href: "/category/men" },
+  { name: "Watches", href: "/category/watches" },
+  { name: "Perfumes", href: "/category/perfumes" },
+  { name: "Foot Wears", href: "/category/foot-wears" },
+];
+
 export function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -456,6 +464,33 @@ export function Navbar() {
               </Button>
             </Link>
           )}
+        </div>
+      </div>
+
+      {/* Mobile category tabs — premium underline indicator */}
+      <div className="md:hidden border-t border-zinc-100 mt-2">
+        <div className="flex items-stretch">
+          {categoryTabs.map((tab) => {
+            const active = pathname === tab.href;
+            return (
+              <Link
+                key={tab.name}
+                href={tab.href}
+                className={cn(
+                  "relative flex-1 text-center py-3 text-[11px] font-bold uppercase tracking-[0.08em] whitespace-nowrap transition-colors",
+                  active ? "text-zinc-950" : "text-zinc-400"
+                )}
+              >
+                {tab.name}
+                <span
+                  className={cn(
+                    "absolute -bottom-px left-2 right-2 h-0.5 rounded-full bg-brand origin-center transition-transform duration-300",
+                    active ? "scale-x-100" : "scale-x-0"
+                  )}
+                />
+              </Link>
+            );
+          })}
         </div>
       </div>
 

@@ -64,3 +64,75 @@
 /* ─── Navbar logo ─────────────────────────────────────────────────────────── */
 /* shimmer animated via WAAPI in Navbar.tsx — no keyframes needed here */
 
+/* ─── Aurora background (Shop by Category) ────────────────────────────────── */
+.aurora-blob {
+  position: absolute;
+  border-radius: 9999px;
+  will-change: transform;
+}
+
+.aurora-blob-left {
+  animation: aurora-left 16s ease-in-out infinite;
+}
+
+.aurora-blob-right {
+  animation: aurora-right 19s ease-in-out infinite;
+}
+
+@keyframes aurora-left {
+  0%   { transform: translate(0%, 0%) scale(1) rotate(0deg); }
+  50%  { transform: translate(12%, 10%) scale(1.25) rotate(25deg); }
+  100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
+}
+
+@keyframes aurora-right {
+  0%   { transform: translate(0%, 0%) scale(1.1) rotate(0deg); }
+  50%  { transform: translate(-12%, 8%) scale(1) rotate(-25deg); }
+  100% { transform: translate(0%, 0%) scale(1.1) rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob-left,
+  .aurora-blob-right {
+    animation: none;
+  }
+}
+
+/* ─── Brand logo marquee ──────────────────────────────────────────────────── */
+/* Duplicated track; 0 → -50% scrolls the row right → left, seamless loop. */
+@keyframes brand-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.brand-marquee-track {
+  animation: brand-marquee 40s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-marquee-track {
+    animation: none;
+  }
+}
+
+/* ─── Rising fire emojis ──────────────────────────────────────────────────── */
+/* Minimal 🔥 emojis float up from the edges, drift, and fade out. */
+.ember {
+  animation: ember-rise 3.4s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes ember-rise {
+  0%   { transform: translateY(14px) scale(0.55) rotate(-8deg); opacity: 0; }
+  18%  { opacity: 1; }
+  65%  { opacity: 0.85; }
+  100% { transform: translateY(-92px) scale(1.05) rotate(8deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ember {
+    animation: none;
+    opacity: 0;
+  }
+}
+

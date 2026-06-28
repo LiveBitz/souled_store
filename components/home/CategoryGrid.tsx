@@ -19,8 +19,26 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
   const rest = withImages.slice(1, 5);
 
   return (
-    <section id="categories" className="py-16 md:py-24 bg-zinc-50">
-      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+    <section id="categories" className="relative overflow-hidden py-16 md:py-24 bg-white">
+      {/* Aurora glow — drifts continuously from the top corners */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div
+          className="aurora-blob aurora-blob-left -top-48 -left-40 w-[36rem] h-[36rem] blur-[110px] opacity-70"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(232,74,74,0.55) 0%, rgba(255,140,80,0.30) 42%, transparent 70%)",
+          }}
+        />
+        <div
+          className="aurora-blob aurora-blob-right -top-52 -right-40 w-[36rem] h-[36rem] blur-[110px] opacity-60"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(150,80,255,0.45) 0%, rgba(232,74,74,0.28) 45%, transparent 70%)",
+          }}
+        />
+      </div>
+
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
         <AnimateOnView>
           <SectionHeading
             eyebrow="Collections"
