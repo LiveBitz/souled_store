@@ -13,8 +13,8 @@ import { ProductGallery } from "@/components/catalog/ProductGallery";
 import { ProductSelection } from "@/components/catalog/ProductSelection";
 import { AnimateOnView } from "@/components/shared/AnimateOnView";
 
-// Phase 7: Cache product pages for 1 hour with ISR
-export const revalidate = 3600;
+// Render on every request so new/edited product details show immediately.
+export const dynamic = "force-dynamic";
 
 async function getProduct(slug: string) {
   return await prisma.product.findUnique({

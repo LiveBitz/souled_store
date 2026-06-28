@@ -2,8 +2,8 @@ import React from "react";
 import prisma from "@/lib/prisma";
 import { CategoryCatalog } from "@/components/catalog/CategoryCatalog";
 
-// ✅ PHASE 2: Static regeneration - cache category pages for 1 hour
-export const revalidate = 3600;
+// Render on every request so new/edited products in a category show immediately.
+export const dynamic = "force-dynamic";
 
 export default async function CategoryPage({ 
   params 

@@ -9,8 +9,9 @@ import { NewsletterBanner } from "@/components/home/NewsletterBanner";
 import { getBanners } from "@/lib/actions/banner-actions";
 import { getCategories } from "@/lib/actions/category-actions";
 
-// ✅ PHASE 2: Static regeneration - revalidate home page every 30 minutes
-export const revalidate = 1800;
+// Render on every request so newly added/edited products appear immediately.
+// (Also avoids ISR-write usage from time-based static regeneration.)
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const heroBanners = await getBanners("HERO");

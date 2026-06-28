@@ -2,7 +2,8 @@ import React from "react";
 import prisma from "@/lib/prisma";
 import { CategoryCatalog } from "@/components/catalog/CategoryCatalog";
 
-export const revalidate = 3600;
+// Render on every request so new/edited products show immediately.
+export const dynamic = "force-dynamic";
 
 export default async function AllProductsPage() {
   const products = await prisma.product.findMany({
