@@ -95,7 +95,7 @@ const sections = [
     id: "governing",
     title: "10. Governing Law & Disputes",
     content: [
-      "These Terms & Conditions are governed by and construed in accordance with the laws of India. Any disputes arising from these terms or your use of the Platform shall be subject to the exclusive jurisdiction of the courts located in Mumbai, Maharashtra, India.",
+      "These Terms & Conditions are governed by and construed in accordance with the laws of India. Any disputes arising from these terms or your use of the Platform shall be subject to the exclusive jurisdiction of the courts located in Krishnagar, Nadia, West Bengal, India.",
       "Before initiating any legal proceedings, both parties agree to attempt to resolve disputes amicably through good-faith negotiations for a period of at least 30 days.",
     ],
   },
@@ -104,7 +104,7 @@ const sections = [
     title: "11. Contact Us",
     content: [
       "If you have any questions, concerns, or feedback regarding these Terms & Conditions, please reach out to us:",
-      "Email: support@uniquehub.store\nPhone: +91 98765 43210\nAddress: Mumbai, Maharashtra, India",
+      "Email: support@uniquehub.store\nPhone: +91 70769 47260\nAddress: Dhubulia, Krishnagar, Nadia — Pin 741140",
     ],
   },
 ];

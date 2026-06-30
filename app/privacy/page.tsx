@@ -98,7 +98,7 @@ const sections = [
     title: "11. Contact & Grievances",
     content: [
       "If you have questions, concerns, or grievances about this Privacy Policy or our data practices, please reach out to our Privacy Team:",
-      "Email: support@uniquehub.store\nPhone: +91 98765 43210\nAddress: Mumbai, Maharashtra, India",
+      "Email: support@uniquehub.store\nPhone: +91 70769 47260\nAddress: Dhubulia, Krishnagar, Nadia — Pin 741140",
       "If you are not satisfied with our response, you may lodge a complaint with the relevant data protection authority in India.",
     ],
   },

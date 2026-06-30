@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Phone, MapPin } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -57,16 +57,12 @@ export function Footer() {
             </h4>
             <div className="flex flex-col gap-4 text-sm text-zinc-400">
               <div className="flex gap-3 items-start">
-                <Mail className="w-5 h-5 text-zinc-500 shrink-0" />
-                <a href="mailto:support@uniquehub.store" className="hover:text-brand transition-colors">support@uniquehub.store</a>
-              </div>
-              <div className="flex gap-3 items-start">
                 <Phone className="w-5 h-5 text-zinc-500 shrink-0" />
-                <a href="tel:+919876543210" className="hover:text-brand transition-colors">+91 98765 43210</a>
+                <a href="tel:+917076947260" className="hover:text-brand transition-colors">+91 70769 47260</a>
               </div>
               <div className="flex gap-3 items-start">
                 <MapPin className="w-5 h-5 text-zinc-500 shrink-0" />
-                <span>Mumbai, Maharashtra, India</span>
+                <span>Dhubulia, Krishnagar, Nadia — Pin 741140</span>
               </div>
             </div>
           </div>
