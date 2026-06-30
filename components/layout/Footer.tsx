@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Phone, MapPin } from "lucide-react";
 
 export function Footer() {
@@ -16,9 +17,8 @@ export function Footer() {
         <div className="container mx-auto px-4 md:px-8 lg:px-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Column 1: Brand */}
           <div className="flex flex-col gap-6 sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="text-2xl font-black tracking-tight">
-              <span className="text-white">Unique</span>
-              <span className="text-brand"> Hub</span>
+            <Link href="/" className="inline-flex w-fit items-center rounded-xl bg-white/95 p-2.5 shadow-sm">
+              <Image src="/logo.png" alt="Unique Hub" width={64} height={64} className="h-14 w-auto object-contain" />
             </Link>
             <p className="text-zinc-500 text-sm leading-relaxed max-w-xs">
               Premium clothing and lifestyle products for the modern individual.
