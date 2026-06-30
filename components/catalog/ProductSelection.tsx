@@ -8,11 +8,12 @@ import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  getTotalStock, 
-  extractBaseSizes, 
-  getAvailableColorsForSize 
+import {
+  getTotalStock,
+  extractBaseSizes,
+  getAvailableColorsForSize
 } from "@/lib/inventory";
+import { parseColor } from "@/lib/colors";
 
 interface ProductSelectionProps {
   product: {
@@ -216,35 +217,40 @@ export function ProductSelection({ product }: ProductSelectionProps) {
             showError && !selectedColor ? "text-rose-500" : "text-zinc-500"
           )}>
             Select Color
-            {selectedColor && <span className="text-zinc-900"> · {selectedColor}</span>}
+            {selectedColor && <span className="text-zinc-900"> · {parseColor(selectedColor).label}</span>}
           </p>
           <div className="flex flex-wrap gap-4">
-            {availableColors.map((color: string) => (
-              <button
-                key={color}
-                onClick={() => {
-                  setSelectedColor(color);
-                  setShowError(false);
-                }}
-                className={cn(
-                  "group relative w-11 h-11 rounded-full border-2 transition-all duration-300 active:scale-90",
-                  selectedColor === color 
-                    ? "border-zinc-900 ring-4 ring-zinc-100" 
-                    : "border-transparent ring-1 ring-zinc-200 hover:ring-zinc-400"
-                )}
-              >
-                <span 
-                  className="absolute inset-1 rounded-full shadow-inner"
-                  style={{ backgroundColor: color.toLowerCase() }}
-                />
-                {selectedColor === color && (
-                  <Check className={cn(
-                    "absolute inset-0 m-auto w-4 h-4 z-10",
-                    color.toLowerCase() === 'white' || color.toLowerCase() === '#ffffff' ? "text-zinc-900" : "text-white"
-                  )} />
-                )}
-              </button>
-            ))}
+            {availableColors.map((color: string) => {
+              const parsed = parseColor(color);
+              const isWhite = parsed.hex.toLowerCase() === "#ffffff" || parsed.hex.toLowerCase() === "white";
+              return (
+                <button
+                  key={color}
+                  title={parsed.label}
+                  onClick={() => {
+                    setSelectedColor(color);
+                    setShowError(false);
+                  }}
+                  className={cn(
+                    "group relative w-11 h-11 rounded-full border-2 transition-all duration-300 active:scale-90",
+                    selectedColor === color
+                      ? "border-zinc-900 ring-4 ring-zinc-100"
+                      : "border-transparent ring-1 ring-zinc-200 hover:ring-zinc-400"
+                  )}
+                >
+                  <span
+                    className="absolute inset-1 rounded-full shadow-inner"
+                    style={{ backgroundColor: parsed.hex }}
+                  />
+                  {selectedColor === color && (
+                    <Check className={cn(
+                      "absolute inset-0 m-auto w-4 h-4 z-10",
+                      isWhite ? "text-zinc-900" : "text-white"
+                    )} />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

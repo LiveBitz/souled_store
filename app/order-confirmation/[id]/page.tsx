@@ -10,6 +10,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { redirectToWhatsApp } from "@/lib/whatsapp-order";
+import { parseColor } from "@/lib/colors";
 import { useToast } from "@/hooks/use-toast";
 
 interface OrderData {
@@ -327,7 +328,7 @@ export default function OrderConfirmationPage() {
                   <div className="flex gap-4 mt-2 text-xs text-zinc-500">
                     <span>Qty: {item.quantity}</span>
                     {item.size && <span>Size: {item.size}</span>}
-                    {item.color && <span>Color: {item.color}</span>}
+                    {item.color && <span>Color: {parseColor(item.color).label}</span>}
                   </div>
                   <p className="text-sm font-bold text-zinc-950 mt-3">
                     ₹{((item.price ?? 0) * item.quantity).toLocaleString("en-IN")}

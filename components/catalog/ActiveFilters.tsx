@@ -4,6 +4,7 @@ import React from "react";
 import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Filters } from "@/hooks/useProductFilter";
+import { parseColor } from "@/lib/colors";
 
 interface ActiveFiltersProps {
   filters: Filters;
@@ -43,7 +44,7 @@ export function ActiveFilters({ filters, setFilters, clearAll }: ActiveFiltersPr
           <FilterChip key={`size-${s}`} label={`Size: ${s}`} onRemove={() => removeFilter("sizes", s)} />
         ))}
         {filters.colors.map((c) => (
-          <FilterChip key={`color-${c}`} label={`Color: ${c}`} onRemove={() => removeFilter("colors", c)} />
+          <FilterChip key={`color-${c}`} label={`Color: ${parseColor(c).label}`} onRemove={() => removeFilter("colors", c)} />
         ))}
         {filters.subCategories.map((sc) => (
           <FilterChip key={`sub-${sc}`} label={sc} onRemove={() => removeFilter("subCategories", sc)} />

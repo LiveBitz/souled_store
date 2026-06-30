@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/context/CartContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { parseColor } from "@/lib/colors";
 
 export function CartSheet() {
   const { items, removeItem, updateQuantity, totalPrice, totalItems, isOpen, setIsOpen } = useCart();
@@ -88,12 +89,12 @@ export function CartSheet() {
                         )}
                         {item.color && (
                           <div className="flex items-center gap-1.5 bg-zinc-100 px-2 py-0.5 rounded-full">
-                            <span 
-                              className="w-2 h-2 rounded-full border border-zinc-200" 
-                              style={{ backgroundColor: item.color.toLowerCase() }} 
+                            <span
+                              className="w-2 h-2 rounded-full border border-zinc-200"
+                              style={{ backgroundColor: parseColor(item.color).hex }}
                             />
                             <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">
-                              {item.color}
+                              {parseColor(item.color).label}
                             </span>
                           </div>
                         )}

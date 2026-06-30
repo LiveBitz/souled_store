@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Filters } from "@/hooks/useProductFilter";
+import { parseColor } from "@/lib/colors";
 
 interface FilterSidebarProps {
   filters: Filters;
@@ -223,32 +224,35 @@ export function FilterSidebar({ filters, setFilters, clearAll, counts, className
                   <div className="flex flex-wrap gap-3 pt-2">
                     {availableColors.map((colorName) => {
                       const count = counts.colors[colorName] || 0;
-                      const colorInfo = colorMap[colorName] || { hex: colorName.toLowerCase() }; // Try CSS color name or hex
+                      const parsed = parseColor(colorName);
+                      const mapped = colorMap[colorName];
+                      const swatchHex = mapped ? mapped.hex : parsed.hex; // predefined map first, else parsed/custom hex
+                      const isLight = ["#ffffff", "white", "#ffff00", "yellow"].includes(swatchHex.toLowerCase()) || parsed.label.toLowerCase() === "beige";
                       const isDisabled = count === 0 && !filters.colors.includes(colorName);
-                      
+
                       return (
                         <div key={colorName} className="flex flex-col items-center gap-2">
                           <button
                             onClick={() => !isDisabled && toggleArrayFilter("colors", colorName)}
-                            title={`${colorName} (${count})`}
+                            title={`${parsed.label} (${count})`}
                             disabled={isDisabled}
                             className={cn(
                               "w-10 h-10 rounded-lg border transition-all relative flex items-center justify-center overflow-hidden",
-                              colorInfo.border || "border-zinc-200",
+                              mapped?.border || "border-zinc-200",
                               filters.colors.includes(colorName) ? "ring-2 ring-brand ring-offset-2" : "hover:border-brand/50",
                               isDisabled ? "opacity-20 grayscale cursor-not-allowed" : "opacity-100"
                             )}
-                            style={{ backgroundColor: colorInfo.hex }}
+                            style={{ backgroundColor: swatchHex }}
                           >
                             {filters.colors.includes(colorName) && (
-                              <Check className={cn("w-4 h-4", ["White", "Yellow", "Beige"].includes(colorName) ? "text-zinc-900" : "text-white")} />
+                              <Check className={cn("w-4 h-4", isLight ? "text-zinc-900" : "text-white")} />
                             )}
                           </button>
                           <span className={cn(
                             "text-[11px] font-medium truncate max-w-[48px] transition-colors",
                             filters.colors.includes(colorName) ? "text-zinc-900 font-semibold" : "text-zinc-500"
                           )}>
-                            {colorName}
+                            {parsed.label}
                           </span>
                         </div>
                       );

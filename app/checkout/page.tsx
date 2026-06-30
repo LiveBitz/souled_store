@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, Truck, Lock, Check, MapPin, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { parseColor } from "@/lib/colors";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { redirectToWhatsApp } from "@/lib/whatsapp-order";
@@ -458,7 +459,7 @@ export default function CheckoutPage() {
                       )}
                       {item.color && (
                         <p className="text-xs text-zinc-500">
-                          Color: {item.color}
+                          Color: {parseColor(item.color).label}
                         </p>
                       )}
                       <p className="text-sm font-bold text-zinc-950 mt-2">

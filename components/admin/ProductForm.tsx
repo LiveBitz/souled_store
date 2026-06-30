@@ -35,6 +35,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { createProduct, updateProduct } from "@/app/admin/actions/product";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { parseColor, makeColorValue } from "@/lib/colors";
 
 interface Category {
   id: string;
@@ -138,6 +139,8 @@ export function ProductForm({
   const [isUploading, setIsUploading] = useState<Record<string, boolean>>({});
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [showPreview, setShowPreview] = useState(false);
+  const [customHex, setCustomHex] = useState("#c8a165");
+  const [customName, setCustomName] = useState("");
 
   const isEdit = !!initialData;
 
@@ -1292,6 +1295,7 @@ export function ProductForm({
                         ].includes(c))
                       ].map((color) => {
                         const isSelected = formData.colors.includes(color);
+                        const parsed = parseColor(color);
                         return (
                           <button
                             key={color}
@@ -1332,15 +1336,13 @@ export function ProductForm({
                                 "w-14 h-14 rounded-full shadow-sm transition-all border-2",
                                 isSelected ? "border-brand ring-2 ring-brand/30 scale-110" : "border-zinc-200 group-hover:scale-105"
                               )}
-                              style={{ 
-                                borderColor: isSelected ? undefined : (color.toLowerCase() === "white" ? "#d1d5db" : "transparent"),
-                                backgroundColor: color.toLowerCase() === "white" 
-                                  ? "#ffffff" 
-                                  : color.toLowerCase() 
+                              style={{
+                                borderColor: isSelected ? undefined : (parsed.hex.toLowerCase() === "#ffffff" || parsed.hex.toLowerCase() === "white" ? "#d1d5db" : "transparent"),
+                                backgroundColor: parsed.hex,
                               }}
                             />
                             <div className="flex flex-col items-center gap-1 w-full">
-                              <span className="text-sm font-bold text-center text-zinc-900">{color}</span>
+                              <span className="text-sm font-bold text-center text-zinc-900 truncate max-w-full">{parsed.label}</span>
                               {isSelected && (
                                 <CheckCircle2 className="w-4 h-4 text-brand" />
                               )}
@@ -1350,49 +1352,51 @@ export function ProductForm({
                       })}
                     </div>
 
-                    {/* Custom Color Input */}
-                    <div className="flex gap-2 pt-2 px-1">
-                      <div className="relative flex-1">
+                    {/* Custom Color — pick an exact shade + name it */}
+                    <div className="pt-2 px-1 space-y-2">
+                      <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Add a custom color</p>
+                      <div className="flex gap-2 items-stretch">
+                        {/* Swatch / picker */}
+                        <label className="relative h-10 sm:h-12 w-12 sm:w-14 shrink-0 rounded-lg sm:rounded-2xl border border-zinc-200 overflow-hidden cursor-pointer shadow-sm" style={{ backgroundColor: customHex }}>
+                          <input
+                            type="color"
+                            value={customHex}
+                            onChange={(e) => setCustomHex(e.target.value)}
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                            aria-label="Pick custom color"
+                          />
+                        </label>
+                        {/* Name */}
                         <Input
-                          placeholder="Add Custom Color..."
-                          id="customColor"
+                          placeholder="Color name (e.g. Sand Beige)"
+                          value={customName}
+                          onChange={(e) => setCustomName(e.target.value)}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === "Enter") {
                               e.preventDefault();
-                              const input = e.currentTarget;
-                              const val = input.value.trim();
-                              if (val && !formData.colors.includes(val)) {
-                                setFormData(p => ({
-                                  ...p,
-                                  colors: Array.from(new Set([...p.colors, val]))
-                                }));
-                                input.value = '';
+                              const val = makeColorValue(customName, customHex);
+                              if (!formData.colors.includes(val)) {
+                                setFormData((p) => ({ ...p, colors: Array.from(new Set([...p.colors, val])) }));
+                                setCustomName("");
                               }
                             }
                           }}
-                          className="h-10 sm:h-12 rounded-lg sm:rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white text-[9px] sm:text-[10px] font-bold uppercase tracking-widest pl-8 sm:pl-10"
+                          className="h-10 sm:h-12 flex-1 rounded-lg sm:rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white text-xs sm:text-sm font-semibold"
                         />
-                        <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2">
-                          <Sparkles className="w-3 sm:w-4 h-3 sm:h-4 text-zinc-300" />
-                        </div>
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            const val = makeColorValue(customName, customHex);
+                            if (!formData.colors.includes(val)) {
+                              setFormData((p) => ({ ...p, colors: Array.from(new Set([...p.colors, val])) }));
+                              setCustomName("");
+                            }
+                          }}
+                          className="h-10 sm:h-12 rounded-lg sm:rounded-2xl bg-zinc-900 text-white px-4 sm:px-6 text-[10px] font-bold uppercase tracking-widest shadow-lg active:scale-95 shrink-0"
+                        >
+                          Add
+                        </Button>
                       </div>
-                      <Button
-                        type="button"
-                        onClick={() => {
-                          const input = document.getElementById('customColor') as HTMLInputElement;
-                          const val = input.value.trim();
-                          if (val && !formData.colors.includes(val)) {
-                            setFormData(p => ({
-                              ...p,
-                              colors: Array.from(new Set([...p.colors, val]))
-                            }));
-                            input.value = '';
-                          }
-                        }}
-                        className="h-10 sm:h-12 rounded-lg sm:rounded-2xl bg-zinc-900 text-white px-3 sm:px-6 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest shadow-lg active:scale-95 shrink-0"
-                      >
-                        Add
-                      </Button>
                     </div>
                   </div>
                 )}
@@ -1429,8 +1433,11 @@ export function ProductForm({
                                   key={`header-${color}`}
                                   className="border border-zinc-200 px-4 py-3 text-center bg-zinc-50 min-w-[100px]"
                                 >
-                                  <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest block">
-                                    {color}
+                                  <span className="flex items-center justify-center gap-1.5">
+                                    <span className="w-3 h-3 rounded-full border border-zinc-300 shrink-0" style={{ backgroundColor: parseColor(color).hex }} />
+                                    <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">
+                                      {parseColor(color).label}
+                                    </span>
                                   </span>
                                 </th>
                               ))}
