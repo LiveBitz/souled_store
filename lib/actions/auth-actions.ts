@@ -20,7 +20,11 @@ export async function signIn(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+
+  // Return the user to where they came from (e.g. the product page), if safe.
+  const redirectTo = (formData.get("redirectTo") as string) || "/";
+  const safe = redirectTo.startsWith("/") && !redirectTo.startsWith("//");
+  redirect(safe ? redirectTo : "/");
 }
 
 export async function signUp(formData: FormData) {

@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { ShoppingBag, Heart, Check, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/hooks/use-toast";
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -32,9 +34,22 @@ export function ProductSelection({ product }: ProductSelectionProps) {
   const { addItem, setIsOpen: setCartOpen } = useCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const { toast } = useToast();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
+
+  // Track auth state so guests can browse but must log in to add to cart.
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setIsAuthed(!!data.user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_e, session) => setIsAuthed(!!session?.user)
+    );
+    return () => subscription.unsubscribe();
+  }, []);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
 
   // Use shared utility for consistent extraction
@@ -62,6 +77,17 @@ export function ProductSelection({ product }: ProductSelectionProps) {
   const hasColors = availableColors.length > 0;
 
   const handleAddToCart = (): boolean => {
+    // Guests can browse, but must log in to add to cart.
+    if (isAuthed === false) {
+      toast({
+        title: "Login required",
+        description: "Please log in to add items to your cart.",
+        duration: 2500,
+      });
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+      return false;
+    }
+
     const isSizeMissing = hasSizes && !selectedSize;
     const isColorMissing = hasColors && !selectedColor;
 

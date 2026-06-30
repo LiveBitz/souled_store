@@ -92,8 +92,8 @@ export default async function ProductDetailsPage({
   return (
     <div className="bg-white min-h-screen pb-24 lg:pb-0">
 
-      {/* ── Breadcrumb ── */}
-      <div className="border-b border-zinc-100">
+      {/* ── Breadcrumb (desktop only) ── */}
+      <div className="hidden md:block border-b border-zinc-100">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
           <AnimateOnView direction="none">
             <nav className="flex items-center gap-2 py-3.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400 overflow-x-auto whitespace-nowrap scrollbar-none">

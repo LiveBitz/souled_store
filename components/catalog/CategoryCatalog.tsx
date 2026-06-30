@@ -40,7 +40,7 @@ export function CategoryCatalog({ initialProducts, slug }: CategoryCatalogProps)
   return (
     <div className="min-h-screen bg-white">
       {/* Header Section */}
-      <div className="container mx-auto px-4 md:px-6 lg:px-8 pt-6 md:pt-8 pb-8">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 pt-10 md:pt-8 pb-8">
         <CatalogHeader 
           slug={slug} 
           count={filteredProducts.length} 
@@ -49,9 +49,9 @@ export function CategoryCatalog({ initialProducts, slug }: CategoryCatalogProps)
         />
       </div>
 
-      {/* Mobile Filter & Sort Bar — scrolls away with the page (not sticky) */}
-      <div className="lg:hidden bg-white border-y border-zinc-200">
-        <div className="container mx-auto px-4 grid grid-cols-2 divide-x divide-zinc-200">
+      {/* Mobile Filter & Sort — fixed bottom toolbar for easy thumb access */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-brand shadow-[0_-4px_24px_-6px_rgba(0,0,0,0.25)] pb-[env(safe-area-inset-bottom)]">
+        <div className="grid grid-cols-2 divide-x divide-white/25">
           <FilterDrawer
             filters={filters}
             setFilters={setFilters}
@@ -64,7 +64,7 @@ export function CategoryCatalog({ initialProducts, slug }: CategoryCatalogProps)
         </div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-6 lg:px-8 pb-20">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 pb-28 lg:pb-20">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Desktop Filter Sidebar (Sticky) */}
           <motion.aside

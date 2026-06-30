@@ -35,10 +35,10 @@ export function SortDropdown({ sortBy, setSortBy }: SortDropdownProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <button className="w-full h-[52px] rounded-none bg-white hover:bg-zinc-50 active:bg-zinc-100 flex items-center justify-center gap-2 transition-colors duration-150 px-2 min-w-0">
-          <ArrowUpDown className="w-[18px] h-[18px] text-zinc-700 shrink-0" />
-          <span className="text-sm font-semibold text-zinc-900 shrink-0">Sort</span>
-          <span className="text-xs font-medium text-zinc-400 truncate">· {currentSort?.label}</span>
+        <button className="w-full h-[52px] rounded-none bg-brand hover:bg-brand/90 active:bg-brand/80 flex items-center justify-center gap-2 transition-colors duration-150 px-2 min-w-0">
+          <ArrowUpDown className="w-[18px] h-[18px] text-white shrink-0" />
+          <span className="text-sm font-semibold text-white shrink-0">Sort</span>
+          <span className="text-xs font-medium text-white/75 truncate">· {currentSort?.label}</span>
         </button>
       </SheetTrigger>
       <SheetContent side="bottom" className="rounded-t-3xl p-0 bg-white border-none">

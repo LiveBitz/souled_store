@@ -28,6 +28,9 @@ export default function LoginPage() {
     setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
+    // Carry the ?redirect= target through so login returns the user there.
+    const redirectTo = new URLSearchParams(window.location.search).get("redirect");
+    if (redirectTo) formData.set("redirectTo", redirectTo);
     const result = await signIn(formData);
 
     if (result?.error) {

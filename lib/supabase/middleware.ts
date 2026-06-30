@@ -33,13 +33,21 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const isAdminPath = request.nextUrl.pathname.startsWith('/admin')
-  const isEntryPath = request.nextUrl.pathname === '/admin/entry'
-  const isAuthPath = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup')
-  const isPublicPath = 
-    request.nextUrl.pathname === '/' || 
+  const pathname = request.nextUrl.pathname
+  const isAdminPath = pathname.startsWith('/admin')
+  const isEntryPath = pathname === '/admin/entry'
+  const isAuthPath = pathname.startsWith('/login') || pathname.startsWith('/signup')
+
+  // Public storefront — browsable without logging in.
+  // (Cart actions, checkout, profile & wishlist still require auth.)
+  const isPublicPath =
+    pathname === '/' ||
     isAuthPath ||
-    request.nextUrl.pathname.startsWith('/auth')
+    pathname.startsWith('/auth') ||
+    pathname.startsWith('/product') ||
+    pathname.startsWith('/category') ||
+    pathname.startsWith('/terms') ||
+    pathname.startsWith('/privacy')
 
   // Redirect authenticated users away from login/signup pages
   if (user && isAuthPath) {

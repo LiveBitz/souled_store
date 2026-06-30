@@ -48,6 +48,8 @@ interface ProductFormProps {
   initialData?: any;
   preSelectedCategoryId?: string;
   existingSubCategories?: Record<string, string[]>;
+  /** Colors already used across the catalog (incl. custom "Name|#hex") */
+  existingColors?: string[];
 }
 
 /**
@@ -132,6 +134,7 @@ export function ProductForm({
   initialData,
   preSelectedCategoryId,
   existingSubCategories = {},
+  existingColors = [],
 }: ProductFormProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -1278,22 +1281,17 @@ export function ProductForm({
                   </div>
 
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-                      {[
-                        "Black",
-                        "White",
-                        "Grey",
-                        "Navy",
-                        "Red",
-                        "Blue",
-                        "Green",
-                        "Yellow",
-                        "Orange",
-                        "Purple",
-                        "Brown",
-                        ...formData.colors.filter((c: string) => ![
-                          "Black", "White", "Grey", "Navy", "Red", "Blue", "Green", "Yellow", "Orange", "Purple", "Brown"
-                        ].includes(c))
-                      ].map((color) => {
+                      {(() => {
+                        const PREDEFINED = ["Black", "White", "Grey", "Navy", "Red", "Blue", "Green", "Yellow", "Orange", "Purple", "Brown"];
+                        // Predefined + previously-used colors from the catalog + any selected on this product
+                        const extras = Array.from(
+                          new Set([
+                            ...existingColors.filter((c) => !PREDEFINED.includes(c)),
+                            ...formData.colors.filter((c: string) => !PREDEFINED.includes(c)),
+                          ])
+                        );
+                        return [...PREDEFINED, ...extras];
+                      })().map((color) => {
                         const isSelected = formData.colors.includes(color);
                         const parsed = parseColor(color);
                         return (

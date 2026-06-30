@@ -55,12 +55,12 @@ export function FilterDrawer({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <button
-          className="w-full h-[52px] rounded-none bg-white hover:bg-zinc-50 active:bg-zinc-100 flex items-center justify-center gap-2 transition-colors duration-150"
+          className="w-full h-[52px] rounded-none bg-brand hover:bg-brand/90 active:bg-brand/80 flex items-center justify-center gap-2 transition-colors duration-150"
         >
-          <SlidersHorizontal className="w-[18px] h-[18px] text-zinc-700" />
-          <span className="text-sm font-semibold text-zinc-900">Filters</span>
+          <SlidersHorizontal className="w-[18px] h-[18px] text-white" />
+          <span className="text-sm font-semibold text-white">Filters</span>
           {activeFilterCount > 0 && (
-            <span className="ml-0.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand text-white text-[11px] font-bold leading-none">
+            <span className="ml-0.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-white text-brand text-[11px] font-bold leading-none">
               {activeFilterCount}
             </span>
           )}

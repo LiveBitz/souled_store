@@ -38,16 +38,26 @@ async function getUniqueSubCategories() {
   return mapping;
 }
 
-export default async function EditProductPage({ 
-  params 
-}: { 
-  params: Promise<{ id: string }> 
+async function getUniqueColors() {
+  const products = await prisma.product.findMany({ select: { colors: true } });
+  const set = new Set<string>();
+  products.forEach((p) =>
+    ((p.colors as string[]) || []).forEach((c) => c && set.add(c))
+  );
+  return Array.from(set);
+}
+
+export default async function EditProductPage({
+  params
+}: {
+  params: Promise<{ id: string }>
 }) {
   const { id } = await params;
-  const [product, categories, subCategories] = await Promise.all([
+  const [product, categories, subCategories, existingColors] = await Promise.all([
     getProduct(id),
     getCategories(),
-    getUniqueSubCategories()
+    getUniqueSubCategories(),
+    getUniqueColors(),
   ]);
 
   if (!product) {
@@ -56,10 +66,11 @@ export default async function EditProductPage({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12">
-      <ProductForm 
-        initialData={product} 
-        categories={categories} 
+      <ProductForm
+        initialData={product}
+        categories={categories}
         existingSubCategories={subCategories}
+        existingColors={existingColors}
       />
     </div>
   );
