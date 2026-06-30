@@ -21,6 +21,18 @@ import { Toaster } from "@/components/ui/toaster";
 export const metadata: Metadata = {
   title: "Unique Hub | Premium Clothing Store",
   description: "Experience premium, conversion-focused clothing shop.",
+  icons: [
+    {
+      rel: "icon",
+      url: "/logo.png",
+      type: "image/png",
+    },
+    {
+      rel: "apple-touch-icon",
+      url: "/logo.png",
+      type: "image/png",
+    },
+  ],
 };
 
 export default function RootLayout({
